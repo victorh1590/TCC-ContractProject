@@ -62,14 +62,18 @@ contract VotingDb
     view
     returns (uint[] memory, string[] memory, uint[][] memory)
     {
-        uint[][] memory votes;
+        uint[][] memory votes = new uint[][](_sections.length);
 
+        assert(_sections.length == 30);
         for(uint i = 0; i < _sections.length; i++)
         {
+            uint[] memory votesByCandidate = new uint[](_candidates.length);
+            assert(_candidates.length == 4);
             for(uint j = 0; j < _candidates.length; j++) 
             {
-                votes[i][j] = _sectionResults[_sections[i]][_candidates[j]];
+                votesByCandidate[j] = _sectionResults[_sections[i]][_candidates[j]];
             }
+            votes[i] = votesByCandidate;
         }
 
         return (_sections, _candidates, votes);
