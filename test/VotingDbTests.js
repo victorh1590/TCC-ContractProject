@@ -23,7 +23,6 @@ contract('VotingDb', (accounts) => {
   it('getVotesBySection should return votes by section', async () => {
     const votingDbInstance = await VotingDb.deployed();
     const results = await votingDbInstance.getVotesBySection(30);
-    
     expect(results).to.exist;
 
     const candidates = results[0];
@@ -38,7 +37,6 @@ contract('VotingDb', (accounts) => {
   it('getVotesOnSectionByCandidate should return votes by section and candidate', async () => {
     const votingDbInstance = await VotingDb.deployed();
     const results = (await votingDbInstance.getVotesOnSectionByCandidate(300, "David")).toNumber();
-    
     expect(results).to.exist;
 
     console.log(results);
@@ -90,98 +88,79 @@ contract('VotingDb', (accounts) => {
   });
   it('getVotesOnSectionByCandidate should revert when sectionID or candidate is invalid', async () => {
     const votingDbInstance = await VotingDb.deployed();
-
     //Valid candidate but invalid sectionID.
     await expect(votingDbInstance.getVotesOnSectionByCandidate(0, "John")).to.be.revertedWith("SectionNotFound");;
-
     //Valid sectionID but invalid candidate.
     await expect(votingDbInstance.getVotesOnSectionByCandidate(20, "4848468")).to.be.revertedWith("CandidateNotFound");;
-
     //candidate and sectionID invalid.
     await expect(votingDbInstance.getVotesOnSectionByCandidate(1500, "@!#?dasd")).to.be.revertedWith("CandidateNotFound");;
   });
   it('getVotesByCandidate should revert when candidate is invalid', async () => {
     const votingDbInstance = await VotingDb.deployed();
-
     //Valid candidate is not reverted.
     await expect(votingDbInstance.getVotesByCandidate("Mark")).to.not.be.reverted;
-
     //Invalid candidate is reverted.
     await expect(votingDbInstance.getVotesByCandidate("Mark8")).to.be.revertedWith("CandidateNotFound");
   });
   it('constructor should revert when initial data is invalid', async () => {
     //Everything is invalid.
     expect(VotingDb.new([[]], [], [], "")).to.be.revertedWith("InitialDataInvalid");
-
     //Votes length is 0.
     expect(VotingDb.new([[]], ["a"], [1,2], "a")).to.be.revertedWith("InitialDataInvalid");
-
     //Candidates length is 0.
     expect(VotingDb.new([[1,2],[3,4]], [], [1,2], "a")).to.be.revertedWith("InitialDataInvalid");
-
     //Sections length is 0.
     expect(VotingDb.new([[1,2],[3,4]], ["a"], [], "a")).to.be.revertedWith("InitialDataInvalid");
-
     //Votes has length [2][2] but candidates has length [1].
     expect(VotingDb.new([[1,2],[3,4]], ["a"], [1,2], "a")).to.be.revertedWith("InitialDataInvalid");
-    
     //Votes has length [2][2] but sections has length [1].
     expect(VotingDb.new([[1,2],[3,4]], ["a", "b"], [1], "a")).to.be.revertedWith("InitialDataInvalid");
-  
     //Timestamp is ""
     expect(VotingDb.new([[1,2],[3,4]], ["a", "b"], [1,2], "")).to.be.revertedWith("InitialDataInvalid");
-  
     //Candidates[0] is ""
     expect(VotingDb.new([[1,2],[3,4]], ["", "b"], [1,2], "a")).to.be.revertedWith("InitialDataInvalid");
   });
   it('getTotalVotesInBlock should return the sum of all votes', async () => {
     const votingDbInstance = await VotingDb.deployed();
+
     const results = await votingDbInstance.getTotalVotesInBlock();
     expect(results).to.exist;
-
     const sum = results.toNumber();
-
+    
     console.log("Total Votes in Block: \n" + sum);
-
     expect(sum).to.deep.equal(570);
   });
   it('getTotalVotesBySection should return the sum of all votes in a given section', async () => {
     const votingDbInstance = await VotingDb.deployed();
+
     const results = await votingDbInstance.getTotalVotesBySection(140);
     expect(results).to.exist;
-
     const sum = results.toNumber();
 
     console.log("Total Votes in Section: \n" + sum);
-
     expect(sum).to.deep.equal(15);
   });
   it('getTotalVotesByCandidate should return the sum of all votes by candidate on a block', async () => {
     const votingDbInstance = await VotingDb.deployed();
+
     const results = await votingDbInstance.getTotalVotesByCandidate("Paul");
     expect(results).to.exist;
-
     const sum = results.toNumber();
 
     console.log("Total Votes by candidate: \n" + sum);
-
     expect(sum).to.deep.equal(144);
   });
   it('getTotalVotesBySection should revert when sectionID is invalid', async () => {
     const votingDbInstance = await VotingDb.deployed();
-
     //Valid sectionID is not reverted.
     await expect(votingDbInstance.getTotalVotesBySection(290)).to.not.be.reverted;
-
     //Invalid sectionID is reverted.
     await expect(votingDbInstance.getTotalVotesBySection(500)).to.be.revertedWith("SectionNotFound");
   });
   it('getTotalVotesByCandidate should revert when candidate is invalid', async () => {
     const votingDbInstance = await VotingDb.deployed();
-
     //Valid candidate is not reverted.
     await expect(votingDbInstance.getTotalVotesByCandidate("John")).to.not.be.reverted;
-
     //Invalid candidate is reverted.
     await expect(votingDbInstance.getTotalVotesByCandidate("@#!$_")).to.be.revertedWith("CandidateNotFound");
   });
