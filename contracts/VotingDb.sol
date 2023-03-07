@@ -42,6 +42,7 @@ contract VotingDb
             InitialDataInvalidError
         );
 
+        //Assignments
         _owner = msg.sender;
         _timestamp = timestamp;
         _sections = sections;
@@ -83,7 +84,7 @@ contract VotingDb
         view
         returns (string[] memory, uint24[] memory)
     {
-        //Post-Condition(s)
+        //Pre-Condition(s)
         if(!_sectionResults[sectionID][_candidates[0]].exists)
         {
             revert(SectionNotFoundError);
@@ -94,7 +95,6 @@ contract VotingDb
         {
             votes[i] = _sectionResults[sectionID][_candidates[i]].vote;
         }
-
         return (_candidates, votes);
     }
 
@@ -106,7 +106,7 @@ contract VotingDb
         view 
         returns (uint24 votes) 
     {
-        //Post-Condition(s)
+        //Pre-Condition(s)
         if(!candidateExist(candidate)) 
         {
             revert(CandidateNotFoundError);
@@ -119,6 +119,26 @@ contract VotingDb
         return _sectionResults[sectionID][candidate].vote;
     }
 
+    function getVotesByCandidate(string memory candidate)
+    public
+    view
+    returns (uint24[] memory, uint24[] memory)
+    {
+        //Pre-Condition(s)
+        if(!candidateExist(candidate)) 
+        {
+            revert(CandidateNotFoundError);
+        }
+
+        uint24[] memory votes = new uint24[](_sections.length);
+        for(uint8 i = 0; i < _sections.length; i++) 
+        {
+            votes[i] = _sectionResults[_sections[i]][candidate].vote;
+        }
+
+        return(_sections, votes);
+    }
+
     function getAllVotes()
         public
         view
@@ -128,7 +148,7 @@ contract VotingDb
             uint24[][] memory
         )
     {
-        //Post-Condition(s)
+        //Pre-Condition(s)
         if( _sections.length == 0 || _candidates.length == 0 ||
             !_sectionResults[_sections[0]][_candidates[0]].exists)
         {
@@ -136,7 +156,6 @@ contract VotingDb
         }
 
         uint24[][] memory votes = new uint24[][](_sections.length);
-
         for (uint8 i = 0; i < _sections.length; i++) 
         {
             uint24[] memory votesByCandidate = new uint24[](_candidates.length);
@@ -146,7 +165,60 @@ contract VotingDb
             }
             votes[i] = votesByCandidate;
         }
-
         return (_sections, _candidates, votes);
+    }
+
+    function getTotalVotesInBlock()
+        public
+        view
+        returns(uint24)
+    {
+        uint24 total = 0;
+        for(uint8 i = 0; i < _sections.length; i++)
+        {
+            for(uint8 j = 0; j < _candidates.length; j++)
+            {
+                total += _sectionResults[_sections[i]][_candidates[j]].vote;
+            }
+        }
+        return total;
+    }
+
+    function getTotalVotesBySection(uint24 sectionID)
+        public
+        view
+        returns(uint24)
+    {
+        //Pre-Condition(s)
+        if(!_sectionResults[sectionID][_candidates[0]].exists)
+        {
+            revert(SectionNotFoundError);
+        }
+
+        uint24 total = 0;
+        for(uint8 i = 0; i < _candidates.length; i++)
+        {
+            total += _sectionResults[sectionID][_candidates[i]].vote;
+        }
+        return total;
+    }
+
+    function getTotalVotesByCandidate(string memory candidate)
+        public
+        view
+        returns(uint24)
+    {
+        //Pre-Condition(s)
+        if(!candidateExist(candidate)) 
+        {
+            revert(CandidateNotFoundError);
+        }
+
+        uint24 total = 0;
+        for(uint8 i = 0; i < _sections.length; i++)
+        {
+            total += _sectionResults[_sections[i]][candidate].vote;
+        }
+        return total;
     }
 }
