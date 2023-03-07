@@ -104,21 +104,21 @@ contract('VotingDb', (accounts) => {
   });
   it('constructor should revert when initial data is invalid', async () => {
     //Everything is invalid.
-    expect(VotingDb.new([[]], [], [], "")).to.be.revertedWith("InitialDataInvalid");
+    await expect(VotingDb.new([[]], [], [], "")).to.be.revertedWith("CreationDataInvalid");
     //Votes length is 0.
-    expect(VotingDb.new([[]], ["a"], [1,2], "a")).to.be.revertedWith("InitialDataInvalid");
+    await expect(VotingDb.new([[]], ["a"], [1,2], "a")).to.be.revertedWith("CreationDataInvalid");
     //Candidates length is 0.
-    expect(VotingDb.new([[1,2],[3,4]], [], [1,2], "a")).to.be.revertedWith("InitialDataInvalid");
+    await expect(VotingDb.new([[1,2],[3,4]], [], [1,2], "a")).to.be.revertedWith("CreationDataInvalid");
     //Sections length is 0.
-    expect(VotingDb.new([[1,2],[3,4]], ["a"], [], "a")).to.be.revertedWith("InitialDataInvalid");
+    await expect(VotingDb.new([[1,2],[3,4]], ["a"], [], "a")).to.be.revertedWith("CreationDataInvalid");
     //Votes has length [2][2] but candidates has length [1].
-    expect(VotingDb.new([[1,2],[3,4]], ["a"], [1,2], "a")).to.be.revertedWith("InitialDataInvalid");
+    await expect(VotingDb.new([[1,2],[3,4]], ["a"], [1,2], "a")).to.be.revertedWith("CreationDataInvalid");
     //Votes has length [2][2] but sections has length [1].
-    expect(VotingDb.new([[1,2],[3,4]], ["a", "b"], [1], "a")).to.be.revertedWith("InitialDataInvalid");
+    await expect(VotingDb.new([[1,2],[3,4]], ["a", "b"], [1], "a")).to.be.revertedWith("CreationDataInvalid");
     //Timestamp is ""
-    expect(VotingDb.new([[1,2],[3,4]], ["a", "b"], [1,2], "")).to.be.revertedWith("InitialDataInvalid");
+    await expect(VotingDb.new([[1,2],[3,4]], ["a", "b"], [1,2], "")).to.be.revertedWith("CreationDataInvalid");
     //Candidates[0] is ""
-    expect(VotingDb.new([[1,2],[3,4]], ["", "b"], [1,2], "a")).to.be.revertedWith("InitialDataInvalid");
+    await expect(VotingDb.new([[1,2],[3,4]], ["", "b"], [1,2], "a")).to.be.revertedWith("CreationDataInvalid");
   });
   it('getTotalVotesInBlock should return the sum of all votes', async () => {
     const votingDbInstance = await VotingDb.deployed();

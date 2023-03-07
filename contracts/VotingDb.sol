@@ -13,7 +13,7 @@ contract VotingDb
     string SectionNotFoundError = "SectionNotFound";
     string CandidateNotFoundError = "CandidateNotFound";
     string ContractEmptyError = "ContractEmpty";
-    string InitialDataInvalidError = "InitialDataInvalid";
+    string CreationDataInvalidError = "CreationDataInvalid";
 
     //Sections (uint) > Candidates (string) > Votes (uint)
     mapping(uint24 => mapping(string => Vote)) _sectionResults;
@@ -31,16 +31,7 @@ contract VotingDb
     ) 
     {
         //Validations
-        require(
-            votes.length      > 0     && 
-            candidates.length > 0     &&
-            sections.length   > 0     &&
-            votes.length      == sections.length   &&
-            votes[0].length   == candidates.length &&
-            keccak256(bytes(timestamp))     != keccak256(bytes("")) &&
-            keccak256(bytes(candidates[0])) != keccak256(bytes("")),
-            InitialDataInvalidError
-        );
+        validation__CreationData(votes, candidates, sections, timestamp);
 
         //Assignments
         _owner = msg.sender;
@@ -61,22 +52,65 @@ contract VotingDb
         }
     }
 
-    //Functions
-    function candidateExist(string memory target)
+    //Validations / Pre-Conditions / Post-Conditions / Invariants
+    function validation__CreationData(
+        uint24[][] memory votes,
+        string[] memory candidates,
+        uint24[] memory sections,
+        string memory timestamp
+    )
         private
         view
-        returns (bool)
     {
-        bytes32 targetBytes = keccak256(abi.encodePacked(target));
+        require(
+            votes.length      > 0     && 
+            candidates.length > 0     &&
+            sections.length   > 0     &&
+            votes.length      == sections.length   &&
+            votes[0].length   == candidates.length &&
+            keccak256(bytes(timestamp))     != keccak256(bytes("")) &&
+            keccak256(bytes(candidates[0])) != keccak256(bytes("")),
+            CreationDataInvalidError
+        );
+    }
+
+
+    function precondition__SectionExists(uint24 sectionID)
+        private
+        view
+    {
+        if(!_sectionResults[sectionID][_candidates[0]].exists)
+        {
+            revert(SectionNotFoundError);
+        }
+    }
+
+    function precondition__CandidateExists(string memory candidate)
+        private
+        view
+    {
+        bytes32 candidateBytes = keccak256(abi.encodePacked(candidate));
         for(uint8 i = 0; i < _candidates.length; i++) 
         {
-            if(keccak256(abi.encodePacked(_candidates[i])) == targetBytes)
+            if(keccak256(abi.encodePacked(_candidates[i])) == candidateBytes)
             {
-                return true;
+                return;
             }
         }
-        return false;
+        revert(CandidateNotFoundError);
     }
+
+    function precondition__ContractIsEmpty()
+        private
+        view
+    {
+        if( _sections.length == 0 || _candidates.length == 0 ||
+            !_sectionResults[_sections[0]][_candidates[0]].exists)
+        {
+            revert(ContractEmptyError);
+        }
+    }
+
 
     //Queries
     function getVotesBySection(uint24 sectionID)
@@ -85,10 +119,7 @@ contract VotingDb
         returns (string[] memory, uint24[] memory)
     {
         //Pre-Condition(s)
-        if(!_sectionResults[sectionID][_candidates[0]].exists)
-        {
-            revert(SectionNotFoundError);
-        }
+        precondition__SectionExists(sectionID);
 
         uint24[] memory votes = new uint24[](_candidates.length);
         for (uint8 i = 0; i < _candidates.length; i++) 
@@ -107,14 +138,8 @@ contract VotingDb
         returns (uint24 votes) 
     {
         //Pre-Condition(s)
-        if(!candidateExist(candidate)) 
-        {
-            revert(CandidateNotFoundError);
-        }
-        if(!_sectionResults[sectionID][candidate].exists) 
-        {
-            revert(SectionNotFoundError);
-        }
+        precondition__CandidateExists(candidate);
+        precondition__SectionExists(sectionID);
 
         return _sectionResults[sectionID][candidate].vote;
     }
@@ -125,10 +150,7 @@ contract VotingDb
     returns (uint24[] memory, uint24[] memory)
     {
         //Pre-Condition(s)
-        if(!candidateExist(candidate)) 
-        {
-            revert(CandidateNotFoundError);
-        }
+        precondition__CandidateExists(candidate);
 
         uint24[] memory votes = new uint24[](_sections.length);
         for(uint8 i = 0; i < _sections.length; i++) 
@@ -149,11 +171,7 @@ contract VotingDb
         )
     {
         //Pre-Condition(s)
-        if( _sections.length == 0 || _candidates.length == 0 ||
-            !_sectionResults[_sections[0]][_candidates[0]].exists)
-        {
-            revert(ContractEmptyError);
-        }
+        precondition__ContractIsEmpty();
 
         uint24[][] memory votes = new uint24[][](_sections.length);
         for (uint8 i = 0; i < _sections.length; i++) 
@@ -190,10 +208,7 @@ contract VotingDb
         returns(uint24)
     {
         //Pre-Condition(s)
-        if(!_sectionResults[sectionID][_candidates[0]].exists)
-        {
-            revert(SectionNotFoundError);
-        }
+        precondition__SectionExists(sectionID);
 
         uint24 total = 0;
         for(uint8 i = 0; i < _candidates.length; i++)
@@ -209,10 +224,7 @@ contract VotingDb
         returns(uint24)
     {
         //Pre-Condition(s)
-        if(!candidateExist(candidate)) 
-        {
-            revert(CandidateNotFoundError);
-        }
+        precondition__CandidateExists(candidate);
 
         uint24 total = 0;
         for(uint8 i = 0; i < _sections.length; i++)
