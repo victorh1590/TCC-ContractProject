@@ -1,0 +1,13 @@
+{
+  "dependencies": {
+    "@openzeppelin/test-helpers": "^0.5.16",
+    "truffle-flattener": "^1.6.0"
+  },
+  "scripts": {
+    "tflat": "truffle-flattener"
+  },
+  "devDependencies": {
+    "chai": "^4.3.7",
+    "ethereum-waffle": "^2.5.1"
+  }
+}

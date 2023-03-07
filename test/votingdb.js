@@ -1,3 +1,7 @@
+const expect = require("chai").expect;
+const chaiUse = require("chai").use;
+const solidity = require("ethereum-waffle").solidity;
+
 const VotingDb = artifacts.require("VotingDb");
 const seedData = require('../contracts/SeedData.js');
 
@@ -6,6 +10,14 @@ const _candidates = seedData["candidates"];
 const _sections = seedData["sections"];
 const _timestamp = seedData["timestamp"]
 
+const {
+  BN,           // Big Number support
+  constants,    // Common constants, like the zero address and largest integers
+  expectEvent,  // Assertions for emitted events
+  expectRevert, // Assertions for transactions that should fail
+} = require('@openzeppelin/test-helpers');
+
+chaiUse(solidity);
 
 contract('VotingDb', (accounts) => {
   it('getVotesBySection should return votes by section', async () => {
@@ -54,20 +66,26 @@ contract('VotingDb', (accounts) => {
     expect(candidates).to.include.deep.ordered.members(_candidates);
     expect(sections).to.include.deep.ordered.members(_sections);
   });
-  it('getVotesBySection should return nothing when sectionID doesn\'t exist', async () => {
-    //TODO add  https://www.npmjs.com/package/@openzeppelin/truffle-upgrades for revert assertions.
+  it('getVotesBySection should revert when sectionID is invalid', async () => {
     const votingDbInstance = await VotingDb.deployed();
-    const results = await votingDbInstance.getVotesBySection(0);
 
-    expect(results).to.exist;
+    await expect(votingDbInstance.getVotesBySection(0)).to.be.revertedWith("SectionNotFound");
+    await expect(votingDbInstance.getVotesBySection(500)).to.be.revertedWith("SectionNotFound");
+    await expect(votingDbInstance.getVotesBySection(15455646)).to.be.revertedWith("SectionNotFound");
+  });
+  it('getOnSectionByCandidate should revert when sectionID or candidate is invalid', async () => {
+    const votingDbInstance = await VotingDb.deployed();
 
-    const candidates = results[0];
-    const votes = results[1].map(element => element.toNumber());
-    
-    console.log(candidates);
-    console.log(votes);
+    //Valid candidate but invalid sectionID.
+    await expect(votingDbInstance.getVotesOnSectionByCandidate(0, "John")).to.be.revertedWith("SectionNotFound");;
 
-    expect(votes).to.be.an('array').that.is.empty;
-    expect(candidates).to.include.deep.ordered.members(_candidates);
+    //Valid sectionID but invalid candidate.
+    await expect(votingDbInstance.getVotesOnSectionByCandidate(20, "4848468")).to.be.revertedWith("CandidateNotFound");;
+
+    //candidate and sectionID invalid.
+    await expect(votingDbInstance.getVotesOnSectionByCandidate(1500, "@!#?dasd")).to.be.revertedWith("CandidateNotFound");;
+  });
+  it('getAllVotes should revert when contract is empty', async () => {
+    expect(VotingDb.new([[]], [], [], "")).to.be.revertedWith("InitialDataInvalid");
   });
 });
