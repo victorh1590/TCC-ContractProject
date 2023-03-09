@@ -164,4 +164,14 @@ contract('VotingDb', (accounts) => {
     //Invalid candidate is reverted.
     await expect(votingDbInstance.getTotalVotesByCandidate("@#!$_")).to.be.revertedWith("CandidateNotFound");
   });
+  it('findSection should return true when section exists', async () => {
+    const votingDbInstance = await VotingDb.deployed();
+    //Valid section returns true.
+    expect(await votingDbInstance.findSection(100)).to.be.true;
+  });
+  it('findSection should revert when section is invalid', async () => {
+    const votingDbInstance = await VotingDb.deployed();
+    //Invalid section should revert.
+    await expect(votingDbInstance.findSection(310)).to.be.revertedWith("SectionNotFound");
+  });
 }); 

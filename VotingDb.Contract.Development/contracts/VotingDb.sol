@@ -157,7 +157,6 @@ contract VotingDb
         {
             votes[i] = _sectionResults[_sections[i]][candidate].vote;
         }
-
         return(_sections, votes);
     }
 
@@ -232,5 +231,16 @@ contract VotingDb
             total += _sectionResults[_sections[i]][candidate].vote;
         }
         return total;
+    }
+
+    function findSection(uint24 sectionID)
+        public
+        view
+        returns(bool)
+    {
+        //Pre-Condition(s)
+        precondition__SectionExists(sectionID);
+
+        return true;
     }
 }

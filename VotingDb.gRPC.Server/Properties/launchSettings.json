@@ -1,0 +1,13 @@
+﻿{
+  "profiles": {
+    "VotingDb.gRPC.Server": {
+      "commandName": "Project",
+      "dotnetRunMessages": true,
+      "launchBrowser": false,
+      "applicationUrl": "http://localhost:5023;https://localhost:7080",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      }
+    }
+  }
+}
