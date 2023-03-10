@@ -174,4 +174,16 @@ contract('VotingDb', (accounts) => {
     //Invalid section should revert.
     await expect(votingDbInstance.findSection(310)).to.be.revertedWith("SectionNotFound");
   });
+  it('constructor should emit heartbeat event with correct data', async () => {
+    const votingDbInstance = await VotingDb.new(_votes, _candidates, _sections, _timestamp);
+    const eventsEmitted = await votingDbInstance.getPastEvents('heartbeat');
+    expect(eventsEmitted.length).to.deep.equal(1);
+    const eventResults = eventsEmitted[0].returnValues;
+    const expectedSections = _sections.map(element => String(element));
+    expect(eventResults.block).to.deep.equal(String(eventsEmitted[0].blockNumber));
+    expect(eventResults.contractAddress).to.deep.equal(votingDbInstance.address);
+    expect(eventResults.elections).to.deep.equal(true);
+    expect(eventResults.sections).to.include.deep.ordered.members(expectedSections);
+    expect(eventResults.account).to.deep.equal(accounts[0]);
+  });
 }); 

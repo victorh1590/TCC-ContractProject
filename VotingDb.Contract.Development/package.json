@@ -1,6 +1,7 @@
 {
   "dependencies": {
     "@openzeppelin/test-helpers": "^0.5.16",
+    "truffle": "^5.8.0",
     "truffle-flattener": "^1.6.0"
   },
   "scripts": {
