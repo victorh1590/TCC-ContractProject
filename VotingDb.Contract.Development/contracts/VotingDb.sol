@@ -23,9 +23,6 @@ contract VotingDb
     string _timestamp;
     address _owner;
 
-    //Heartbeat Event.
-    event heartbeat(address account, uint indexed block, bool indexed elections, uint24[] sections, address contractAddress);
-
     constructor(
         uint24[][] memory votes,
         string[] memory candidates,
@@ -56,6 +53,14 @@ contract VotingDb
 
         emit heartbeat(msg.sender, block.number, true, _sections, address(this));
     }
+
+    //Events
+    event heartbeat(
+        address indexed account,
+        uint indexed block, 
+        bool indexed elections, 
+        uint24[] sections, 
+        address contractAddress);
 
     //Validations / Pre-Conditions / Post-Conditions / Invariants
     function validation__CreationData(
