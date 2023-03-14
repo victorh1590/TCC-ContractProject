@@ -10,39 +10,39 @@ using Nethereum.Contracts.CQS;
 using Nethereum.Contracts.ContractHandlers;
 using Nethereum.Contracts;
 using System.Threading;
-using Console.VotingDb.ContractDefinition;
+using App.VotingDb.ContractDefinition;
 
-namespace Console.VotingDb
+namespace App.VotingDb
 {
-    public partial class VotingDbService
+    public partial class VotingDbService : IVotingDbService
     {
-        public static Task<TransactionReceipt> DeployContractAndWaitForReceiptAsync(Nethereum.Web3.Web3 web3, VotingDbDeployment votingDbDeployment, CancellationTokenSource cancellationTokenSource = null)
+        public static Task<TransactionReceipt> DeployContractAndWaitForReceiptAsync(Web3 web3, VotingDbDeployment votingDbDeployment, CancellationTokenSource cancellationTokenSource = null)
         {
             return web3.Eth.GetContractDeploymentHandler<VotingDbDeployment>().SendRequestAndWaitForReceiptAsync(votingDbDeployment, cancellationTokenSource);
         }
 
-        public static Task<string> DeployContractAsync(Nethereum.Web3.Web3 web3, VotingDbDeployment votingDbDeployment)
+        public static Task<string> DeployContractAsync(Web3 web3, VotingDbDeployment votingDbDeployment)
         {
             return web3.Eth.GetContractDeploymentHandler<VotingDbDeployment>().SendRequestAsync(votingDbDeployment);
         }
 
-        public static async Task<VotingDbService> DeployContractAndGetServiceAsync(Nethereum.Web3.Web3 web3, VotingDbDeployment votingDbDeployment, CancellationTokenSource cancellationTokenSource = null)
+        public static async Task<VotingDbService> DeployContractAndGetServiceAsync(Web3 web3, VotingDbDeployment votingDbDeployment, CancellationTokenSource cancellationTokenSource = null)
         {
             var receipt = await DeployContractAndWaitForReceiptAsync(web3, votingDbDeployment, cancellationTokenSource);
             return new VotingDbService(web3, receipt.ContractAddress);
         }
 
-        protected Nethereum.Web3.IWeb3 Web3{ get; }
+        protected IWeb3 Web3{ get; }
 
         public ContractHandler ContractHandler { get; }
 
-        public VotingDbService(Nethereum.Web3.Web3 web3, string contractAddress)
+        public VotingDbService(Web3 web3, string contractAddress)
         {
             Web3 = web3;
             ContractHandler = web3.Eth.GetContractHandler(contractAddress);
         }
 
-        public VotingDbService(Nethereum.Web3.IWeb3 web3, string contractAddress)
+        public VotingDbService(IWeb3 web3, string contractAddress)
         {
             Web3 = web3;
             ContractHandler = web3.Eth.GetContractHandler(contractAddress);
