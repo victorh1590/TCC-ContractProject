@@ -47,17 +47,20 @@ public class DomainService
     public async Task GetSectionAsync()
     {
         Web3 web3 = GetWeb3Client();
-        Event<HeartbeatEventDTO> heartbeatEventHandler = web3.Eth.GetEvent<HeartbeatEventDTO>();
-        HexBigInteger? heartbeatEventFilter = await heartbeatEventHandler
-            .CreateFilterAsync<string?, BigInteger?, bool?>(null, null, true);
-        if (heartbeatEventFilter == null) throw new Exception();
-        var logs = await heartbeatEventHandler.GetFilterChangesAsync(heartbeatEventFilter);
+        Event<SectionEventDTO> sectionEventHandler = web3.Eth.GetEvent<SectionEventDTO>();
+        // HexBigInteger sectionEventFilter = await sectionEventHandler.CreateFilterAsync(10U);
+        // Console.WriteLine(sectionEventFilter);
+        // if (sectionEventFilter == null) throw new Exception();
+        // var logs = await sectionEventHandler.GetFilterChangesAsync(sectionEventFilter);
+        var sectionEventFilter = sectionEventHandler.CreateFilterInput(10U, BlockParameter.CreateLatest(), BlockParameter.CreateLatest());
+        var logs = await sectionEventHandler.GetAllChangesAsync(sectionEventFilter);
         Console.WriteLine(logs);
         Console.WriteLine(logs.Count);
         foreach (var log in logs)
         {
-            Console.WriteLine(log.Log.IndexedVal1);
-            Console.WriteLine(log.Event.VotesJSON);
+            Console.WriteLine(log.Event.Section);
+            Console.WriteLine(log.Event.Block);
+            Console.WriteLine(log.Event.ContractAddress);
         }
     }
 }

@@ -32,24 +32,29 @@ contract VotingDb
         _CompressedSectionData = CompressedSectionData;
 
         emit heartbeat(
-            msg.sender, 
+            address(this),
             block.number, 
-            true, 
-            Sections, 
+            msg.sender, 
             VotesJSON,
-            Timestamp,
-            address(this));
+            Timestamp
+            );
+
+        for(uint i = 0; i < Sections.length; i++) 
+        {
+            emit section(Sections[i], address(this), block.number);
+        }
     }
 
     //Events
     event heartbeat(
-        address indexed Account,
+        address indexed ContractAddress,
         uint indexed Block, 
-        bool indexed Election, 
-        uint32[] Sections,
+        address indexed Account,
         string VotesJSON,
-        string Timestamp,
-        address ContractAddress);
+        string Timestamp
+        );
+
+    event section(uint32 indexed Section, address ContractAddress, uint Block);
 
     //Validations / Pre-Conditions / Post-Conditions / Invariants
     function validation__CreationData(
