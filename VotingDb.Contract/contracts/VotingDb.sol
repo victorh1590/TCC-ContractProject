@@ -13,59 +13,89 @@ contract VotingDb
     string _CompressedSectionData;
 
     constructor(
+        uint32[][] memory Votes,
+        uint32[] memory Candidates,
         uint32[] memory Sections,
         string memory Timestamp,
-        string memory CompressedSectionData,
-        string[] memory SectionJSON
+        string memory CompressedSectionData
     ) 
     {
         //Validations
         validation__CreationData(
-            Sections, 
+            Sections,
+            Candidates,
+            Votes, 
             Timestamp, 
-            CompressedSectionData,
-            SectionJSON);
+            CompressedSectionData);
 
         //Assignments
         _Owner = msg.sender;
         _Timestamp = Timestamp;
         _CompressedSectionData = CompressedSectionData;
 
+        emit metadata(address(this), block.number, Sections, Candidates);
         for(uint i = 0; i < Sections.length; i++) 
         {
-            validate_SectionJSON(SectionJSON[i]);
-            emit section(Sections[i], address(this), block.number, SectionJSON[i]);
+            emit section(Sections[i], address(this), Votes[i]);
+            validation__VotesForSection(Votes[i], Candidates);
+            for(uint j = 0; j < Candidates.length; j++)
+            {
+                emit candidate(Candidates[j], Sections[i], address(this), Votes[i][j]);
+            }
         }
     }
 
 	//Events
-    event section(uint32 indexed Section, address indexed ContractAddress, uint indexed Block, string SectionJSON);
+    event candidate(
+        uint32 indexed Candidate, 
+        uint32 indexed Section, 
+        address ContractAddress, 
+        uint32 Votes);
+
+    event section(
+        uint32 indexed Section, 
+        address ContractAddress, 
+        uint32[] Votes);
+
+   event metadata(
+        address indexed ContractAddress, 
+        uint Block, 
+        uint32[] Sections,
+        uint32[] Candidates);
 
     //Validations / Pre-Conditions / Post-Conditions / Invariants
     function validation__CreationData(
         uint32[] memory Sections,
+        uint32[] memory Candidates,
+        uint32[][] memory Votes,
         string memory Timestamp,
-        string memory CompressedSectionData,
-        string[] memory SectionJSON
+        string memory CompressedSectionData
     )
         private
         view
     {
         require(
-            Sections.length > 0 &&
-            SectionJSON.length > 0 &&
-            SectionJSON.length == Sections.length &&
+            Sections.length   > 0     &&
+            Candidates.length > 0     &&
+            Sections.length   > 0     &&
+            Votes.length      == Sections.length   &&
             keccak256(bytes(Timestamp)) != keccak256(bytes("")) &&
             keccak256(bytes(CompressedSectionData)) != keccak256(bytes("")),
             CreationDataInvalidError
         );
     }
 
-    function validate_SectionJSON(string memory SectionJSON)
+    function validation__VotesForSection(
+        uint32[] memory VotesForSection,
+        uint32[] memory Candidates
+    )
         private
         view
-    {        
-        require(keccak256(bytes(SectionJSON)) != keccak256(bytes("")), CreationDataInvalidError);
+    {
+        require(
+            VotesForSection.length == Candidates.length,
+            CreationDataInvalidError
+        );
     }
 
     function GetCompressedData()

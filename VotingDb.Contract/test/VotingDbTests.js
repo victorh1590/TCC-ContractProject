@@ -1,88 +1,128 @@
 const expect = require("chai").expect;
 const chaiUse = require("chai").use;
 const solidity = require("ethereum-waffle").solidity;
+const web3Utils = require("web3").utils;
+const web3EthAbi = require('web3-eth-abi');
 
 const VotingDb = artifacts.require("VotingDb");
 const seedData = require('../contracts/SeedData.js');
 const compressedData = require('../contracts/CompressedData.js');
 
+const _votes = seedData["votes"];
+const _candidates = seedData["candidates"];
 const _sections = seedData["sections"];
 const _timestamp = seedData["timestamp"]
 const _compressedSectionData = compressedData["compressedSectionData"];
-const _sectionJSON = compressedData["sectionJSON"];
 
 chaiUse(solidity);
 
 contract('VotingDb', (accounts) => {
   it('constructor should revert when initial data is invalid', async () => {
     //Everything is invalid.
-    await expect(VotingDb.new([], "", "", [])).to.be.revertedWith("CreationDataInvalid");
+    await expect(VotingDb.new([[]], [], [], "", "")).to.be.revertedWith("CreationDataInvalid");
+    //Votes length is 0.
+    await expect(VotingDb.new([[]], ["a"], [1, 2], "a", _compressedSectionData)).to.be.revertedWith("CreationDataInvalid");
+    //Candidates length is 0.
+    await expect(VotingDb.new([[1, 2], [3, 4]], [], [1, 2], "a", _compressedSectionData)).to.be.revertedWith("CreationDataInvalid");
     //Sections length is 0.
-    await expect(VotingDb.new([], "a", _compressedSectionData, _sectionJSON)).to.be.revertedWith("CreationDataInvalid");
+    await expect(VotingDb.new([[1, 2], [3, 4]], ["a"], [], "a", _compressedSectionData)).to.be.revertedWith("CreationDataInvalid");
+    //Votes has length [2][2] but candidates has length [1].
+    await expect(VotingDb.new([[1, 2], [3, 4]], ["a"], [1, 2], "a", _compressedSectionData)).to.be.revertedWith("CreationDataInvalid");
+    //Votes has length [2][2] but sections has length [1].
+    await expect(VotingDb.new([[1, 2], [3, 4]], ["a", "b"], [1], "a", _compressedSectionData)).to.be.revertedWith("CreationDataInvalid");
     //Timestamp is ""
-    await expect(VotingDb.new([1, 2], "", _compressedSectionData, _sectionJSON)).to.be.revertedWith("CreationDataInvalid");
+    await expect(VotingDb.new([[1, 2], [3, 4]], ["a", "b"], [1, 2], "", _compressedSectionData)).to.be.revertedWith("CreationDataInvalid");
+    //Candidates[0] is ""
+    await expect(VotingDb.new([[1, 2], [3, 4]], ["", "b"], [1, 2], "a", _compressedSectionData)).to.be.revertedWith("CreationDataInvalid");
     //Compressed Data is invalid
-    await expect(VotingDb.new([1, 2], "a", "", _sectionJSON)).to.be.revertedWith("CreationDataInvalid");
-    //sectionJSON have length 0
-    await expect(VotingDb.new([1, 2], "a", _compressedSectionData, [])).to.be.revertedWith("CreationDataInvalid");
-    //sectionJSON and section have different sizes
-    await expect(VotingDb.new([1, 2], "a", _compressedSectionData, ["1"])).to.be.revertedWith("CreationDataInvalid");
-    //sectionJSON content is invalid.
-    await expect(VotingDb.new([1, 2], "a", _compressedSectionData, ["", ""])).to.be.revertedWith("CreationDataInvalid");
+    await expect(VotingDb.new([[1, 2]], ["a"], [1], "a", "")).to.be.revertedWith("CreationDataInvalid");
   });
-  // it('constructor should emit heartbeat event with correct data', async () => {
-  //   const votingDbInstance = await VotingDb.new(_sections, _timestamp, _compressedSectionData, _sectionJSON);
-  //   const eventsEmitted = await votingDbInstance.getPastEvents('heartbeat');
-  //   expect(eventsEmitted.length).to.deep.equal(1);
-  //   const eventResults = eventsEmitted[0].returnValues;
-  //   console.log(eventResults);
-  //   expect(eventResults.Block).to.deep.equal(String(eventsEmitted[0].blockNumber));
-  //   expect(eventResults.ContractAddress).to.deep.equal(votingDbInstance.address);
-  //   expect(eventResults.Account).to.deep.equal(accounts[0]);
-  //   expect(eventResults.Timestamp).to.deep.equal(_timestamp);
-  //   // expect(eventResults.SectionJSON).to.have.deep.ordered.members(_sectionJSON);
-  // });
-  it('constructor should emit section event with correct data', async () => {
-    const votingDbInstance = await VotingDb.new(_sections, _timestamp, _compressedSectionData, _sectionJSON);
+  it('constructor should emit all candidate events with correct data', async () => {
+    const votingDbInstance = await VotingDb.new(_votes, _candidates, _sections, _timestamp, _compressedSectionData);
+    const eventsEmitted = await votingDbInstance.getPastEvents('candidate');
+    expect(eventsEmitted).to.exist;
+    expect(eventsEmitted.length).to.deep.equal(_sections.length * _candidates.length);
+    const mappedEvents = eventsEmitted.map(element => element.returnValues);
+    const eventResults = [];
+    mappedEvents.map(element =>
+    (eventResults.push(
+      {
+        "Candidate": element.CandidateSHA3,
+        "Section": parseInt(element.Section),
+        "ContractAddress": element.ContractAddress,
+        "Votes": parseInt(element.Votes)
+      }
+    )));
+    const expectedSectionCandidateUnion = [];
+    _sections.map(section => {
+      _candidates.forEach(candidate => {
+        const abi = web3EthAbi.encodeParameter('string', candidate);
+        const sha3 = web3Utils.sha3(abi);
+        expectedSectionCandidateUnion.push([section, sha3])
+      }
+      )
+    });
+    const expectedVotes = [];
+    _votes.forEach((element) => {
+      element.forEach(votesQt => expectedVotes.push(votesQt))
+    });
+    // eventResults.forEach(element => {
+    //   console.log("Section: " + element.Section);
+    //   console.log("Candidate: " + element.Candidate);
+    //   console.log("ContractAddress: " + element.ContractAddress);
+    //   console.log("Block: " + element.Block);
+    //   console.log("Votes: " + element.Votes);
+    // });
+    eventResults.forEach((element, index) => {
+      expect(element.Section).to.deep.equal(expectedSectionCandidateUnion[index][0]);
+      expect(element.Candidate).to.deep.equal(expectedSectionCandidateUnion[index][1]);
+      expect(element.ContractAddress).to.deep.equal(votingDbInstance.address);
+      expect(element.Votes).to.deep.equal(expectedVotes[index]);
+    });
+  });
+  it('constructor should emit all section events with correct data', async () => {
+    const votingDbInstance = await VotingDb.new(_votes, _candidates, _sections, _timestamp, _compressedSectionData);
     const eventsEmitted = await votingDbInstance.getPastEvents('section');
-    // const heartbeatEvent = await votingDbInstance.getPastEvents('heartbeat');
     expect(eventsEmitted).to.exist;
     expect(eventsEmitted.length).to.deep.equal(_sections.length);
     const mappedEvents = eventsEmitted.map(element => element.returnValues);
-    const eventResults = mappedEvents.map(element =>
-    ({
-      "Section": parseInt(element.Section),
-      "ContractAddress": element.ContractAddress,
-      "Block": parseInt(element.Block),
-      "SectionJSON": element.SectionJSON
-    }));
-    // eventResults.forEach(element => {
-    //   console.log("Section: " + element.Section);
-    //   console.log("ContractAddress: " + element.ContractAddress);
-    //   console.log("Block: " + element.Block);
-    // });
+    const eventResults = [];
+    mappedEvents.map(element =>
+    (eventResults.push(
+      {
+        "Section": parseInt(element.Section),
+        "ContractAddress": element.ContractAddress,
+        "Votes": element.Votes
+      }
+    )));
     eventResults.forEach((element, index) => {
       expect(element.Section).to.deep.equal(_sections[index]);
       expect(element.ContractAddress).to.deep.equal(votingDbInstance.address);
-      // expect(element.ContractAddress).to.deep.equal(heartbeatEvent[0].returnValues.ContractAddress);
-      expect(element.Block).to.deep.equal(eventsEmitted[0].blockNumber);
-      // expect(element.Block).to.deep.equal(heartbeatEvent[0].blockNumber);
-      // expect(element.Block).to.deep.equal(parseInt(heartbeatEvent[0].returnValues.Block));
-      expect(element.SectionJSON).to.deep.equal(_sectionJSON[index]);
+      expect(element.Votes).to.have.deep.ordered.members(element.Votes);
     });
+  });
+  it('constructor should emit metadata event with correct data', async () => {
+    const votingDbInstance = await VotingDb.new(_votes, _candidates, _sections, _timestamp, _compressedSectionData);
+    const eventsEmitted = await votingDbInstance.getPastEvents('metadata');
+    expect(eventsEmitted).to.exist;
+    expect(eventsEmitted.length).to.deep.equal(1);
+    const eventResults = eventsEmitted[0].returnValues;
+    const expectedSections = _sections.map(element => String(element));
+    expect(eventResults.Block).to.deep.equal(String(eventsEmitted[0].blockNumber));
+    expect(eventResults.ContractAddress).to.deep.equal(votingDbInstance.address);
+    expect(eventResults.Sections).to.include.deep.ordered.members(expectedSections);
+    expect(eventResults.Candidates).to.include.deep.ordered.members(_candidates);
   });
   it('GetCompressedData returns correct brotli compressed data string with correct SHA3', async () => {
     const votingDbInstance = await VotingDb.deployed();
     const results = await votingDbInstance.GetCompressedData();
     expect(results).to.exist;
-
     expect(results).to.deep.equal(_compressedSectionData);
   });
   it('GetOwner should return account address', async () => {
     const votingDbInstance = await VotingDb.deployed();
     const results = await votingDbInstance.GetOwner();
     expect(results).to.exist;
-
     expect(results).to.deep.equal(accounts[0]);
     expect(results).to.not.deep.equal(accounts[1]);
   });
@@ -90,7 +130,6 @@ contract('VotingDb', (accounts) => {
     const votingDbInstance = await VotingDb.deployed();
     const results = await votingDbInstance.GetTimestamp();
     expect(results).to.exist;
-
     expect(results).to.deep.equal(_timestamp);
     expect(results).to.not.deep.equal("whatever215@!#$%^&*()");
   });
