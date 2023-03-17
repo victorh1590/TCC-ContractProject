@@ -12,10 +12,5 @@
     <PackageReference Include="Nethereum.RPC" Version="4.13.0" />
     <PackageReference Include="Nethereum.Web3" Version="4.13.0" />
   </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="DomainService\Models" />
-    <Folder Include="DomainService\Utils" />
-  </ItemGroup>
-
+  
 </Project>

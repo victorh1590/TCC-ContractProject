@@ -13,11 +13,14 @@ using System.Threading;
 using App.Persistence.ContractDefinition;
 
 namespace App.Persistence;
-internal partial class VotingDbService : IVotingDbService
+
+public partial class VotingDbService : IVotingDbService
 {
-    public static Task<TransactionReceipt> DeployContractAndWaitForReceiptAsync(Web3 web3, VotingDbDeployment votingDbDeployment, CancellationTokenSource? cancellationTokenSource = null)
+    public static Task<TransactionReceipt> DeployContractAndWaitForReceiptAsync(Web3 web3,
+        VotingDbDeployment votingDbDeployment, CancellationTokenSource? cancellationTokenSource = null)
     {
-        return web3.Eth.GetContractDeploymentHandler<VotingDbDeployment>().SendRequestAndWaitForReceiptAsync(votingDbDeployment, cancellationTokenSource);
+        return web3.Eth.GetContractDeploymentHandler<VotingDbDeployment>()
+            .SendRequestAndWaitForReceiptAsync(votingDbDeployment, cancellationTokenSource);
     }
 
     public static Task<string> DeployContractAsync(Web3 web3, VotingDbDeployment votingDbDeployment)
@@ -25,13 +28,14 @@ internal partial class VotingDbService : IVotingDbService
         return web3.Eth.GetContractDeploymentHandler<VotingDbDeployment>().SendRequestAsync(votingDbDeployment);
     }
 
-    public static async Task<VotingDbService> DeployContractAndGetServiceAsync(Web3 web3, VotingDbDeployment votingDbDeployment, CancellationTokenSource? cancellationTokenSource = null)
+    public static async Task<VotingDbService> DeployContractAndGetServiceAsync(Web3 web3,
+        VotingDbDeployment votingDbDeployment, CancellationTokenSource? cancellationTokenSource = null)
     {
         var receipt = await DeployContractAndWaitForReceiptAsync(web3, votingDbDeployment, cancellationTokenSource);
         return new VotingDbService(web3, receipt.ContractAddress);
     }
 
-    protected IWeb3 Web3{ get; }
+    protected IWeb3 Web3 { get; }
 
     public ContractHandler ContractHandler { get; }
 
@@ -47,12 +51,13 @@ internal partial class VotingDbService : IVotingDbService
         ContractHandler = web3.Eth.GetContractHandler(contractAddress);
     }
 
-    public Task<string> GetCompressedDataQueryAsync(GetCompressedDataFunction getCompressedDataFunction, BlockParameter? blockParameter = null)
+    public Task<string> GetCompressedDataQueryAsync(GetCompressedDataFunction getCompressedDataFunction,
+        BlockParameter? blockParameter = null)
     {
         return ContractHandler.QueryAsync<GetCompressedDataFunction, string>(getCompressedDataFunction, blockParameter);
     }
 
-        
+
     public Task<string> GetCompressedDataQueryAsync(BlockParameter? blockParameter = null)
     {
         return ContractHandler.QueryAsync<GetCompressedDataFunction?, string>(null, blockParameter);
@@ -63,18 +68,19 @@ internal partial class VotingDbService : IVotingDbService
         return ContractHandler.QueryAsync<GetOwnerFunction, string>(getOwnerFunction, blockParameter);
     }
 
-        
+
     public Task<string> GetOwnerQueryAsync(BlockParameter? blockParameter = null)
     {
         return ContractHandler.QueryAsync<GetOwnerFunction?, string>(null, blockParameter);
     }
 
-    public Task<string> GetTimestampQueryAsync(GetTimestampFunction getTimestampFunction, BlockParameter? blockParameter = null)
+    public Task<string> GetTimestampQueryAsync(GetTimestampFunction getTimestampFunction,
+        BlockParameter? blockParameter = null)
     {
         return ContractHandler.QueryAsync<GetTimestampFunction, string>(getTimestampFunction, blockParameter);
     }
 
-        
+
     public Task<string> GetTimestampQueryAsync(BlockParameter? blockParameter = null)
     {
         return ContractHandler.QueryAsync<GetTimestampFunction?, string>(null, blockParameter);

@@ -21,21 +21,19 @@ contract('VotingDb', (accounts) => {
     //Everything is invalid.
     await expect(VotingDb.new([[]], [], [], "", "")).to.be.revertedWith("CreationDataInvalid");
     //Votes length is 0.
-    await expect(VotingDb.new([[]], ["a"], [1, 2], "a", _compressedSectionData)).to.be.revertedWith("CreationDataInvalid");
+    await expect(VotingDb.new([[]], [1, 2], [1, 2], "a", _compressedSectionData)).to.be.revertedWith("CreationDataInvalid");
     //Candidates length is 0.
     await expect(VotingDb.new([[1, 2], [3, 4]], [], [1, 2], "a", _compressedSectionData)).to.be.revertedWith("CreationDataInvalid");
     //Sections length is 0.
-    await expect(VotingDb.new([[1, 2], [3, 4]], ["a"], [], "a", _compressedSectionData)).to.be.revertedWith("CreationDataInvalid");
+    await expect(VotingDb.new([[1, 2], [3, 4]], [5, 6], [], "a", _compressedSectionData)).to.be.revertedWith("CreationDataInvalid");
     //Votes has length [2][2] but candidates has length [1].
-    await expect(VotingDb.new([[1, 2], [3, 4]], ["a"], [1, 2], "a", _compressedSectionData)).to.be.revertedWith("CreationDataInvalid");
+    await expect(VotingDb.new([[1, 2], [3, 4]], [1], [1, 2], "a", _compressedSectionData)).to.be.revertedWith("CreationDataInvalid");
     //Votes has length [2][2] but sections has length [1].
-    await expect(VotingDb.new([[1, 2], [3, 4]], ["a", "b"], [1], "a", _compressedSectionData)).to.be.revertedWith("CreationDataInvalid");
+    await expect(VotingDb.new([[1, 2], [3, 4]], [5, 6], [1], "a", _compressedSectionData)).to.be.revertedWith("CreationDataInvalid");
     //Timestamp is ""
-    await expect(VotingDb.new([[1, 2], [3, 4]], ["a", "b"], [1, 2], "", _compressedSectionData)).to.be.revertedWith("CreationDataInvalid");
-    //Candidates[0] is ""
-    await expect(VotingDb.new([[1, 2], [3, 4]], ["", "b"], [1, 2], "a", _compressedSectionData)).to.be.revertedWith("CreationDataInvalid");
-    //Compressed Data is invalid
-    await expect(VotingDb.new([[1, 2]], ["a"], [1], "a", "")).to.be.revertedWith("CreationDataInvalid");
+    await expect(VotingDb.new([[1, 2], [3, 4]], [5, 6], [1, 2], "", _compressedSectionData)).to.be.revertedWith("CreationDataInvalid");
+ //Compressed Data is invalid
+    await expect(VotingDb.new([[1, 2]], [5, 6], [1], "a", "")).to.be.revertedWith("CreationDataInvalid");
   });
   it('constructor should emit all candidate events with correct data', async () => {
     const votingDbInstance = await VotingDb.new(_votes, _candidates, _sections, _timestamp, _compressedSectionData);
@@ -47,7 +45,7 @@ contract('VotingDb', (accounts) => {
     mappedEvents.map(element =>
     (eventResults.push(
       {
-        "Candidate": element.CandidateSHA3,
+        "Candidate": parseInt(element.Candidate),
         "Section": parseInt(element.Section),
         "ContractAddress": element.ContractAddress,
         "Votes": parseInt(element.Votes)
@@ -56,9 +54,7 @@ contract('VotingDb', (accounts) => {
     const expectedSectionCandidateUnion = [];
     _sections.map(section => {
       _candidates.forEach(candidate => {
-        const abi = web3EthAbi.encodeParameter('string', candidate);
-        const sha3 = web3Utils.sha3(abi);
-        expectedSectionCandidateUnion.push([section, sha3])
+        expectedSectionCandidateUnion.push([section, candidate])
       }
       )
     });
@@ -108,10 +104,11 @@ contract('VotingDb', (accounts) => {
     expect(eventsEmitted.length).to.deep.equal(1);
     const eventResults = eventsEmitted[0].returnValues;
     const expectedSections = _sections.map(element => String(element));
+    const expectedCandidates = _candidates.map(element => String(element));
     expect(eventResults.Block).to.deep.equal(String(eventsEmitted[0].blockNumber));
     expect(eventResults.ContractAddress).to.deep.equal(votingDbInstance.address);
     expect(eventResults.Sections).to.include.deep.ordered.members(expectedSections);
-    expect(eventResults.Candidates).to.include.deep.ordered.members(_candidates);
+    expect(eventResults.Candidates).to.include.deep.ordered.members(expectedCandidates);
   });
   it('GetCompressedData returns correct brotli compressed data string with correct SHA3', async () => {
     const votingDbInstance = await VotingDb.deployed();

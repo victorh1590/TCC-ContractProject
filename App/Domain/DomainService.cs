@@ -1,6 +1,8 @@
 ﻿using App.Persistence;
 using App.Persistence.ContractDefinition;
+using Nethereum.ABI;
 using Nethereum.Contracts;
+using Nethereum.Hex.HexConvertors.Extensions;
 using Nethereum.RPC.Eth.DTOs;
 using Nethereum.Web3;
 using Nethereum.Web3.Accounts;
@@ -36,30 +38,78 @@ internal class DomainService
         return transactionReceipt.ContractAddress;
     }
 
-    private VotingDbService GetVotingDbService(string contractAdress)
+    private VotingDbService GetVotingDbService(string contractAddresss)
     {
         Web3 web3 = GetWeb3Client();
-        return new VotingDbService(web3, contractAdress);
+        return new VotingDbService(web3, contractAddresss);
     }
 
-    public async Task GetSectionAsync()
+    public async Task GetSectionAsync(uint sectionNumber = 0)
     {
         Web3 web3 = GetWeb3Client();
         Event<SectionEventDTO> sectionEventHandler = web3.Eth.GetEvent<SectionEventDTO>();
-        // HexBigInteger sectionEventFilter = await sectionEventHandler.CreateFilterAsync(10U);
-        // Console.WriteLine(sectionEventFilter);
-        // if (sectionEventFilter == null) throw new Exception();
-        // var logs = await sectionEventHandler.GetFilterChangesAsync(sectionEventFilter);
-        var sectionEventFilter = sectionEventHandler.CreateFilterInput(10U, BlockParameter.CreateLatest(), BlockParameter.CreateLatest());
+        var latest = BlockParameter.CreateLatest();
+        var sectionEventFilter = sectionEventHandler.CreateFilterInput(sectionNumber, latest, latest);
         var logs = await sectionEventHandler.GetAllChangesAsync(sectionEventFilter);
         Console.WriteLine(logs);
         Console.WriteLine(logs.Count);
         foreach (var log in logs)
         {
-            Console.WriteLine(log.Event.Section);
-            Console.WriteLine(log.Event.Block);
-            Console.WriteLine(log.Event.ContractAddress);
-            Console.WriteLine(log.Event.SectionJSON);
+            Console.WriteLine("Section: " + log.Event.Section);
+            Console.WriteLine("Votes: " + log.Event.Votes);
+            Console.WriteLine("Contract Address: " + log.Event.ContractAddress);
         }
+
+        //TODO should return SectionVotes
     }
+
+    //public async Task GetSectionRangeAsync(uint[]? sectionNumber = null)
+    public async Task GetSectionRangeAsync(uint candidate = 0)
+    {
+        Web3 web3 = GetWeb3Client();
+        Event<CandidateEventDTO> sectionEventHandler = web3.Eth.GetEvent<CandidateEventDTO>();
+        var latest = BlockParameter.CreateLatest();
+        var sectionEventFilter = sectionEventHandler.CreateFilterInput(candidate, latest, latest);
+        var logs = await sectionEventHandler.GetAllChangesAsync(sectionEventFilter);
+        Console.WriteLine(logs);
+        Console.WriteLine(logs.Count);
+        foreach (var log in logs)
+        {
+            Console.WriteLine("Candidate Number: " + log.Event.Candidate);
+            Console.WriteLine("Section: " + log.Event.Section);
+            Console.WriteLine("Votes: " + log.Event.Votes);
+        }
+
+        //TODO should return SectionVotes[]
+    }
+
+    // public async Task GetVotesByCandidate(string candidate)
+    // {
+    //     //TODO return SectionVotes[i].Votes["Name"]
+    // }
+    //
+    // public async Task GetVotesByCandidateForSection(string candidate, uint sectionNumber)
+    // {
+    //     //TODO return SectionVotes.Votes["Name"]
+    // }
+    //
+    // public async Task GetAllVotesByCandidate(string candidate)
+    // {
+    //     //TODO return Soma SectionVotes[i].Votes["Name"]
+    // }
+    //
+    // public async Task GetAllVotes()
+    // {
+    //     //TODO return Soma SectionVotes[]
+    // }
+    //
+    // public async Task CreateSection()
+    // {
+    //     //TODO call deploy a contract with the section.
+    // }
+    //
+    // public async Task CreateSectionRange()
+    // {
+    //     //TODO call deploy a contract with sections.
+    // }
 }
