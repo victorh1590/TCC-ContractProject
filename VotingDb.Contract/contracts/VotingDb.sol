@@ -15,64 +15,57 @@ contract VotingDb
     constructor(
         uint32[] memory Sections,
         string memory Timestamp,
-        string memory VotesJSON,
-        string memory CompressedSectionData
+        string memory CompressedSectionData,
+        string[] memory SectionJSON
     ) 
     {
         //Validations
         validation__CreationData(
             Sections, 
             Timestamp, 
-            VotesJSON, 
-            CompressedSectionData);
+            CompressedSectionData,
+            SectionJSON);
 
         //Assignments
         _Owner = msg.sender;
         _Timestamp = Timestamp;
         _CompressedSectionData = CompressedSectionData;
 
-        emit heartbeat(
-            address(this),
-            block.number, 
-            msg.sender, 
-            VotesJSON,
-            Timestamp
-            );
-
         for(uint i = 0; i < Sections.length; i++) 
         {
-            emit section(Sections[i], address(this), block.number);
+            validate_SectionJSON(SectionJSON[i]);
+            emit section(Sections[i], address(this), block.number, SectionJSON[i]);
         }
     }
 
-    //Events
-    event heartbeat(
-        address indexed ContractAddress,
-        uint indexed Block, 
-        address indexed Account,
-        string VotesJSON,
-        string Timestamp
-        );
-
-    event section(uint32 indexed Section, address ContractAddress, uint Block);
+	//Events
+    event section(uint32 indexed Section, address indexed ContractAddress, uint indexed Block, string SectionJSON);
 
     //Validations / Pre-Conditions / Post-Conditions / Invariants
     function validation__CreationData(
         uint32[] memory Sections,
         string memory Timestamp,
-        string memory VotesJSON,
-        string memory CompressedSectionData
+        string memory CompressedSectionData,
+        string[] memory SectionJSON
     )
         private
         view
     {
         require(
             Sections.length > 0 &&
-            keccak256(bytes(VotesJSON)) != keccak256(bytes("")) && 
+            SectionJSON.length > 0 &&
+            SectionJSON.length == Sections.length &&
             keccak256(bytes(Timestamp)) != keccak256(bytes("")) &&
             keccak256(bytes(CompressedSectionData)) != keccak256(bytes("")),
             CreationDataInvalidError
         );
+    }
+
+    function validate_SectionJSON(string memory SectionJSON)
+        private
+        view
+    {        
+        require(keccak256(bytes(SectionJSON)) != keccak256(bytes("")), CreationDataInvalidError);
     }
 
     function GetCompressedData()

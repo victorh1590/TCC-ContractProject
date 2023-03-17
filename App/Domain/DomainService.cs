@@ -1,15 +1,13 @@
-﻿using App.VotingDb;
-using App.VotingDb.ContractDefinition;
+﻿using App.Persistence;
+using App.Persistence.ContractDefinition;
 using Nethereum.Contracts;
-using Nethereum.Hex.HexTypes;
 using Nethereum.RPC.Eth.DTOs;
 using Nethereum.Web3;
 using Nethereum.Web3.Accounts;
-using Org.BouncyCastle.Math;
 
-namespace App;
+namespace App.Domain;
 
-public class DomainService
+internal class DomainService
 {
     private string URL { get; }
     private int ChainID { get; }
@@ -31,7 +29,7 @@ public class DomainService
     public async Task<string> DeployContract(VotingDbDeployment votingDbDeployment)
     {
         Web3 web3 = GetWeb3Client();
-        web3.TransactionManager.UseLegacyAsDefault = true; 
+        web3.TransactionManager.UseLegacyAsDefault = true;
         TransactionReceipt transactionReceipt = await web3.Eth
             .GetContractDeploymentHandler<VotingDbDeployment>()
             .SendRequestAndWaitForReceiptAsync(votingDbDeployment);
@@ -61,6 +59,7 @@ public class DomainService
             Console.WriteLine(log.Event.Section);
             Console.WriteLine(log.Event.Block);
             Console.WriteLine(log.Event.ContractAddress);
+            Console.WriteLine(log.Event.SectionJSON);
         }
     }
 }

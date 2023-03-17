@@ -6,6 +6,6 @@ module.exports = function(deployer) {
   deployer.deploy(VotingDb, 
     seedData["sections"],
     seedData["timestamp"], 
-    compressedData["votesJSON"], 
-    compressedData["compressedSectionData"]);
+    compressedData["compressedSectionData"],
+    compressedData["sectionJSON"]);
 };
