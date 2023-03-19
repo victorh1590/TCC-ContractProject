@@ -1,5 +1,5 @@
-﻿using App.Persistence;
-using App.Persistence.ContractDefinition;
+﻿using Voting.Server.Persistence;
+using Voting.Server.Persistence.ContractDefinition;
 using Nethereum.ABI;
 using Nethereum.Contracts;
 using Nethereum.Hex.HexConvertors.Extensions;
@@ -7,7 +7,7 @@ using Nethereum.RPC.Eth.DTOs;
 using Nethereum.Web3;
 using Nethereum.Web3.Accounts;
 
-namespace App.Domain;
+namespace Voting.Server.Domain;
 
 internal class DomainService
 {
@@ -38,10 +38,10 @@ internal class DomainService
         return transactionReceipt.ContractAddress;
     }
 
-    private VotingDbService GetVotingDbService(string contractAddresss)
+    private VotingDbService GetVotingDbService(string contractAddress)
     {
         Web3 web3 = GetWeb3Client();
-        return new VotingDbService(web3, contractAddresss);
+        return new VotingDbService(web3, contractAddress);
     }
 
     public async Task GetSectionAsync(uint sectionNumber = 0)

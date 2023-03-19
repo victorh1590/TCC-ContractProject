@@ -11,7 +11,7 @@ using Nethereum.Contracts.CQS;
 using Nethereum.Contracts;
 using System.Threading;
 
-namespace App.Persistence.ContractDefinition;
+namespace Voting.Server.Persistence.ContractDefinition;
 
 public partial class VotingDbDeployment : VotingDbDeploymentBase
 {

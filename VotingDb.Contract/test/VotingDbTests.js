@@ -1,8 +1,6 @@
 const expect = require("chai").expect;
 const chaiUse = require("chai").use;
 const solidity = require("ethereum-waffle").solidity;
-const web3Utils = require("web3").utils;
-const web3EthAbi = require('web3-eth-abi');
 
 const VotingDb = artifacts.require("VotingDb");
 const seedData = require('../contracts/SeedData.js');
@@ -88,13 +86,15 @@ contract('VotingDb', (accounts) => {
       {
         "Section": parseInt(element.Section),
         "ContractAddress": element.ContractAddress,
-        "Votes": element.Votes
+        "Votes": element.Votes,
+        "Candidates": element.Candidates
       }
     )));
     eventResults.forEach((element, index) => {
       expect(element.Section).to.deep.equal(_sections[index]);
       expect(element.ContractAddress).to.deep.equal(votingDbInstance.address);
       expect(element.Votes).to.have.deep.ordered.members(element.Votes);
+      expect(element.Candidates).to.have.deep.ordered.members(element.Candidates);
     });
   });
   it('constructor should emit metadata event with correct data', async () => {
@@ -104,11 +104,9 @@ contract('VotingDb', (accounts) => {
     expect(eventsEmitted.length).to.deep.equal(1);
     const eventResults = eventsEmitted[0].returnValues;
     const expectedSections = _sections.map(element => String(element));
-    const expectedCandidates = _candidates.map(element => String(element));
     expect(eventResults.Block).to.deep.equal(String(eventsEmitted[0].blockNumber));
     expect(eventResults.ContractAddress).to.deep.equal(votingDbInstance.address);
     expect(eventResults.Sections).to.include.deep.ordered.members(expectedSections);
-    expect(eventResults.Candidates).to.include.deep.ordered.members(expectedCandidates);
   });
   it('GetCompressedData returns correct brotli compressed data string with correct SHA3', async () => {
     const votingDbInstance = await VotingDb.deployed();

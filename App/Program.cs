@@ -1,6 +1,6 @@
 ﻿using App;
-using App.Domain;
-using App.Persistence.ContractDefinition;
+using Voting.Server.Domain;
+using Voting.Server.Persistence.ContractDefinition;
 using Nethereum.ABI;
 using Nethereum.Hex.HexConvertors.Extensions;
 using Nethereum.Web3;

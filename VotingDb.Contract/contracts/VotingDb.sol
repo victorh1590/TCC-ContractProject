@@ -33,10 +33,10 @@ contract VotingDb
         _Timestamp = Timestamp;
         _CompressedSectionData = CompressedSectionData;
 
-        emit metadata(address(this), block.number, Sections, Candidates);
+        emit metadata(address(this), block.number, Sections);
         for(uint i = 0; i < Sections.length; i++) 
         {
-            emit section(Sections[i], address(this), Votes[i]);
+            emit section(Sections[i], address(this), Votes[i], Candidates);
             validation__VotesForSection(Votes[i], Candidates);
             for(uint j = 0; j < Candidates.length; j++)
             {
@@ -55,13 +55,13 @@ contract VotingDb
     event section(
         uint32 indexed Section, 
         address ContractAddress, 
-        uint32[] Votes);
+        uint32[] Votes,
+        uint32[] Candidates);
 
    event metadata(
         address indexed ContractAddress, 
         uint Block, 
-        uint32[] Sections,
-        uint32[] Candidates);
+        uint32[] Sections);
 
     //Validations / Pre-Conditions / Post-Conditions / Invariants
     function validation__CreationData(
