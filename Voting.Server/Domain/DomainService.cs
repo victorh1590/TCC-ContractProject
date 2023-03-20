@@ -1,4 +1,5 @@
 ﻿using System.Globalization;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices.JavaScript;
 using System.Text.Json;
 using CommunityToolkit.Diagnostics;
@@ -13,6 +14,7 @@ using Nethereum.Web3.Accounts;
 using Voting.Server.Domain.Models;
 using Voting.Server.Domain.Utils;
 
+[assembly: InternalsVisibleTo("Voting.Server.UnitTests")]
 namespace Voting.Server.Domain;
 
 internal class DomainService
@@ -20,6 +22,7 @@ internal class DomainService
     private string URL { get; }
     private int ChainID { get; }
     private string PrivateKey { get; }
+    public IWeb3 Web3Instance { get; set; }
 
     public DomainService()
     {
@@ -27,10 +30,17 @@ internal class DomainService
         ChainID = 5777;
         PrivateKey = "d1d45d0629c5a5fe5ac563c89d759ca057cb7e2936f6c78351bb93bb2f58eb99";
     }
+    
+    public DomainService(string url, int chainID, string privateKey)
+    {
+        URL = url;
+        ChainID = chainID;
+        PrivateKey = privateKey;
+    }
 
     private Web3 GetWeb3Client()
     {
-        Account account = new Account(PrivateKey, 5777);
+        Account account = new Account(PrivateKey, ChainID);
         return new Web3(account, URL);
     }
 
@@ -50,7 +60,7 @@ internal class DomainService
         return new VotingDbService(web3, contractAddress);
     }
 
-    public async Task<SectionVotes> GetSectionAsync(uint sectionNumber = 0, Web3? web3 = null)
+    public async Task<Section> GetSectionAsync(uint sectionNumber = 0, Web3? web3 = null)
     {
         Guard.IsNotEqualTo(sectionNumber, 0);
         
@@ -65,25 +75,21 @@ internal class DomainService
         SectionEventDTO sectionEvent = sectionLogs.FirstOrDefault()!.Event;
         Guard.IsEqualTo(sectionEvent.Candidates.Count, sectionEvent.Votes.Count);
 
-        Dictionary<uint, uint> votesByCandidate = new();
-        for (int i = 0; i < sectionEvent.Candidates.Count; i++)
-        {
-            votesByCandidate.Add(sectionEvent.Candidates[i], sectionEvent.Votes[i]);
-        }
+        List<CandidateVotes> candidateVotes = sectionEvent.Candidates.Select((t, i) => new CandidateVotes(t, sectionEvent.Votes[i])).ToList();
 
-        return new SectionVotes(sectionEvent.Section, votesByCandidate);
+        return new Section(sectionEvent.Section, candidateVotes);
     }
 
-    public async Task<List<SectionVotes>> GetSectionRangeAsync(uint[] sectionNumbers)
+    public async Task<List<Section>> GetSectionRangeAsync(uint[] sectionNumbers)
     {
         Guard.IsNotEmpty(sectionNumbers);
         
         Web3 web3 = GetWeb3Client();
-        List<SectionVotes> sectionVotesList = new();
+        List<Section> sectionVotesList = new();
         foreach (var sectionNumber in sectionNumbers)
         {
-            SectionVotes sectionVotes = await GetSectionAsync(sectionNumber, web3);
-            sectionVotesList.Add(sectionVotes);
+            Section section = await GetSectionAsync(sectionNumber, web3);
+            sectionVotesList.Add(section);
         }
         Guard.IsNotNull(sectionVotesList);
         Guard.IsNotEmpty(sectionVotesList);
@@ -124,16 +130,16 @@ internal class DomainService
     //     //TODO return Soma SectionVotes[]
     // }
     //
-    public async Task<string> CreateSection(SectionVotes section)
+    public async Task<string> CreateSection(Section section)
     {
-        Guard.IsNotEqualTo(section.Section, 0);
-        
-        List<uint> candidates = section.Votes.Keys.ToList();
+        Guard.IsNotEqualTo(section.SectionID, 0);
+
+        List<uint> candidates = section.CandidateVotes.Select(x => x.Candidate).ToList();
         Guard.IsNotEmpty(candidates);
 
-        List<List<uint>> votes = new() { section.Votes.Values.ToList() };
-        Guard.IsNotEmpty(votes[0]);
-        Guard.IsNotEqualTo(votes[0].Count, candidates.Count);
+        List<List<uint>> votes = new() { section.CandidateVotes.Select(x => x.Votes).ToList() };
+        Guard.IsNotEmpty(votes.First());
+        Guard.IsNotEqualTo(votes.First().Count, candidates.Count);
         
         string sectionJSON = JsonSerializer.Serialize(section);
         Guard.IsNotNullOrEmpty(sectionJSON);
@@ -149,7 +155,7 @@ internal class DomainService
         {
             Votes = votes,
             Candidates = candidates,
-            Sections = new List<uint> { section.Section },
+            Sections = new List<uint> { section.SectionID },
             Timestamp = timestamp,
             CompressedSectionData = compressedSection
         };
