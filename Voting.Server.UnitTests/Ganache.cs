@@ -1,5 +1,8 @@
 ﻿using System.Diagnostics;
 using System.Management;
+using System.Text;
+using CommunityToolkit.Diagnostics;
+using Microsoft.Extensions.Configuration;
 
 namespace Voting.Server.UnitTests;
 
@@ -13,42 +16,35 @@ namespace Voting.Server.UnitTests;
 
 public class Ganache 
 {
-  public string Host { get; set; } = default!;
-  public int Port { get; set; } = 8545;
-  public int ChainID { get; set; } = 56666;
-  public int BlockTime { get; set; } = 0;
-  public string DefaultGasPrice { get; set; } = "0x0";
-  public string BlockGasLimit { get; set; } = "0x87369400";
-  public string DefaultTransactionGasLimit { get; set; } = "0x87369400";
-  public Process? Proc { get; set; } = null;
-  public string PrivateKey { get; set; }
-  public string InitialBalance { get; set; }
+  private IGanacheOptions Options { get; set; }
+  private Process? Proc { get; set; }
   
-  public Ganache()
+  public Ganache(IGanacheOptions opts)
   {
-  }
-
-  public Ganache(string host, int port, int chainID, int blockTime, string defaultGasPrice, string blockGasLimit, string defaultTransactionGasLimit, string privateKey, string initialBalance)
-  {
-    Host = host;
-    Port = port;
-    ChainID = chainID;
-    BlockTime = blockTime;
-    DefaultGasPrice = defaultGasPrice;
-    BlockGasLimit = blockGasLimit;
-    DefaultTransactionGasLimit = defaultTransactionGasLimit;
-    PrivateKey = privateKey;
-    InitialBalance = initialBalance;
+    Options = opts;
   }
 
   public void Start()
   {
+    Guard.IsTrue(OperatingSystem.IsWindows());
+    StringBuilder sb = new StringBuilder();
+    sb.Append($"/K ganache");
+    sb.Append($" --server.host={Options.Host}");
+    sb.Append($" --server.port={Options.Port}");
+    sb.Append($" --chain.chainId={Options.ChainID}");
+    sb.Append($" --miner.blockTime={Options.BlockTime}");
+    sb.Append($" --miner.defaultGasPrice={Options.DefaultGasPrice}");
+    sb.Append($" --miner.blockGasLimit={Options.BlockGasLimit}");
+    sb.Append($" --miner.defaultTransactionGasLimit={Options.DefaultTransactionGasLimit}");
+    sb.Append($" --wallet.accountKeysPath={Options.AccountKeysPath}");
+    sb.Append($" --chain.hardfork=\"berlin\"");
+    // sb.Append($" --wallet.accounts={PrivateKey},{InitialBalance}");
+    
     ProcessStartInfo startInfo = new ProcessStartInfo();
     startInfo.FileName = "cmd.exe";
     startInfo.UseShellExecute = true;
     startInfo.WindowStyle = ProcessWindowStyle.Normal;
-    startInfo.Arguments = $"/K ganache --server.host={Host} --server.port={Port} --chain.chainId={ChainID} --miner.blockTime={BlockTime} --miner.defaultGasPrice={DefaultGasPrice} --miner.blockGasLimit={BlockGasLimit} --miner.defaultTransactionGasLimit={DefaultTransactionGasLimit} --wallet.accounts={PrivateKey},{InitialBalance} --chain.hardfork=\"berlin\"";
-    // startInfo.Arguments = $"/K ganache --server.host={Host} --server.port={Port} --chain.chainId={ChainID} --miner.blockTime={BlockTime} --miner.defaultGasPrice={DefaultGasPrice} --wallet.totalAccounts=0";
+    startInfo.Arguments = sb.ToString();
     Proc = Process.Start(startInfo);
     if(Proc == null)
     {
@@ -58,13 +54,25 @@ public class Ganache
 
   public void Stop()
   {
+    Guard.IsTrue(OperatingSystem.IsWindows());
     if(Proc == null) return;
     KillProcessTree(Proc.Id);
     Proc = null;
+    try
+    {
+      File.Delete(Path.Join(Directory.GetCurrentDirectory(), Options.AccountKeysPath));
+    }
+    catch (Exception e)
+    {
+      Console.WriteLine(e);
+      Console.WriteLine("Accounts File not removed.");
+    }
   }
 
   private void KillProcessTree(int pid)
   {
+    Guard.IsTrue(OperatingSystem.IsWindows());
+#pragma warning disable CA1416 // Guard.IsTrue(OperatingSystem.IsWindows()) ensures it's running on Windows.
     if (pid == 0) return;
     ManagementObjectSearcher lookup = new ManagementObjectSearcher("SELECT * FROM Win32_Process WHERE ParentProcessID=" + pid);
     ManagementObjectCollection procList = lookup.Get();
@@ -80,4 +88,5 @@ public class Ganache
     {
     }
   }
+#pragma warning restore CA1416
 }

@@ -1,5 +1,8 @@
 using System.Net;
+using System.Reflection;
 using System.Text.Json;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Options;
 using Nethereum.Hex.HexConvertors.Extensions;
 using Nethereum.Signer;
 using Nethereum.Web3;
@@ -13,25 +16,41 @@ namespace Voting.Server.UnitTests;
 public class DomainServiceTests
 {
     public Ganache? Blockchain { get; set; }
-    public string? PrivateKey { get; set; }
+    public string URL { get; set; }
+    public string PrivateKey { get; set; }
+    public AccountAddresses Accounts { get; set; } = new();
+    public IGanacheOptions Options { get; set; } = new GanacheOptions();
     
     [OneTimeSetUp]
-    public void OneTimeSetUp()
+    public async Task OneTimeSetUp()
     {
-        EthECKey ecKey = EthECKey.GenerateKey();
-        PrivateKey = ecKey.GetPrivateKeyAsBytes().ToHex();
-        PrivateKey = "0x" + PrivateKey;
-        Blockchain = new Ganache(
-            "127.0.0.1", 
-            8545, 
-            56666, 
-            0, 
-            "0x0", 
-            "0x87369400", 
-            "0x87369400",
-            PrivateKey,
-            "0X56BC75E2D63100000");
+        string testProjectDirectory =  
+                Path.GetDirectoryName(
+                Path.GetDirectoryName(
+                Path.GetDirectoryName(TestContext.CurrentContext.TestDirectory))) ?? "";
+        var configuration = new ConfigurationBuilder()
+            .SetBasePath(testProjectDirectory)
+            .AddJsonFile("ganache_configs.json")
+            .Build();
+        configuration.Bind(Options);
+
+        Blockchain = new Ganache(Options);
         Blockchain.Start();
+        URL = $"HTTP://{Options.Host}:{Options.Port}";
+
+        string accountFilePath = Path.Join(Directory.GetCurrentDirectory(), Options.AccountKeysPath);
+        int fileReadTries = 0;
+        while(fileReadTries < 3)
+        {
+            if (!File.Exists(accountFilePath))
+            {
+                Thread.Sleep(3000);
+            }
+            fileReadTries++;
+        }
+        string text = await File.ReadAllTextAsync(accountFilePath);
+        Accounts = JsonSerializer.Deserialize<AccountAddresses>(text) ?? throw new ArgumentException("Failed to read accounts.");
+        PrivateKey = Accounts.Addresses.Values.First();
     }
 
     [OneTimeTearDown]
@@ -43,18 +62,9 @@ public class DomainServiceTests
     [Test]
     public async Task DeployContractTest()
     {
-        string url = "HTTP://localhost:8545";
-        int chainId = 56666;
-        // string? privateKey;
-        IWeb3 web3 = new Web3(url);
+        IWeb3 web3 = new Web3(URL);
         web3.TransactionManager.UseLegacyAsDefault = true;
-        //
-        // EthECKey ecKey = EthECKey.GenerateKey();
-        // privateKey = ecKey.GetPrivateKeyAsBytes().ToHex();
-        // Assert.IsNotNull(privateKey);
-        // string? account = await web3.Personal.NewAccount.SendRequestAsync(privateKey);
-        // Assert.IsNotNull(account);
-        //
+
         var accounts = await web3.Personal.ListAccounts.SendRequestAsync();
         Assert.IsNotNull(accounts);
         Assert.IsNotEmpty(accounts);
@@ -65,7 +75,7 @@ public class DomainServiceTests
             Console.WriteLine(item);
         }
         
-        DomainService ds = new DomainService(url, chainId, PrivateKey ?? "");
+        DomainService ds = new DomainService(URL, Options.ChainID, PrivateKey ?? "");
         VotingDbDeployment deployment = new VotingDbDeployment
         {
             Candidates = SeedData.Candidates,
@@ -95,12 +105,12 @@ public class DomainServiceTests
             }
         );
 
-        string json = JsonSerializer.Serialize(sectionData);
-        string jsonExp = JsonSerializer.Serialize(expectedSection);
-        Console.WriteLine(json);
-        Console.WriteLine("Expected: " + jsonExp);
-        
-        Assert.AreEqual(jsonExp, json);
+        string resultJSON = JsonSerializer.Serialize(sectionData);
+        string expectedJSON = JsonSerializer.Serialize(expectedSection);
+        Console.WriteLine(resultJSON);
+        Console.WriteLine("Expected: " + expectedJSON);
+
+        Assert.That(resultJSON, Is.EqualTo(expectedJSON));
         CollectionAssert.AreEqual(expectedSection.CandidateVotes, sectionData.CandidateVotes);
     }
 }
