@@ -45,11 +45,7 @@ public class Ganache
     startInfo.UseShellExecute = true;
     startInfo.WindowStyle = ProcessWindowStyle.Normal;
     startInfo.Arguments = sb.ToString();
-    Proc = Process.Start(startInfo);
-    if(Proc == null)
-    {
-      throw new SystemException("Process failed to start.");
-    }
+    Proc = Process.Start(startInfo) ?? throw new SystemException("Process failed to start.");
   }
 
   public void Stop()
@@ -62,10 +58,17 @@ public class Ganache
     {
       File.Delete(Path.Join(Directory.GetCurrentDirectory(), Options.AccountKeysPath));
     }
-    catch (Exception e)
+    catch (Exception err) 
+      when (err is ArgumentException 
+                or ArgumentNullException 
+                or DirectoryNotFoundException 
+                or IOException 
+                or NotSupportedException 
+                or PathTooLongException 
+                or UnauthorizedAccessException)
     {
-      Console.WriteLine(e);
-      Console.WriteLine("Accounts File not removed.");
+      Console.WriteLine("Failed to remove Accounts file.");
+      throw;
     }
   }
 
@@ -84,8 +87,11 @@ public class Ganache
     {
         Process.GetProcessById(pid).Kill();
     }
-    catch (ArgumentException)
+    catch (Exception err) 
+      when (err is InvalidOperationException or ArgumentException)
     {
+      Console.WriteLine("Failed to stop process tree.");
+      throw;
     }
   }
 #pragma warning restore CA1416

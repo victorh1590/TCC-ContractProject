@@ -22,79 +22,52 @@ internal class DomainService
     private string URL { get; }
     private int ChainID { get; }
     private string PrivateKey { get; }
-    public IWeb3 Web3Instance { get; set; }
+    public Account Acc { get; set; }
+    public IWeb3 Web3 { get; set; }
+    public IVotingDbRepository Repository { get; set; }
 
-    public DomainService()
+    public DomainService(IVotingDbRepository repository)
     {
         URL = "HTTP://localhost:7545";
         ChainID = 5777;
         PrivateKey = "d1d45d0629c5a5fe5ac563c89d759ca057cb7e2936f6c78351bb93bb2f58eb99";
+        Acc = new Account(PrivateKey, ChainID);
+        Web3 = new Web3(Acc, URL);
+        Repository = repository;
     }
     
-    public DomainService(string url, int chainID, string privateKey)
+    public DomainService(string url, int chainID, string privateKey, IVotingDbRepository repository)
     {
         URL = url;
         ChainID = chainID;
         PrivateKey = privateKey;
-    }
-
-    private Web3 GetWeb3Client()
-    {
-        Account account = new Account(PrivateKey, ChainID);
-        return new Web3(account, URL);
+        Acc = new Account(privateKey, chainID);
+        Web3 = new Web3(Acc, URL);
+        Repository = repository;
     }
 
     public async Task<string> DeployContract(VotingDbDeployment votingDbDeployment)
     {
-        Web3 web3 = GetWeb3Client();
-        web3.TransactionManager.UseLegacyAsDefault = true;
-        TransactionReceipt transactionReceipt = await web3.Eth
+        Web3.TransactionManager.UseLegacyAsDefault = true;
+        TransactionReceipt transactionReceipt = await Web3.Eth
             .GetContractDeploymentHandler<VotingDbDeployment>()
             .SendRequestAndWaitForReceiptAsync(votingDbDeployment);
         return transactionReceipt.ContractAddress;
     }
 
-    private VotingDbService GetVotingDbService(string contractAddress)
+    private VotingDbRepository GetVotingDbService(string contractAddress)
     {
-        Web3 web3 = GetWeb3Client();
-        return new VotingDbService(web3, contractAddress);
+        return new VotingDbRepository(Web3, contractAddress);
     }
 
-    public async Task<Section> GetSectionAsync(uint sectionNumber = 0, Web3? web3 = null)
+    public async Task<Section> GetSectionAsync(uint sectionNumber = 0)
     {
-        Guard.IsNotEqualTo(sectionNumber, 0);
-        
-        web3 ??= GetWeb3Client();
-        Event<SectionEventDTO> sectionEventHandler = web3.Eth.GetEvent<SectionEventDTO>();
-        BlockParameter earliest = BlockParameter.CreateEarliest();
-        BlockParameter latest = BlockParameter.CreateLatest();
-        NewFilterInput sectionEventFilter = sectionEventHandler.CreateFilterInput(sectionNumber, earliest, latest);
-        List<EventLog<SectionEventDTO>>? sectionLogs = await sectionEventHandler.GetAllChangesAsync(sectionEventFilter);
-        Guard.IsNotNull(sectionLogs);
-        Guard.IsNotEmpty(sectionLogs);
-        SectionEventDTO sectionEvent = sectionLogs.FirstOrDefault()!.Event;
-        Guard.IsEqualTo(sectionEvent.Candidates.Count, sectionEvent.Votes.Count);
-
-        List<CandidateVotes> candidateVotes = sectionEvent.Candidates.Select((t, i) => new CandidateVotes(t, sectionEvent.Votes[i])).ToList();
-
-        return new Section(sectionEvent.Section, candidateVotes);
+        return await Repository.GetSectionAsync(Web3, sectionNumber);
     }
 
     public async Task<List<Section>> GetSectionRangeAsync(uint[] sectionNumbers)
     {
-        Guard.IsNotEmpty(sectionNumbers);
-        
-        Web3 web3 = GetWeb3Client();
-        List<Section> sectionVotesList = new();
-        foreach (var sectionNumber in sectionNumbers)
-        {
-            Section section = await GetSectionAsync(sectionNumber, web3);
-            sectionVotesList.Add(section);
-        }
-        Guard.IsNotNull(sectionVotesList);
-        Guard.IsNotEmpty(sectionVotesList);
-
-        return sectionVotesList;
+        return await Repository.GetSectionRangeAsync(Web3, sectionNumbers);
     }
 
     // public async Task GetVotesByCandidate(uint candidate = 0)
@@ -102,23 +75,12 @@ internal class DomainService
     //     //TODO return SectionVotes[i].Votes["Name"]
     // }
     //
+    
     public async Task<dynamic> GetVotesByCandidateForSection(uint candidate = 0, uint sectionNumber = 0)
     {
-        Guard.IsNotEqualTo(candidate, 0);
-        Guard.IsNotEqualTo(sectionNumber, 0);
-        
-        Web3 web3 = GetWeb3Client();
-        Event<CandidateEventDTO> candidateEventHandler = web3.Eth.GetEvent<CandidateEventDTO>();
-        BlockParameter earliest = BlockParameter.CreateEarliest();
-        BlockParameter latest = BlockParameter.CreateLatest();
-        NewFilterInput candidateEventFilter = candidateEventHandler.CreateFilterInput(sectionNumber, earliest, latest);
-        List<EventLog<CandidateEventDTO>>? candidateLogs = await candidateEventHandler.GetAllChangesAsync(candidateEventFilter);
-        Guard.IsNotNull(candidateLogs);
-        Guard.IsNotEmpty(candidateLogs);
-        CandidateEventDTO candidateEvent = candidateLogs.FirstOrDefault()!.Event;
-        
-        return new { candidateEvent.Section, candidateEvent.Candidate, candidateEvent.Votes };
+        return await Repository.GetVotesByCandidateForSection(Web3, candidate, sectionNumber);
     }
+    
     //
     // public async Task GetAllVotesByCandidate(string candidate)
     // {

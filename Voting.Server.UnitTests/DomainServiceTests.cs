@@ -9,6 +9,7 @@ using Nethereum.Web3;
 using Voting.Server.Domain;
 using Nethereum.Web3.Accounts;
 using Voting.Server.Domain.Models;
+using Voting.Server.Persistence;
 using Voting.Server.Persistence.ContractDefinition;
 
 namespace Voting.Server.UnitTests;
@@ -75,7 +76,7 @@ public class DomainServiceTests
             Console.WriteLine(item);
         }
         
-        DomainService ds = new DomainService(URL, Options.ChainID, PrivateKey ?? "");
+        DomainService ds = new DomainService(URL, Options.ChainID, PrivateKey, new VotingDbRepository());
         VotingDbDeployment deployment = new VotingDbDeployment
         {
             Candidates = SeedData.Candidates,
