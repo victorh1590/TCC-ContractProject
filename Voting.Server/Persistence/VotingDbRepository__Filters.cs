@@ -39,11 +39,11 @@ public partial class VotingDbRepository
     //     return web3.Eth.GetEvent<T>();
     // }
 
-    public async Task<Section> GetSectionAsync(IWeb3 web3, uint sectionNumber = 0)
+    public async Task<Section> GetSectionAsync(uint sectionNumber = 0)
     {
         Guard.IsNotEqualTo(sectionNumber, 0);
         
-        Event<SectionEventDTO> sectionEventHandler = web3.Eth.GetEvent<SectionEventDTO>();
+        Event<SectionEventDTO> sectionEventHandler = Web3.Eth.GetEvent<SectionEventDTO>();
         GetFilterRangeSettings(FilterRange.FromEarliestToLatest, out BlockParameter from, out BlockParameter to);
         NewFilterInput sectionEventFilter = sectionEventHandler.CreateFilterInput(sectionNumber, from, to);
         List<EventLog<SectionEventDTO>>? sectionLogs = await sectionEventHandler.GetAllChangesAsync(sectionEventFilter);
@@ -52,25 +52,25 @@ public partial class VotingDbRepository
         return Mappings.SectionEventDTOToSection(sectionLogs.FirstOrDefault()!.Event);
     }
     
-    public async Task<List<Section>> GetSectionRangeAsync(IWeb3 web3, uint[] sectionNumbers)
+    public async Task<List<Section>> GetSectionRangeAsync(uint[] sectionNumbers)
     {
         Guard.IsNotEmpty(sectionNumbers);
         
         List<Section> sectionVotesList = new();
         foreach (var sectionNumber in sectionNumbers)
         {
-            Section section = await GetSectionAsync(web3, sectionNumber);
+            Section section = await GetSectionAsync(sectionNumber);
             sectionVotesList.Add(section);
         }
         return sectionVotesList;
     }
     
-    public async Task<Section> GetVotesByCandidateForSection(IWeb3 web3, uint candidate = 0, uint sectionNumber = 0)
+    public async Task<Section> GetVotesByCandidateForSection(uint candidate = 0, uint sectionNumber = 0)
     {
         Guard.IsNotEqualTo(candidate, 0);
         Guard.IsNotEqualTo(sectionNumber, 0);
         
-        Event<CandidateEventDTO> candidateEventHandler = web3.Eth.GetEvent<CandidateEventDTO>();
+        Event<CandidateEventDTO> candidateEventHandler = Web3.Eth.GetEvent<CandidateEventDTO>();
         GetFilterRangeSettings(FilterRange.FromEarliestToLatest, out BlockParameter from, out BlockParameter to);
         NewFilterInput candidateEventFilter = candidateEventHandler.CreateFilterInput(sectionNumber, from, to);
         List<EventLog<CandidateEventDTO>>? candidateLogs = await candidateEventHandler.GetAllChangesAsync(candidateEventFilter);

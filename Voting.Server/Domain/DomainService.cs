@@ -24,7 +24,7 @@ internal class DomainService
     // private string PrivateKey { get; }
     // public Account Acc { get; set; }
     // public IWeb3 Web3 { get; set; }
-    public IVotingDbRepository Repository { get; set; }
+    private IVotingDbRepository Repository { get; }
 
     public DomainService(IVotingDbRepository repository)
     {
@@ -36,38 +36,38 @@ internal class DomainService
         Repository = repository;
     }
     
-    public DomainService(string url, int chainID, string privateKey, IVotingDbRepository repository)
-    {
-        URL = url;
-        ChainID = chainID;
-        PrivateKey = privateKey;
-        Acc = new Account(privateKey, chainID);
-        Web3 = new Web3(Acc, URL);
-        Repository = repository;
-    }
+    // public DomainService(string url, int chainID, string privateKey, IVotingDbRepository repository)
+    // {
+    //     // URL = url;
+    //     // ChainID = chainID;
+    //     // PrivateKey = privateKey;
+    //     // Acc = new Account(privateKey, chainID);
+    //     // Web3 = new Web3(Acc, URL);
+    //     Repository = repository;
+    // }
 
-    public async Task<string> DeployContract(VotingDbDeployment votingDbDeployment)
-    {
-        Web3.TransactionManager.UseLegacyAsDefault = true;
-        TransactionReceipt transactionReceipt = await Web3.Eth
-            .GetContractDeploymentHandler<VotingDbDeployment>()
-            .SendRequestAndWaitForReceiptAsync(votingDbDeployment);
-        return transactionReceipt.ContractAddress;
-    }
+    // public async Task<string> DeployContract(VotingDbDeployment votingDbDeployment)
+    // {
+    //     Web3.TransactionManager.UseLegacyAsDefault = true;
+    //     TransactionReceipt transactionReceipt = await Web3.Eth
+    //         .GetContractDeploymentHandler<VotingDbDeployment>()
+    //         .SendRequestAndWaitForReceiptAsync(votingDbDeployment);
+    //     return transactionReceipt.ContractAddress;
+    // }
 
-    private VotingDbRepository GetVotingDbService(string contractAddress)
-    {
-        return new VotingDbRepository(Web3, contractAddress);
-    }
+    // private VotingDbRepository GetVotingDbService(string contractAddress)
+    // {
+    //     return new VotingDbRepository(Web3, contractAddress);
+    // }
 
     public async Task<Section> GetSectionAsync(uint sectionNumber = 0)
     {
-        return await Repository.GetSectionAsync(Web3, sectionNumber);
+        return await Repository.GetSectionAsync(sectionNumber);
     }
 
     public async Task<List<Section>> GetSectionRangeAsync(uint[] sectionNumbers)
     {
-        return await Repository.GetSectionRangeAsync(Web3, sectionNumbers);
+        return await Repository.GetSectionRangeAsync(sectionNumbers);
     }
 
     // public async Task GetVotesByCandidate(uint candidate = 0)
@@ -78,7 +78,7 @@ internal class DomainService
     
     public async Task<dynamic> GetVotesByCandidateForSection(uint candidate = 0, uint sectionNumber = 0)
     {
-        return await Repository.GetVotesByCandidateForSection(Web3, candidate, sectionNumber);
+        return await Repository.GetVotesByCandidateForSection(candidate, sectionNumber);
     }
     
     //
@@ -122,11 +122,45 @@ internal class DomainService
             CompressedSectionData = compressedSection
         };
 
-        return await DeployContract(deployment);
+        return await Repository.DeployContractAsync(deployment);
     }
     //
-    // public async Task CreateSectionRange()
-    // {
-    //     //TODO call deploy a contract with sections.
-    // }
+    public async Task<string> CreateSectionRange(List<Section> sections)
+    {
+        // Guard.IsNotEqualTo(sections.SectionID, 0);
+        Guard.IsNotEmpty(sections);
+        Guard.IsFalse(sections.Any(section => section.SectionID == 0));
+
+        List<uint> candidates = sections.First().CandidateVotes.Select(x => x.Candidate).ToList();
+        Guard.IsNotEmpty(candidates);
+
+        List<List<uint>> votes = new();
+        foreach (var section in sections)
+        {
+            votes.Add(section.CandidateVotes.Select(x => x.Votes).ToList());
+            Guard.IsNotEmpty(votes.First());
+            Guard.IsNotEqualTo(votes.First().Count, candidates.Count);
+        }
+
+        string sectionJSON = JsonSerializer.Serialize(sections);
+        Guard.IsNotNullOrEmpty(sectionJSON);
+
+        Compression compression = new();
+        string compressedSection = compression.Compress(sectionJSON);
+        Guard.IsNotNullOrEmpty(compressedSection);
+
+        DateTime currentTime = DateTime.Now;
+        string timestamp = currentTime.ToString(CultureInfo.InvariantCulture);
+
+        VotingDbDeployment deployment = new()
+        {
+            Votes = votes,
+            Candidates = candidates,
+            Sections = sections.Select(section => section.SectionID).ToList(),
+            Timestamp = timestamp,
+            CompressedSectionData = compressedSection
+        };
+
+        return await Repository.DeployContractAsync(deployment);
+    }
 }

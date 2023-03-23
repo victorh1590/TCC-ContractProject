@@ -12,4 +12,5 @@ public class GanacheOptions : IGanacheOptions
     public string BlockGasLimit { get; set; }
     public string DefaultTransactionGasLimit { get; set; }
     public string AccountKeysPath { get; set; }
+    public int TotalAccounts { get; set; }
 }

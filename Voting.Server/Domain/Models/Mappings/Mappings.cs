@@ -27,4 +27,34 @@ internal class Mappings
         };
         return new Section(candidateDTO.Section, candidateVotes);
     }
+
+    public static List<Section> DeploymentToSections(VotingDbDeployment deployment)
+    {
+        Guard.IsNotEmpty(deployment.Candidates);
+        Guard.IsNotEmpty(deployment.Sections);
+        Guard.IsNotEmpty(deployment.Votes);
+        Guard.IsNotNullOrEmpty(deployment.Timestamp);
+        Guard.IsNotNullOrEmpty(deployment.CompressedSectionData);
+        Guard.IsEqualTo(deployment.Votes.Count, deployment.Sections.Count);
+        Guard.IsEqualTo(deployment.Votes.First().Count, deployment.Candidates.Count);
+        
+        List<Section> sections = new();
+        // List<CandidateVotes> candidateVotesList = new();
+        for (int i = 0; i < deployment.Votes.Count; i++)
+        {
+            List<CandidateVotes> candidateVotesList = deployment.Votes[i]
+                .Select(
+                    (votes, j) => new CandidateVotes 
+                    { 
+                        Candidate = deployment.Candidates[j], 
+                        Votes = votes 
+                    })
+                .ToList();
+            sections.Add(new Section(deployment.Sections[i], candidateVotesList));
+        }
+        
+        Guard.IsNotEmpty(sections);
+        Guard.IsEqualTo(sections.Count, deployment.Sections.Count);
+        return sections;
+    }
 }

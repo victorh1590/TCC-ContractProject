@@ -10,4 +10,5 @@ public interface IGanacheOptions
     string BlockGasLimit { get; set; }
     string DefaultTransactionGasLimit { get; set; }
     string AccountKeysPath { get; set; }
+    int TotalAccounts { get; set; }
 }

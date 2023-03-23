@@ -14,6 +14,8 @@ public class Web3ClientsManager : IWeb3ClientsManager
         Web3Clients = accounts.Accounts
             .Select(account => new Web3(account))
             .ToImmutableList();
+        
+        Web3Clients.ForEach(web3 => web3.TransactionManager.UseLegacyAsDefault = true);
 
         Guard.IsNotNull(Web3Clients);
     }

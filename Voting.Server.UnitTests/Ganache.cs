@@ -16,17 +16,26 @@ namespace Voting.Server.UnitTests;
 
 public class Ganache 
 {
-  private IGanacheOptions Options { get; set; }
+  private IGanacheOptions Options { get; }
+  private IConfiguration Config { get; }
   private Process? Proc { get; set; }
   
-  public Ganache(IGanacheOptions opts)
+  public Ganache(IGanacheOptions opts, IConfiguration config)
   {
     Options = opts;
+    Config = config;
   }
 
   public void Start()
   {
     Guard.IsTrue(OperatingSystem.IsWindows());
+    
+    List<KeyValuePair<string, string?>> accountCredentials = Config
+      .GetSection("Accounts")
+      .AsEnumerable()
+      .Select(item => item)
+      .Where(item => item.Value != null)
+      .ToList();
     StringBuilder sb = new StringBuilder();
     sb.Append($"/K ganache");
     sb.Append($" --server.host={Options.Host}");
@@ -36,7 +45,9 @@ public class Ganache
     sb.Append($" --miner.defaultGasPrice={Options.DefaultGasPrice}");
     sb.Append($" --miner.blockGasLimit={Options.BlockGasLimit}");
     sb.Append($" --miner.defaultTransactionGasLimit={Options.DefaultTransactionGasLimit}");
+    sb.Append($" --wallet.accounts={accountCredentials.First().Key},{accountCredentials.First().Value}");
     sb.Append($" --wallet.accountKeysPath={Options.AccountKeysPath}");
+    sb.Append($" --wallet.totalAccounts={Options.TotalAccounts}");
     sb.Append($" --chain.hardfork=\"berlin\"");
     // sb.Append($" --wallet.accounts={PrivateKey},{InitialBalance}");
     

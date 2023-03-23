@@ -8,14 +8,19 @@ namespace Voting.Server.Persistence;
 
 public interface IVotingDbRepository
 {
-    // ContractHandler ContractHandler { get; }
+    IWeb3 Web3 { get; }
+    public Task<TransactionReceipt> DeployContractAndWaitForReceiptAsync(
+        VotingDbDeployment votingDbDeployment, IWeb3? web3 = null,
+        CancellationTokenSource? cancellationTokenSource = null);
+
+    public Task<string> DeployContractAsync(VotingDbDeployment votingDbDeployment, IWeb3? web3 = null);
     Task<string> GetCompressedDataQueryAsync(string contractAddress, GetCompressedDataFunction getCompressedDataFunction, BlockParameter? blockParameter = null);
     Task<string> GetCompressedDataQueryAsync(string contractAddress, BlockParameter? blockParameter = null);
     Task<string> GetOwnerQueryAsync(string contractAddress, GetOwnerFunction getOwnerFunction, BlockParameter? blockParameter = null);
     Task<string> GetOwnerQueryAsync(string contractAddress, BlockParameter? blockParameter = null);
     Task<string> GetTimestampQueryAsync(string contractAddress, GetTimestampFunction getTimestampFunction, BlockParameter? blockParameter = null);
     Task<string> GetTimestampQueryAsync(string contractAddress, BlockParameter? blockParameter = null);
-    Task<Section> GetSectionAsync(IWeb3 web3, uint sectionNumber = 0);
-    Task<List<Section>> GetSectionRangeAsync(IWeb3 web3, uint[] sectionNumbers);
-    Task<Section> GetVotesByCandidateForSection(IWeb3 web3, uint candidate = 0, uint sectionNumber = 0);
+    Task<Section> GetSectionAsync(uint sectionNumber = 0);
+    Task<List<Section>> GetSectionRangeAsync(uint[] sectionNumbers);
+    Task<Section> GetVotesByCandidateForSection(uint candidate = 0, uint sectionNumber = 0);
 }

@@ -6,5 +6,6 @@
   "DefaultGasPrice": "0x0",
   "BlockGasLimit": "0x1c9c380",
   "DefaultTransactionGasLimit": "0x15f90",
-  "AccountKeysPath": "accounts.json"
+  "AccountKeysPath": "accounts.json",
+  "TotalAccounts": 1
 }
