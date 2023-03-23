@@ -6,22 +6,25 @@ namespace Voting.Server.Persistence;
 
 public partial class VotingDbRepository
 {
-    public static Task<TransactionReceipt> DeployContractAndWaitForReceiptAsync(IWeb3 web3,
-        VotingDbDeployment votingDbDeployment, CancellationTokenSource? cancellationTokenSource = null)
+    public Task<TransactionReceipt> DeployContractAndWaitForReceiptAsync(
+        VotingDbDeployment votingDbDeployment, IWeb3? web3 = null, CancellationTokenSource? cancellationTokenSource = null)
     {
+        web3 ??= Web3;
         return web3.Eth.GetContractDeploymentHandler<VotingDbDeployment>()
             .SendRequestAndWaitForReceiptAsync(votingDbDeployment, cancellationTokenSource);
     }
 
-    public static Task<string> DeployContractAsync(IWeb3 web3, VotingDbDeployment votingDbDeployment)
+    public Task<string> DeployContractAsync(VotingDbDeployment votingDbDeployment, IWeb3? web3 = null)
     {
+        web3 ??= Web3;
         return web3.Eth.GetContractDeploymentHandler<VotingDbDeployment>().SendRequestAsync(votingDbDeployment);
     }
 
-    public static async Task<VotingDbRepository> DeployContractAndGetRepositoryAsync(IWeb3 web3,
-        VotingDbDeployment votingDbDeployment, CancellationTokenSource? cancellationTokenSource = null)
-    {
-        var receipt = await DeployContractAndWaitForReceiptAsync(web3, votingDbDeployment, cancellationTokenSource);
-        return new VotingDbRepository(web3, receipt.ContractAddress);
-    }
+    // public async Task<VotingDbRepository> DeployContractAndGetRepositoryAsync(
+    //     VotingDbDeployment votingDbDeployment, IWeb3? web3 = null, CancellationTokenSource? cancellationTokenSource = null)
+    // {
+    //     web3 ??= Web3;
+    //     var receipt = await DeployContractAndWaitForReceiptAsync(web3, votingDbDeployment, cancellationTokenSource);
+    //     return new VotingDbRepository(Web3, receipt.ContractAddress);
+    // }
 }

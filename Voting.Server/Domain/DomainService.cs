@@ -19,20 +19,20 @@ namespace Voting.Server.Domain;
 
 internal class DomainService
 {
-    private string URL { get; }
-    private int ChainID { get; }
-    private string PrivateKey { get; }
-    public Account Acc { get; set; }
-    public IWeb3 Web3 { get; set; }
+    // private string URL { get; }
+    // private int ChainID { get; }
+    // private string PrivateKey { get; }
+    // public Account Acc { get; set; }
+    // public IWeb3 Web3 { get; set; }
     public IVotingDbRepository Repository { get; set; }
 
     public DomainService(IVotingDbRepository repository)
     {
-        URL = "HTTP://localhost:7545";
-        ChainID = 5777;
-        PrivateKey = "d1d45d0629c5a5fe5ac563c89d759ca057cb7e2936f6c78351bb93bb2f58eb99";
-        Acc = new Account(PrivateKey, ChainID);
-        Web3 = new Web3(Acc, URL);
+        // URL = "HTTP://localhost:7545";
+        // ChainID = 5777;
+        // PrivateKey = "d1d45d0629c5a5fe5ac563c89d759ca057cb7e2936f6c78351bb93bb2f58eb99";
+        // Acc = new Account(PrivateKey, ChainID);
+        // Web3 = new Web3(Acc, URL);
         Repository = repository;
     }
     
