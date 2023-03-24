@@ -3,6 +3,7 @@ using System.Management;
 using System.Text;
 using CommunityToolkit.Diagnostics;
 using Microsoft.Extensions.Configuration;
+using Voting.Server.Persistence.Accounts;
 
 namespace Voting.Server.UnitTests;
 
@@ -14,28 +15,25 @@ namespace Voting.Server.UnitTests;
 // Console.ReadKey();
 // blockchain.Stop();
 
-public class Ganache 
+internal class Ganache 
 {
   private IGanacheOptions Options { get; }
   private IConfiguration Config { get; }
+  private AccountManager? AccountManager { get; }
   private Process? Proc { get; set; }
   
-  public Ganache(IGanacheOptions opts, IConfiguration config)
+  internal Ganache(IGanacheOptions opts, IConfiguration config, AccountManager accountManager)
   {
     Options = opts;
     Config = config;
+    AccountManager = accountManager;
+    Guard.IsNotNull(AccountManager);
   }
 
-  public void Start()
+  internal void Start()
   {
     Guard.IsTrue(OperatingSystem.IsWindows());
     
-    List<KeyValuePair<string, string?>> accountCredentials = Config
-      .GetSection("Accounts")
-      .AsEnumerable()
-      .Select(item => item)
-      .Where(item => item.Value != null)
-      .ToList();
     StringBuilder sb = new StringBuilder();
     sb.Append($"/K ganache");
     sb.Append($" --server.host={Options.Host}");
@@ -45,9 +43,9 @@ public class Ganache
     sb.Append($" --miner.defaultGasPrice={Options.DefaultGasPrice}");
     sb.Append($" --miner.blockGasLimit={Options.BlockGasLimit}");
     sb.Append($" --miner.defaultTransactionGasLimit={Options.DefaultTransactionGasLimit}");
-    sb.Append($" --wallet.accounts={accountCredentials.First().Key},{accountCredentials.First().Value}");
+    sb.Append($" --wallet.accounts={AccountManager?.Accounts.First().PrivateKey + ",0x3635C9ADC5DEA00000"}");
     sb.Append($" --wallet.accountKeysPath={Options.AccountKeysPath}");
-    sb.Append($" --wallet.totalAccounts={Options.TotalAccounts}");
+    // sb.Append($" --wallet.totalAccounts={Options.TotalAccounts}");
     sb.Append($" --chain.hardfork=\"berlin\"");
     // sb.Append($" --wallet.accounts={PrivateKey},{InitialBalance}");
     
@@ -59,7 +57,7 @@ public class Ganache
     Proc = Process.Start(startInfo) ?? throw new SystemException("Process failed to start.");
   }
 
-  public void Stop()
+  internal void Stop()
   {
     Guard.IsTrue(OperatingSystem.IsWindows());
     if(Proc == null) return;

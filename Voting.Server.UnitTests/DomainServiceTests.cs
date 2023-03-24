@@ -19,14 +19,14 @@ namespace Voting.Server.UnitTests;
 
 public class DomainServiceTests
 {
-    public Ganache? Blockchain { get; set; }
+    internal Ganache? Blockchain { get; set; }
     public string URL { get; set; }
     // public string PrivateKey { get; set; }
     // public AccountAddresses Accounts { get; set; } = new();
     public IGanacheOptions Options { get; set; } = new GanacheOptions();
 
     private IConfiguration Config { get; set; } = default!;
-    private IAccountManager AccountManager { get; set; } = default!;
+    private AccountManager AccountManager { get; set; } = default!;
     private IWeb3ClientsManager ClientsManager { get; set; } = default!;
     private IVotingDbRepository Repository { get; set; } = default!;
     
@@ -50,7 +50,7 @@ public class DomainServiceTests
         ClientsManager = new Web3ClientsManager(AccountManager);
         Repository = new VotingDbRepository(ClientsManager);
 
-        Blockchain = new Ganache(Options, Config);
+        Blockchain = new Ganache(Options, Config, AccountManager);
         Blockchain.Start();
         URL = $"HTTP://{Options.Host}:{Options.Port}";
 

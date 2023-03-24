@@ -24,7 +24,7 @@ public partial class VotingDbRepository : IVotingDbRepository
 
     // public ContractHandler ContractHandler { get; }
 
-    public VotingDbRepository(IWeb3ClientsManager clients)
+    internal VotingDbRepository(IWeb3ClientsManager clients)
     {
         _clients = clients;
         Web3 = clients.Web3Clients.First();

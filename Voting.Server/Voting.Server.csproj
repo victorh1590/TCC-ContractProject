@@ -10,10 +10,11 @@
   <ItemGroup>
     <PackageReference Include="CommunityToolkit.Diagnostics" Version="8.2.0-preview1" />
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="7.0.4" />
+    <PackageReference Include="Nethereum.HdWallet" Version="4.14.0" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.4.0" />
-    <PackageReference Include="Nethereum.Accounts" Version="4.13.0" />
-    <PackageReference Include="Nethereum.RPC" Version="4.13.0" />
-    <PackageReference Include="Nethereum.Web3" Version="4.13.0" />
+    <PackageReference Include="Nethereum.Accounts" Version="4.14.0" />
+    <PackageReference Include="Nethereum.RPC" Version="4.14.0" />
+    <PackageReference Include="Nethereum.Web3" Version="4.14.0" />
   </ItemGroup>
 
 </Project>

@@ -3,7 +3,7 @@ using Nethereum.Web3.Accounts;
 
 namespace Voting.Server.Persistence.Accounts;
 
-public interface IAccountManager
+internal interface IAccountManager
 { 
-    ImmutableList<Account> Accounts { get; }
+    ImmutableList<string> PublicKeys { get; }
 }

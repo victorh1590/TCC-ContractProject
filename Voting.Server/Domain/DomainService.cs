@@ -139,7 +139,7 @@ internal class DomainService
         {
             votes.Add(section.CandidateVotes.Select(x => x.Votes).ToList());
             Guard.IsNotEmpty(votes.First());
-            Guard.IsNotEqualTo(votes.First().Count, candidates.Count);
+            Guard.IsEqualTo(votes.First().Count, candidates.Count);
         }
 
         string sectionJSON = JsonSerializer.Serialize(sections);
