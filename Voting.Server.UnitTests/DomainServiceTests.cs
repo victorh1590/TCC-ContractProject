@@ -14,6 +14,7 @@ using Voting.Server.Persistence;
 using Voting.Server.Persistence.Accounts;
 using Voting.Server.Persistence.Clients;
 using Voting.Server.Persistence.ContractDefinition;
+using Voting.Server.UnitTests.TestNet.Ganache;
 
 namespace Voting.Server.UnitTests;
 
@@ -23,7 +24,7 @@ public class DomainServiceTests
     public string URL { get; set; }
     // public string PrivateKey { get; set; }
     // public AccountAddresses Accounts { get; set; } = new();
-    public IGanacheOptions Options { get; set; } = new GanacheOptions();
+    public ITestNetOptions Options { get; } = new TestNetOptions();
 
     private IConfiguration Config { get; set; } = default!;
     private AccountManager AccountManager { get; set; } = default!;
@@ -31,7 +32,7 @@ public class DomainServiceTests
     private IVotingDbRepository Repository { get; set; } = default!;
     
     [OneTimeSetUp]
-    public async Task OneTimeSetUp()
+    public void OneTimeSetUp()
     {
         string testProjectDirectory =  
                 Path.GetDirectoryName(
@@ -39,7 +40,7 @@ public class DomainServiceTests
                 Path.GetDirectoryName(TestContext.CurrentContext.TestDirectory))) ?? "";
         var configuration = new ConfigurationBuilder()
             .SetBasePath(testProjectDirectory)
-            .AddJsonFile("ganache_configs.json")
+            .AddJsonFile(Path.Join(".", "TestNet.Ganache", "testnet_ganache_options.json"))
             .Build();
         configuration.Bind(Options);
         
@@ -50,9 +51,9 @@ public class DomainServiceTests
         ClientsManager = new Web3ClientsManager(AccountManager);
         Repository = new VotingDbRepository(ClientsManager);
 
-        Blockchain = new Ganache(Options, Config, AccountManager);
+        Blockchain = new Ganache(Options, AccountManager);
         Blockchain.Start();
-        URL = $"HTTP://{Options.Host}:{Options.Port}";
+        URL = $"HTTP://{Options.GanacheOptions.Host}:{Options.GanacheOptions.Port}";
 
 
         // string accountFilePath = Path.Join(Directory.GetCurrentDirectory(), Options.AccountKeysPath);
@@ -98,11 +99,11 @@ public class DomainServiceTests
         
         VotingDbDeployment deployment = new VotingDbDeployment
         {
-            Candidates = SeedData.Candidates,
-            Votes = SeedData.Votes,
-            Sections = SeedData.Sections,
-            Timestamp = SeedData.Timestamp,
-            CompressedSectionData = SeedData.CompressedSectionData
+            Candidates = SeedData.SeedData.Candidates,
+            Votes = SeedData.SeedData.Votes,
+            Sections = SeedData.SeedData.Sections,
+            Timestamp = SeedData.SeedData.Timestamp,
+            CompressedSectionData = SeedData.SeedData.CompressedSectionData
         };
 
         var service = await ds.CreateSectionRange(Mappings.DeploymentToSections(deployment));

@@ -1,4 +1,4 @@
-﻿namespace Voting.Server.UnitTests;
+﻿namespace Voting.Server.UnitTests.TestNet.Ganache;
 
 public interface IGanacheOptions
 {
