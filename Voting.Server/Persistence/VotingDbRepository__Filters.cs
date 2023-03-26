@@ -1,7 +1,6 @@
 ﻿using CommunityToolkit.Diagnostics;
 using Nethereum.Contracts;
 using Nethereum.RPC.Eth.DTOs;
-using Nethereum.Web3;
 using Voting.Server.Domain.Models;
 using Voting.Server.Domain.Models.Mappings;
 using Voting.Server.Persistence.ContractDefinition;
@@ -31,14 +30,7 @@ public partial class VotingDbRepository
                 break;
         }
     }
-    //
-    // private Event<T> UseFilter<T>(IWeb3? web3 = null)
-    //     where T : IEventDTO, new()
-    // {
-    //     Guard.IsNotNull(web3);
-    //     return web3.Eth.GetEvent<T>();
-    // }
-
+    
     public async Task<Section> GetSectionAsync(uint sectionNumber = 0)
     {
         Guard.IsNotEqualTo(sectionNumber, 0);

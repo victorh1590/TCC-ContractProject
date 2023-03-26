@@ -14,32 +14,37 @@ namespace Voting.Server.UnitTests.TestNet.Ganache;
 // Console.ReadKey();
 // blockchain.Stop();
 
-internal class Ganache 
+internal class Ganache : IPrivateBlockchain
 {
-  private ITestNetOptions Options { get; }
-  private AccountManager? AccountManager { get; }
+  public ITestNetOptions Options { get; private set; }
+  public AccountManager? AccountManager { get; private set;  }
   private Process? Proc { get; set; }
-  
-  internal Ganache(ITestNetOptions opts, AccountManager accountManager)
+
+  public Ganache()
   {
-    Options = opts;
-    AccountManager = accountManager;
-    Guard.IsNotNull(AccountManager);
+    Options = new TestNetOptions();
+    AccountManager = null;
+    Proc = null;
   }
-  
-  internal void Start()
+
+  public void Start(ITestNetOptions opts, AccountManager accountManager)
   {
     Guard.IsTrue(OperatingSystem.IsWindows());
 
-    ProcessStartInfo startInfo = new ProcessStartInfo();
-    startInfo.FileName = Options.TestNetEnvironmentOptions.Terminal;
-    startInfo.UseShellExecute = true;
-    startInfo.WindowStyle = ProcessWindowStyle.Normal;
-    startInfo.Arguments = GetExecutionString();
+    Options = opts;
+    AccountManager = accountManager;
+
+    ProcessStartInfo startInfo = new ProcessStartInfo
+    {
+      FileName = Options.TestNetEnvironmentOptions.Terminal,
+      UseShellExecute = true,
+      WindowStyle = ProcessWindowStyle.Normal,
+      Arguments = GetExecutionString()
+    };
     Proc = Process.Start(startInfo) ?? throw new SystemException("Process failed to start.");
   }
 
-  internal void Stop()
+  public void Stop()
   {
     Guard.IsTrue(OperatingSystem.IsWindows());
     if(Proc == null) return;
@@ -63,7 +68,7 @@ internal class Ganache
     }
   }
 
-  private void KillProcessTree(int pid)
+  public void KillProcessTree(int pid)
   {
     Guard.IsTrue(OperatingSystem.IsWindows());
 #pragma warning disable CA1416 // Guard.IsTrue(OperatingSystem.IsWindows()) ensures it's running on Windows.
@@ -87,7 +92,7 @@ internal class Ganache
 #pragma warning restore CA1416
   }
 
-  private string GetExecutionString()
+  public string GetExecutionString()
   {
     StringBuilder sb = new StringBuilder();
     sb.Append($"/K ganache");
