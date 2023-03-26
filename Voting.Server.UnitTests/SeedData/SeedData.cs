@@ -47,6 +47,5 @@ internal static class SeedData
 
     internal static string Timestamp => "2020-04-10T17:50:00Z";
 
-    internal static string CompressedSectionData =
-        "G94BIJwHdizgzsxREIheKVn2+ijCM5SBTfuH/EpkC9popr6Q/lBBUx78v7vns9a8BdQeXQDNWkte1hZQmAfgH8w+wsk2QRAKbEL8jBfFp/0va3jEE10q56GngWgZbWsOtRZrd7doGuKgeTyWrTOYsoaFMP3OYJyjTjMWIVaxYiwMXeVpG2e1DYRNUmpRngrGtYtoXtCWvOHFszOoVvzRTpRKZ+IkmwuFFY5whivc4Qlv+MIfFa3oiM7oiu7oid7oi/5UDaQWa//EKhz4iYnvhYNb4TM=";
+    internal const string CompressedSectionData = "G94BIJwHdizgzsxREIheKVn2+ijCM5SBTfuH/EpkC9popr6Q/lBBUx78v7vns9a8BdQeXQDNWkte1hZQmAfgH8w+wsk2QRAKbEL8jBfFp/0va3jEE10q56GngWgZbWsOtRZrd7doGuKgeTyWrTOYsoaFMP3OYJyjTjMWIVaxYiwMXeVpG2e1DYRNUmpRngrGtYtoXtCWvOHFszOoVvzRTpRKZ+IkmwuFFY5whivc4Qlv+MIfFa3oiM7oiu7oid7oi/5UDaQWa//EKhz4iYnvhYNb4TM=";
 }

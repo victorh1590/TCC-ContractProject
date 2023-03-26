@@ -28,6 +28,7 @@ internal class AccountManager : IAccountManager
             publicKeys.Add(account.PublicKey);
         }
         
+        accounts.ForEach(acc => Guard.IsNotNull(acc));
         Guard.IsNotEmpty(accounts);
         Guard.IsNotEmpty(publicKeys);
         Guard.IsEqualTo(accounts.Count, publicKeys.Count);

@@ -1,22 +1,19 @@
-using System.Reflection.Emit;
-using System.Text.Json;
-using CommunityToolkit.Diagnostics;
+﻿using System.Text.Json;
 using Microsoft.Extensions.Configuration;
-using Voting.Server.Domain;
+using Nethereum.BlockchainProcessing.BlockStorage.Entities.Mapping;
+using Nethereum.RPC.Eth.DTOs;
 using Voting.Server.Domain.Models;
-using Voting.Server.Domain.Models.Mappings;
 using Voting.Server.Persistence;
 using Voting.Server.Persistence.Accounts;
 using Voting.Server.Persistence.Clients;
 using Voting.Server.Persistence.ContractDefinition;
 using Voting.Server.UnitTests.TestNet.Ganache;
 
-
 namespace Voting.Server.UnitTests;
 
-public partial class DomainServiceTests
+public class VotingDbRepositoryTests__GetSectionAsync
 {
-    private TestChain<Ganache> TestChain { get; set; } = default!;
+     private TestChain<Ganache> TestChain { get; set; } = default!;
     private IConfiguration Config { get; set; } = default!;
     private AccountManager AccountManager { get; set; } = default!;
     private IWeb3ClientsManager ClientsManager { get; set; } = default!;
@@ -27,7 +24,7 @@ public partial class DomainServiceTests
     public void OneTimeSetUp()
     {
         Config = new ConfigurationBuilder()
-            .AddUserSecrets<DomainServiceTests>()
+            .AddUserSecrets<TestChain<Ganache>>()
             .Build();
         AccountManager = new AccountManager(Config);
         ClientsManager = new Web3ClientsManager(AccountManager);
@@ -52,6 +49,7 @@ public partial class DomainServiceTests
         Assert.That(accounts, Is.Not.Null);
         Assert.That(accounts, Is.Not.Empty);
         CollectionAssert.AllItemsAreNotNull(accounts);
+        
         TestContext.WriteLine("Accounts in chain: ");
         accounts.ForEach(TestContext.WriteLine);
 
@@ -64,8 +62,13 @@ public partial class DomainServiceTests
             CompressedSectionData = SeedData.SeedData.CompressedSectionData
         };
 
-        string contractAddress = await Repository.DeployContractAsync(deployment);
-        TestContext.WriteLine("Contract Address: " + contractAddress);
+        TransactionReceipt transaction = await Repository.DeployContractAndWaitForReceiptAsync(deployment);
+        TestContext.WriteLine("Contract Address: " + transaction.ContractAddress);
+        
+        //Check BYTECODE and transaction status.
+        Assert.That(async() => await Repository.Web3.Eth.GetCode.SendRequestAsync(transaction.ContractAddress), 
+            Is.Not.Null.Or.Empty);
+        Assert.That(transaction.Status.ToLong(), Is.EqualTo(1));
 
         uint sectionNumber = 190U;
         TestContext.WriteLine($"Trying to access contract and getting section {sectionNumber}...");
