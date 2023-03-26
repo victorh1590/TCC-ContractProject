@@ -47,6 +47,8 @@ internal class Ganache : IPrivateBlockchain
   public void Stop()
   {
     Guard.IsTrue(OperatingSystem.IsWindows());
+    // TestContext.WriteLine("Press enter to stop...");
+    // TestContext.ReadLine();
     if(Proc == null) return;
     KillProcessTree(Proc.Id);
     Proc = null;
@@ -105,6 +107,7 @@ internal class Ganache : IPrivateBlockchain
     sb.Append($" --miner.defaultTransactionGasLimit={Options.GanacheOptions.DefaultTransactionGasLimit}");
     sb.Append($" --wallet.accounts={AccountManager?.Accounts.First().PrivateKey + ",0x3635C9ADC5DEA00000"}");
     sb.Append($" --wallet.accountKeysPath={Options.GanacheOptions.AccountKeysPath}");
+    sb.Append($" --miner.instamine=eager");
     // sb.Append($" --wallet.totalAccounts={Options.GanacheOptions.TotalAccounts}");
     sb.Append($" --chain.hardfork=\"berlin\"");
     return sb.ToString();

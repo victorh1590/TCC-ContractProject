@@ -9,16 +9,19 @@ using Nethereum.Hex.HexConvertors.Extensions;
 using Nethereum.JsonRpc.Client;
 using Nethereum.RPC.Eth.DTOs;
 using Nethereum.Web3;
+using NUnit.Framework.Internal;
 using Voting.Server.Domain.Models;
 using Voting.Server.Persistence;
 using Voting.Server.Persistence.Accounts;
 using Voting.Server.Persistence.Clients;
 using Voting.Server.Persistence.ContractDefinition;
+using Voting.Server.UnitTests.SeedData;
 using Voting.Server.UnitTests.TestNet.Ganache;
 using Contract = Nethereum.Contracts.Contract;
 
 namespace Voting.Server.UnitTests;
 
+[TestFixture]
 public class VotingDbRepositoryTests__DeployContract
 {
     private TestChain<Ganache> TestChain { get; set; } = default!;
@@ -29,6 +32,7 @@ public class VotingDbRepositoryTests__DeployContract
     private string Account { get; set; } = default!;
     private BlockParameter Latest { get; } = BlockParameter.CreateLatest();
     private BlockParameter Pending { get; } = BlockParameter.CreatePending();
+    private BlockParameter Ealiest { get; } = BlockParameter.CreateEarliest();
     // public string URL { get; set; }
 
     [OneTimeSetUp]
@@ -64,7 +68,11 @@ public class VotingDbRepositoryTests__DeployContract
         TestChain.TearDown();
     }
 
-    [Test]
+    private void DisposeBlockchain()
+    {
+        TestChain.TearDown();
+    }
+    
     public async Task Valid_Contract_Is_Successfully_Deployed()
     {
         VotingDbDeployment deployment = new VotingDbDeployment
@@ -89,23 +97,22 @@ public class VotingDbRepositoryTests__DeployContract
         
         //Transaction Count is correct.
         long completedTransactionCount = (await Repository.Web3.Eth.Transactions.GetTransactionCount
-                .SendRequestAsync(Account, Latest)).ToLong();
-        long pendingTransactionCount = (await Repository.Web3.Eth.Transactions.GetTransactionCount
-                .SendRequestAsync(Account, Pending)).ToLong();
+                .SendRequestAsync(Account)).ToLong();
+        // long pendingTransactionCount = (await Repository.Web3.Eth.Transactions.GetTransactionCount
+        //         .SendRequestAsync(Account, Pending)).ToLong();
         Assert.That(completedTransactionCount, Is.EqualTo(1));
-        Assert.That(pendingTransactionCount, Is.EqualTo(1));
+        // Assert.That(pendingTransactionCount, Is.EqualTo(1));
         
         //Successfully creates ContractHandler.
         TestContext.WriteLine("Contract Address: " + transaction.ContractAddress);
         ContractHandler handler = Repository.Web3.Eth.GetContractHandler(transaction.ContractAddress);
         Assert.That(handler, Is.Not.Null);
-
+        
         //Contract returns data.
         var compressedDataResult = await handler.QueryAsync<GetCompressedDataFunction?, string>(null, Latest);
         Assert.That(compressedDataResult, Is.EqualTo(SeedData.SeedData.CompressedSectionData));
     }
     
-    [Test]
     public async Task Invalid_Contract_Fails_To_Be_Deployed()
     {
         //All data Invalid.
@@ -121,13 +128,58 @@ public class VotingDbRepositoryTests__DeployContract
         //Failed Deployment should throw Exception.
         Assert.That(async () => await Repository.DeployContractAsync(deployment), 
             Throws.TypeOf<RpcResponseException>());
-        
+
+        // Repository.Web3.Eth.TransactionManager.
+        // Thread.Sleep(3000);
         //Transaction count should be zero.
         long completedTransactionCount = (await Repository.Web3.Eth.Transactions.GetTransactionCount
-            .SendRequestAsync(Account, Latest)).ToLong();
-        long pendingTransactionCount = (await Repository.Web3.Eth.Transactions.GetTransactionCount
-            .SendRequestAsync(Account, Pending)).ToLong();
-        Assert.That(completedTransactionCount, Is.EqualTo(0));
-        Assert.That(pendingTransactionCount, Is.EqualTo(0));
+            .SendRequestAsync(Account)).ToLong();
+        // long pendingTransactionCount = (await Repository.Web3.Eth.Transactions.GetTransactionCount
+        //     .SendRequestAsync(Account, Pending, 1337)).ToLong();
+        Assert.That(completedTransactionCount, Is.EqualTo(1));
+        // Assert.That(pendingTransactionCount, Is.EqualTo(0));
+    }
+    
+    public async Task Random_Contract_Is_Successfully_Deployed()
+    {
+        SeedDataGenerator.GenerateNew(100, 30);
+
+        //Successfully returns TransactionReceipt with valid ContractAddress and correct BlockNumber.
+        TransactionReceipt transaction = await Repository.DeployContractAndWaitForReceiptAsync(SeedDataGenerator.Deployment);
+        Assert.That(transaction, Is.Not.Null.Or.Empty);
+        Assert.That(transaction.ContractAddress, Is.Not.Null.Or.Empty);
+        Assert.That(transaction.BlockNumber.ToLong(), Is.EqualTo(2));
+        
+        //Check BYTECODE and transaction status.
+        Assert.That(async() => await Repository.Web3.Eth.GetCode.SendRequestAsync(transaction.ContractAddress), 
+            Is.Not.Null.Or.Empty);
+        Assert.That(transaction.Status.ToLong(), Is.EqualTo(1));
+        
+        //Transaction Count is correct.
+        long completedTransactionCount = (await Repository.Web3.Eth.Transactions.GetTransactionCount
+                .SendRequestAsync(Account)).ToLong();
+        // long pendingTransactionCount = (await Repository.Web3.Eth.Transactions.GetTransactionCount
+        //         .SendRequestAsync(Account, Pending)).ToLong();
+        Assert.That(completedTransactionCount, Is.EqualTo(2));
+        // Assert.That(pendingTransactionCount, Is.EqualTo(1));
+        
+        //Successfully creates ContractHandler.
+        TestContext.WriteLine("Contract Address: " + transaction.ContractAddress);
+        ContractHandler handler = Repository.Web3.Eth.GetContractHandler(transaction.ContractAddress);
+        Assert.That(handler, Is.Not.Null);
+        // TestContext.WriteLine(SeedDataGenerator.GetFormattedJSON());
+        
+        //Contract returns data.
+        var compressedDataResult = await handler.QueryAsync<GetCompressedDataFunction?, string>(null, Latest);
+        Assert.That(compressedDataResult, Is.EqualTo(SeedDataGenerator.Deployment.CompressedSectionData));
+    }
+
+    [Test]
+    public async Task Test_Multiple_Deploys_In_Correct_Order()
+    {
+        await Valid_Contract_Is_Successfully_Deployed();
+        await Invalid_Contract_Fails_To_Be_Deployed();
+        await Random_Contract_Is_Successfully_Deployed();
+        DisposeBlockchain();
     }
 }

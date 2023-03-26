@@ -33,8 +33,6 @@ internal class Mappings
         Guard.IsNotEmpty(deployment.Candidates);
         Guard.IsNotEmpty(deployment.Sections);
         Guard.IsNotEmpty(deployment.Votes);
-        Guard.IsNotNullOrEmpty(deployment.Timestamp);
-        Guard.IsNotNullOrEmpty(deployment.CompressedSectionData);
         Guard.IsEqualTo(deployment.Votes.Count, deployment.Sections.Count);
         Guard.IsEqualTo(deployment.Votes.First().Count, deployment.Candidates.Count);
         

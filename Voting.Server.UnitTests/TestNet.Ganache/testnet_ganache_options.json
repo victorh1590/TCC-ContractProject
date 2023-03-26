@@ -9,8 +9,8 @@
     "ChainID": 1337,
     "BlockTime": 0,
     "DefaultGasPrice": "0x0",
-    "BlockGasLimit": "0x1c9c380",
-    "DefaultTransactionGasLimit": "0x15f90",
+    "BlockGasLimit": "0x1fffffffffffff",
+    "DefaultTransactionGasLimit": "0x1fffffffffffff",
     "AccountKeysPath": "accounts.json",
     "TotalAccounts": 1
   }

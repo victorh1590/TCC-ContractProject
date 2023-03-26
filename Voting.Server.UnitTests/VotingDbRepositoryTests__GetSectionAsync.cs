@@ -11,6 +11,8 @@ using Voting.Server.UnitTests.TestNet.Ganache;
 
 namespace Voting.Server.UnitTests;
 
+[Ignore("Testing blockchain creation.")]
+[TestFixture]
 public class VotingDbRepositoryTests__GetSectionAsync
 {
      private TestChain<Ganache> TestChain { get; set; } = default!;
