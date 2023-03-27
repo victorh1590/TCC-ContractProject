@@ -6,28 +6,20 @@ using Voting.Server.Persistence.Accounts;
 
 namespace Voting.Server.UnitTests.TestNet.Ganache;
 
-// call
-// Ganache blockchain = new("127.0.0.1", 8545, 56666, 0, "0x0", "0x87369400", "0x87369400");
-// blockchain.Start();
-//
-// Console.WriteLine("Press Any key to stop...");
-// Console.ReadKey();
-// blockchain.Stop();
-
-internal class Ganache : IPrivateBlockchain
+internal class Ganache : IGanache
 {
-  public ITestNetOptions Options { get; private set; }
+  public IGanacheOptions Options { get; private set; }
   public AccountManager? AccountManager { get; private set;  }
   private Process? Proc { get; set; }
 
   public Ganache()
   {
-    Options = new TestNetOptions();
+    Options = new GanacheOptions();
     AccountManager = null;
     Proc = null;
   }
 
-  public void Start(ITestNetOptions opts, AccountManager accountManager)
+  public void Start(IGanacheOptions opts, AccountManager accountManager)
   {
     Guard.IsTrue(OperatingSystem.IsWindows());
 
@@ -36,7 +28,7 @@ internal class Ganache : IPrivateBlockchain
 
     ProcessStartInfo startInfo = new ProcessStartInfo
     {
-      FileName = Options.TestNetEnvironmentOptions.Terminal,
+      FileName = Options.GanacheEnvironmentOptions.Terminal,
       UseShellExecute = true,
       WindowStyle = ProcessWindowStyle.Normal,
       Arguments = GetExecutionString()
@@ -54,7 +46,7 @@ internal class Ganache : IPrivateBlockchain
     Proc = null;
     try
     {
-      File.Delete(Path.Join(Directory.GetCurrentDirectory(), Options.GanacheOptions.AccountKeysPath));
+      File.Delete(Path.Join(Directory.GetCurrentDirectory(), Options.GanacheSetupOptions.AccountKeysPath));
     }
     catch (Exception err) 
       when (err is ArgumentException 
@@ -98,15 +90,15 @@ internal class Ganache : IPrivateBlockchain
   {
     StringBuilder sb = new StringBuilder();
     sb.Append($"/K ganache");
-    sb.Append($" --server.host={Options.GanacheOptions.Host}");
-    sb.Append($" --server.port={Options.GanacheOptions.Port}");
-    sb.Append($" --chain.chainId={Options.GanacheOptions.ChainID}");
-    sb.Append($" --miner.blockTime={Options.GanacheOptions.BlockTime}");
-    sb.Append($" --miner.defaultGasPrice={Options.GanacheOptions.DefaultGasPrice}");
-    sb.Append($" --miner.blockGasLimit={Options.GanacheOptions.BlockGasLimit}");
-    sb.Append($" --miner.defaultTransactionGasLimit={Options.GanacheOptions.DefaultTransactionGasLimit}");
+    sb.Append($" --server.host={Options.GanacheSetupOptions.Host}");
+    sb.Append($" --server.port={Options.GanacheSetupOptions.Port}");
+    sb.Append($" --chain.chainId={Options.GanacheSetupOptions.ChainID}");
+    sb.Append($" --miner.blockTime={Options.GanacheSetupOptions.BlockTime}");
+    sb.Append($" --miner.defaultGasPrice={Options.GanacheSetupOptions.DefaultGasPrice}");
+    sb.Append($" --miner.blockGasLimit={Options.GanacheSetupOptions.BlockGasLimit}");
+    sb.Append($" --miner.defaultTransactionGasLimit={Options.GanacheSetupOptions.DefaultTransactionGasLimit}");
     sb.Append($" --wallet.accounts={AccountManager?.Accounts.First().PrivateKey + ",0x3635C9ADC5DEA00000"}");
-    sb.Append($" --wallet.accountKeysPath={Options.GanacheOptions.AccountKeysPath}");
+    sb.Append($" --wallet.accountKeysPath={Options.GanacheSetupOptions.AccountKeysPath}");
     sb.Append($" --miner.instamine=eager");
     // sb.Append($" --wallet.totalAccounts={Options.GanacheOptions.TotalAccounts}");
     sb.Append($" --chain.hardfork=\"berlin\"");

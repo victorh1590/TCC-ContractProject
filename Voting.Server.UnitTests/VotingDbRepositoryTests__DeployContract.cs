@@ -8,7 +8,7 @@ using Voting.Server.Persistence;
 using Voting.Server.Persistence.Accounts;
 using Voting.Server.Persistence.Clients;
 using Voting.Server.Persistence.ContractDefinition;
-using Voting.Server.UnitTests.SeedData;
+using Voting.Server.UnitTests.TestData;
 using Voting.Server.UnitTests.TestNet.Ganache;
 
 namespace Voting.Server.UnitTests;
@@ -16,7 +16,7 @@ namespace Voting.Server.UnitTests;
 [TestFixture]
 public class VotingDbRepositoryTests__DeployContract
 {
-    private TestChain<Ganache> TestChain { get; set; } = default!;
+    private TestNet<Ganache> TestNet { get; set; } = default!;
     private IConfiguration Config { get; set; } = default!;
     private AccountManager AccountManager { get; set; } = default!;
     private IWeb3ClientsManager ClientsManager { get; set; } = default!;
@@ -31,15 +31,15 @@ public class VotingDbRepositoryTests__DeployContract
     public async Task OneTimeSetUp()
     {
         Config = new ConfigurationBuilder()
-            .AddUserSecrets<TestChain<Ganache>>()
+            .AddUserSecrets<TestNet<Ganache>>()
             .Build();
         
         AccountManager = new AccountManager(Config);
         ClientsManager = new Web3ClientsManager(AccountManager);
         Repository = new VotingDbRepository(ClientsManager);
-        TestChain = new TestChain<Ganache>(AccountManager);
+        TestNet = new TestNet<Ganache>(AccountManager);
         Account = AccountManager.Accounts.First().Address;
-        TestChain.SetUp();
+        TestNet.SetUp();
         // URL = $"HTTP://{Options.GanacheOptions.Host}:{Options.GanacheOptions.Port}";
         
         TimeSpan timeSpan = TimeSpan.FromSeconds(30); 
@@ -57,14 +57,14 @@ public class VotingDbRepositoryTests__DeployContract
     [OneTimeTearDown]
     public void OneTimeTearDown()
     {
-        TestChain.TearDown();
+        TestNet.TearDown();
     }
 
     [Theory]
     [Order(1)]
     public async Task Valid_Contract_Is_Successfully_Deployed()
     {
-        SeedData.SeedData seedData = SeedDataBuilder.GenerateNew(30, 4);
+        SeedData seedData = SeedDataBuilder.GenerateNew(30, 4);
 
         //Successfully returns TransactionReceipt with valid ContractAddress and correct BlockNumber.
         TransactionReceipt transaction = await Repository.DeployContractAndWaitForReceiptAsync(seedData.Deployment);

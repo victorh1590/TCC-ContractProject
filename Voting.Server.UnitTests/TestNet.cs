@@ -5,17 +5,17 @@ using Voting.Server.UnitTests.TestNet.Ganache;
 
 namespace Voting.Server.UnitTests;
 
-internal class TestChain<T> where T : IPrivateBlockchain, new()
+internal class TestNet<T> where T : IGanache, new()
 {
-    private IPrivateBlockchain Blockchain { get; }
+    private IGanache Blockchain { get; }
+    private IGanacheOptions Options { get; } 
     private AccountManager AccountManager { get; }
-    private ITestNetOptions Options { get; } 
 
-    internal TestChain(AccountManager accountManager)
+    internal TestNet(AccountManager accountManager)
     {
         AccountManager = accountManager;
         Blockchain = new T();
-        Options = new TestNetOptions();
+        Options = new GanacheOptions();
 
         string testProjectDirectory =  
             Path.GetDirectoryName(

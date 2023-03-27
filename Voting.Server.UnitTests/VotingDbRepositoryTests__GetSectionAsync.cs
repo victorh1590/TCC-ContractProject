@@ -7,7 +7,7 @@ using Voting.Server.Domain.Models;
 using Voting.Server.Persistence;
 using Voting.Server.Persistence.Accounts;
 using Voting.Server.Persistence.Clients;
-using Voting.Server.UnitTests.SeedData;
+using Voting.Server.UnitTests.TestData;
 using Voting.Server.UnitTests.TestNet.Ganache;
 
 namespace Voting.Server.UnitTests;
@@ -15,7 +15,7 @@ namespace Voting.Server.UnitTests;
 [TestFixture]
 public class VotingDbRepositoryTests__GetSectionAsync
 {
-     private TestChain<Ganache> TestChain { get; set; } = default!;
+     private TestNet<Ganache> TestNet { get; set; } = default!;
     private IConfiguration Config { get; set; } = default!;
     private AccountManager AccountManager { get; set; } = default!;
     private IWeb3ClientsManager ClientsManager { get; set; } = default!;
@@ -26,20 +26,20 @@ public class VotingDbRepositoryTests__GetSectionAsync
     public void OneTimeSetUp()
     {
         Config = new ConfigurationBuilder()
-            .AddUserSecrets<TestChain<Ganache>>()
+            .AddUserSecrets<TestNet<Ganache>>()
             .Build();
         AccountManager = new AccountManager(Config);
         ClientsManager = new Web3ClientsManager(AccountManager);
         Repository = new VotingDbRepository(ClientsManager);
-        TestChain = new TestChain<Ganache>(AccountManager);
-        TestChain.SetUp();
+        TestNet = new TestNet<Ganache>(AccountManager);
+        TestNet.SetUp();
         // URL = $"HTTP://{Options.GanacheOptions.Host}:{Options.GanacheOptions.Port}";
     }
 
     [OneTimeTearDown]
     public void OneTimeTearDown()
     {
-        TestChain.TearDown();
+        TestNet.TearDown();
     }
 
     [Theory]
@@ -55,7 +55,7 @@ public class VotingDbRepositoryTests__GetSectionAsync
         TestContext.WriteLine("Accounts in chain: ");
         accounts.ForEach(TestContext.WriteLine);
 
-        SeedData.SeedData seedData = SeedDataBuilder.GenerateNew(30, 4);
+        SeedData seedData = SeedDataBuilder.GenerateNew(30, 4);
 
         TransactionReceipt transaction = await Repository.DeployContractAndWaitForReceiptAsync(seedData.Deployment);
         TestContext.WriteLine("Contract Address: " + transaction.ContractAddress);

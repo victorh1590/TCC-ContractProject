@@ -1,6 +1,6 @@
 ﻿namespace Voting.Server.UnitTests.TestNet.Ganache;
 
-public interface ITestNetEnvironmentOptions
+public interface IGanacheEnvironmentOptions
 {
     string Terminal { get; set; }
 }

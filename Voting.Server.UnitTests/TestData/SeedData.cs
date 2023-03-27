@@ -3,7 +3,7 @@ using CommunityToolkit.Diagnostics;
 using Voting.Server.Domain.Models;
 using Voting.Server.Persistence.ContractDefinition;
 
-namespace Voting.Server.UnitTests.SeedData;
+namespace Voting.Server.UnitTests.TestData;
 
 public class SeedData
 {

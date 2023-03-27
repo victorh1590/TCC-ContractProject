@@ -2,11 +2,11 @@
 
 namespace Voting.Server.UnitTests.TestNet.Ganache;
 
-internal interface IPrivateBlockchain
+internal interface IGanache
 {
-    ITestNetOptions Options { get; }
+    IGanacheOptions Options { get; }
     AccountManager? AccountManager { get; }
-    void Start(ITestNetOptions opts, AccountManager accountManager);
+    void Start(IGanacheOptions opts, AccountManager accountManager);
     void Stop();
     void KillProcessTree(int pid);
     string GetExecutionString();

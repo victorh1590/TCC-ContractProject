@@ -1,9 +1,9 @@
 ﻿{
-  "TestNetEnvironmentOptions":
+  "GanacheEnvironmentOptions":
   {
     "Terminal": "cmd.exe"
   },
-  "GanacheOptions": {
+  "GanacheSetupOptions": {
     "Host": "127.0.0.1",
     "Port": 8545,
     "ChainID": 1337,

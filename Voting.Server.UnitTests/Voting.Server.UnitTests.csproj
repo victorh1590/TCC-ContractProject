@@ -25,4 +25,9 @@
       <ProjectReference Include="..\Voting.Server\Voting.Server.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Compile Remove="TestNet.Ganache\IGanacheEnvironmentOptions.cs" />
+      <Compile Remove="TestNet.Ganache\IGanacheSetupOptions.cs" />
+    </ItemGroup>
+
 </Project>

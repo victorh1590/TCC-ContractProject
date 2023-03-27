@@ -1,4 +1,4 @@
-﻿namespace Voting.Server.UnitTests.SeedData;
+﻿namespace Voting.Server.UnitTests.TestData;
 
 internal static class SeedDataOld
 {

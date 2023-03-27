@@ -2,7 +2,7 @@
 
 namespace Voting.Server.UnitTests.TestNet.Ganache;
 
-public class TestNetEnvironmentOptions : ITestNetEnvironmentOptions
+public class GanacheEnvironmentOptions
 {
     public string Terminal { get; set; }
 }

@@ -6,7 +6,7 @@ using Voting.Server.Domain.Models.Mappings;
 using Voting.Server.Domain.Utils;
 using Voting.Server.Persistence.ContractDefinition;
 
-namespace Voting.Server.UnitTests.SeedData;
+namespace Voting.Server.UnitTests.TestData;
 
 public static class SeedDataBuilder
 {
