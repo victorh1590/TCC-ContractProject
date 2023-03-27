@@ -1,8 +1,8 @@
 ﻿namespace App;
 
-internal static class SeedData
+internal class SeedData1
 {
-    internal static List<List<uint>> Votes { get; } = new()
+    internal List<List<uint>> Votes { get; } = new()
     {
         new List<uint> { 3, 8, 5, 6 },
         new List<uint> { 1, 0, 7, 4 },
@@ -36,23 +36,23 @@ internal static class SeedData
         new List<uint> { 7, 1, 0, 8 }
     };
 
-    internal static List<uint> Sections { get; } = new()
+    internal List<uint> Sections { get; } = new()
     {
         10U, 20U, 30U, 40U, 50U, 60U, 70U, 80U, 90U, 100U, 110U,
         120U, 130U, 140U, 150U, 160U, 170U, 180U, 190U, 200U, 210U,
         220U, 230U, 240U, 250U, 260U, 270U, 280U, 290U, 300
     };
 
-    internal static List<uint> Candidates { get; } = new() { 15U, 25U, 35U, 55U };
+    internal List<uint> Candidates { get; } = new() { 15U, 25U, 35U, 55U };
 
-    internal static string Timestamp => "2020-04-10T17:50:00Z";
+    internal string Timestamp => "2020-04-10T17:50:00Z";
 
-    internal static string CompressedSectionData =
+    internal string CompressedSectionData =
         "G94BIJwHdizgzsxREIheKVn2+ijCM5SBTfuH/EpkC9popr6Q/lBBUx78v7vns9a8BdQeXQDNWkte1hZQmAfgH8w+wsk2QRAKbEL8jBfFp/0va3jEE10q56GngWgZbWsOtRZrd7doGuKgeTyWrTOYsoaFMP3OYJyjTjMWIVaxYiwMXeVpG2e1DYRNUmpRngrGtYtoXtCWvOHFszOoVvzRTpRKZ+IkmwuFFY5whivc4Qlv+MIfFa3oiM7oiu7oid7oi/5UDaQWa//EKhz4iYnvhYNb4TM=";
 }
 
 
-//internal static string SectionSHA256 = "7831e7b9bbb1673b1f97bb1e7baad0dc6259a66d2f7bb35f941adf1a21a35aa0";
+//internal string SectionSHA256 = "7831e7b9bbb1673b1f97bb1e7baad0dc6259a66d2f7bb35f941adf1a21a35aa0";
 
 //{"Votes":[[3,8,5,6],[1,0,7,4],[2,9,0,1],[7,8,5,7],[3,5,4,8],[9,0,2,4],[2,6,4,9],[4,7,4,2],[7,9,5,1],[6,8,3,7],[3,8,9,5],[9,6,2,3],[4,1,8,9],[1,7,5,2],[9,5,4,6],[6,0,7,3],[2,4,6,1],[3,2,9,8],[1,8,7,5],[7,6,1,9],[8,3,0,4],[5,9,8,6],[4,5,1,7],[8,4,2,3],[6,7,3,0],[2,1,5,9],[9,3,6,4],[5,0,8,2],[4,2,7,1],[7,1,0,8]],"Sections":[10,20,30,40,50,60,70,80,90,100,110,120,130,140,150,160,170,180,190,200,210,220,230,240,250,260,270,280,290,300],"Candidates":["John","Mark","David","Paul"]}
 

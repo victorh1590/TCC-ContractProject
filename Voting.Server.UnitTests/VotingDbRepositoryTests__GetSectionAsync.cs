@@ -1,4 +1,5 @@
 ﻿using System.Text.Json;
+using CommunityToolkit.Diagnostics;
 using Microsoft.Extensions.Configuration;
 using Nethereum.BlockchainProcessing.BlockStorage.Entities.Mapping;
 using Nethereum.RPC.Eth.DTOs;
@@ -6,12 +7,11 @@ using Voting.Server.Domain.Models;
 using Voting.Server.Persistence;
 using Voting.Server.Persistence.Accounts;
 using Voting.Server.Persistence.Clients;
-using Voting.Server.Persistence.ContractDefinition;
+using Voting.Server.UnitTests.SeedData;
 using Voting.Server.UnitTests.TestNet.Ganache;
 
 namespace Voting.Server.UnitTests;
 
-[Ignore("Testing blockchain creation.")]
 [TestFixture]
 public class VotingDbRepositoryTests__GetSectionAsync
 {
@@ -43,51 +43,35 @@ public class VotingDbRepositoryTests__GetSectionAsync
     }
 
     [Theory]
-    public async Task DeployContractTest()
+    public async Task GetSectionAsync_Should_Return_Correct_Data()
     {
         TimeSpan timeSpan = TimeSpan.FromSeconds(30); 
         var accountsTask = Repository.Web3.Personal.ListAccounts.SendRequestAsync();
-        List<string> accounts = (await accountsTask.WaitAsync(timeSpan) ?? Array.Empty<string>()).ToList();
-        Assert.That(accounts, Is.Not.Null);
-        Assert.That(accounts, Is.Not.Empty);
+        List<string> accounts = (await accountsTask.WaitAsync(timeSpan)).ToList();
+        Guard.IsNotNull(accounts);
+        Guard.IsNotEmpty(accounts);
         CollectionAssert.AllItemsAreNotNull(accounts);
         
         TestContext.WriteLine("Accounts in chain: ");
         accounts.ForEach(TestContext.WriteLine);
 
-        VotingDbDeployment deployment = new VotingDbDeployment
-        {
-            Candidates = SeedData.SeedData.Candidates,
-            Votes = SeedData.SeedData.Votes,
-            Sections = SeedData.SeedData.Sections,
-            Timestamp = SeedData.SeedData.Timestamp,
-            CompressedSectionData = SeedData.SeedData.CompressedSectionData
-        };
+        SeedData.SeedData seedData = SeedDataBuilder.GenerateNew(30, 4);
 
-        TransactionReceipt transaction = await Repository.DeployContractAndWaitForReceiptAsync(deployment);
+        TransactionReceipt transaction = await Repository.DeployContractAndWaitForReceiptAsync(seedData.Deployment);
         TestContext.WriteLine("Contract Address: " + transaction.ContractAddress);
         
         //Check BYTECODE and transaction status.
-        Assert.That(async() => await Repository.Web3.Eth.GetCode.SendRequestAsync(transaction.ContractAddress), 
-            Is.Not.Null.Or.Empty);
-        Assert.That(transaction.Status.ToLong(), Is.EqualTo(1));
+        Guard.IsNotNullOrEmpty(await Repository.Web3.Eth.GetCode.SendRequestAsync(transaction.ContractAddress));
+        Guard.IsEqualTo(transaction.Status.ToLong(), 1);
 
-        uint sectionNumber = 190U;
+        uint sectionNumber = seedData.Deployment.Sections.OrderBy(_ => Guid.NewGuid()).FirstOrDefault();
         TestContext.WriteLine($"Trying to access contract and getting section {sectionNumber}...");
 
         Section sectionData = await Repository.GetSectionAsync(sectionNumber);
-        Assert.That(sectionData, Is.Not.Null);
-
-        Section expectedSection = new Section(
-            190U,
-            new List<CandidateVotes>
-            {
-                new(15U, 1U),
-                new(25U, 8U),
-                new(35U, 7U),
-                new(55U, 5U)
-            }
-        );
+        Section? expectedSection = seedData.Sections
+            .Select(section => section)
+            .FirstOrDefault(section => section.SectionID == sectionNumber);
+        Guard.IsNotNull(expectedSection);
 
         string resultJSON = JsonSerializer.Serialize(sectionData);
         string expectedJSON = JsonSerializer.Serialize(expectedSection);
