@@ -4,9 +4,11 @@ using Microsoft.Extensions.Configuration;
 using Nethereum.BlockchainProcessing.BlockStorage.Entities.Mapping;
 using Nethereum.RPC.Eth.DTOs;
 using Voting.Server.Domain.Models;
+using Voting.Server.Domain.Models.Mappings;
 using Voting.Server.Persistence;
 using Voting.Server.Persistence.Accounts;
 using Voting.Server.Persistence.Clients;
+using Voting.Server.Persistence.ContractDefinition;
 using Voting.Server.UnitTests.TestData;
 using Voting.Server.UnitTests.TestNet.Ganache;
 
@@ -19,7 +21,6 @@ public class VotingDbRepositoryTests__GetSectionRangeAsync
     private AccountManager AccountManager { get; set; } = default!;
     private IWeb3ClientsManager ClientsManager { get; set; } = default!;
     private IVotingDbRepository Repository { get; set; } = default!;
-    public  Type { get; set; }
     
     [OneTimeSetUp]
     public void OneTimeSetUp()
@@ -41,6 +42,7 @@ public class VotingDbRepositoryTests__GetSectionRangeAsync
         TestNet.TearDown();
     }
     
+    [Ignore("TODO")]
     [Test, Sequential]
     public async Task GetSectionRangeAsync_Should_Return_Correct_Data(
         [Values(10U, 20U, 30U, 50U, 100U)] uint numSections,
@@ -50,14 +52,15 @@ public class VotingDbRepositoryTests__GetSectionRangeAsync
 
         Random rand = new Random();
         List<uint> sectionNumberArr = new();
-        for (var i = 0; i < rand.NextInt64(2, numSections); i++)
-        {
-            sectionNumberArr.Add();
-        }
+        // for (var i = 0; i < rand.NextInt64(2, numSections); i++)
+        // {
+        //     sectionNumberArr.Add();
+        // }
         uint sectionNumber = seedData.Deployment.Sections.OrderBy(_ => Guid.NewGuid()).FirstOrDefault();
         TestContext.WriteLine($"Trying to access contract and getting section {sectionNumber}...");
 
-        Section sectionData = await Repository.ReadSectionAsync(sectionNumber);
+        SectionEventDTO? sectionEventDTO = await Repository.ReadSectionAsync(sectionNumber);
+        Section sectionData = Mappings.SectionEventDTOToSection(sectionEventDTO);
         Section? expectedSection = seedData.Sections
             .Select(section => section)
             .FirstOrDefault(section => section.SectionID == sectionNumber);

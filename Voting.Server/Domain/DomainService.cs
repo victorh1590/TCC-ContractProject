@@ -6,6 +6,7 @@ using CommunityToolkit.Diagnostics;
 using Voting.Server.Persistence;
 using Voting.Server.Persistence.ContractDefinition;
 using Nethereum.ABI;
+using Nethereum.BlockchainProcessing.BlockStorage.Entities.Mapping;
 using Nethereum.Contracts;
 using Nethereum.Hex.HexConvertors.Extensions;
 using Nethereum.RPC.Eth.DTOs;
@@ -61,12 +62,13 @@ internal class DomainService
         return mappedResult;
     }
     
-    public async Task<string> InsertSections(List<Section> sections)
+    public async void InsertSections(List<Section> sections)
     {
         List<Section> uniqueSections = await RemoveRedundantSections(sections);
         Guard.IsNotEmpty(uniqueSections);
         VotingDbDeployment deployment = Mappings.SectionsListToDeployment(uniqueSections);
-        return await Repository.CreateSectionRange(deployment);
+        TransactionReceipt receipt =  await Repository.CreateSectionRange(deployment);
+        Guard.IsEqualTo(receipt.Status.ToLong(), 1);
     }
 
     private async Task<List<Section>> RemoveRedundantSections(List<Section> sections)

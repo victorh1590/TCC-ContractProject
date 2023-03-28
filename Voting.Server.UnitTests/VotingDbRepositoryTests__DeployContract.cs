@@ -67,7 +67,7 @@ public class VotingDbRepositoryTests__DeployContract
         SeedData seedData = SeedDataBuilder.GenerateNew(30, 4);
 
         //Successfully returns TransactionReceipt with valid ContractAddress and correct BlockNumber.
-        TransactionReceipt transaction = await Repository.DeployContractAndWaitForReceiptAsync(seedData.Deployment);
+        TransactionReceipt transaction = await Repository.CreateSectionRange(seedData.Deployment);
         Assert.That(transaction, Is.Not.Null.Or.Empty);
         Assert.That(transaction.ContractAddress, Is.Not.Null.Or.Empty);
         Assert.That(transaction.BlockNumber.ToLong(), Is.EqualTo(1));
@@ -110,7 +110,7 @@ public class VotingDbRepositoryTests__DeployContract
         };
 
         //Failed Deployment should throw Exception.
-        Assert.That(async () => await Repository.DeployContractAsync(deployment), 
+        Assert.That(async () => await Repository.CreateSectionRange(deployment), 
             Throws.TypeOf<RpcResponseException>());
         
         //Transaction count should be zero.

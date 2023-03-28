@@ -2,11 +2,14 @@
 using CommunityToolkit.Diagnostics;
 using Microsoft.Extensions.Configuration;
 using Nethereum.BlockchainProcessing.BlockStorage.Entities.Mapping;
+using Nethereum.Contracts;
 using Nethereum.RPC.Eth.DTOs;
 using Voting.Server.Domain.Models;
+using Voting.Server.Domain.Models.Mappings;
 using Voting.Server.Persistence;
 using Voting.Server.Persistence.Accounts;
 using Voting.Server.Persistence.Clients;
+using Voting.Server.Persistence.ContractDefinition;
 using Voting.Server.UnitTests.TestData;
 using Voting.Server.UnitTests.TestNet.Ganache;
 
@@ -43,10 +46,10 @@ public class VotingDbRepositoryTests__GetSectionAsync
     }
 
     [Test, Sequential]
+    [Order(3)]
     public async Task GetSectionAsync_Should_Return_Correct_Data(
         [Values(10U, 20U, 30U, 50U, 100U)] uint numSections,
-        [Values(3U, 4U, 5U, 7U, 10U)] uint numCandidates,
-        [Range(1, 5, 1)] long transactionNum)
+        [Values(3U, 4U, 5U, 7U, 10U)] uint numCandidates)
     {
         TimeSpan timeSpan = TimeSpan.FromSeconds(30); 
         var accountsTask = Repository.Web3.Personal.ListAccounts.SendRequestAsync();
@@ -60,17 +63,18 @@ public class VotingDbRepositoryTests__GetSectionAsync
 
         SeedData seedData = SeedDataBuilder.GenerateNew(numSections, numCandidates);
 
-        TransactionReceipt transaction = await Repository.DeployContractAndWaitForReceiptAsync(seedData.Deployment);
+        TransactionReceipt transaction = await Repository.CreateSectionRange(seedData.Deployment);
         TestContext.WriteLine("Contract Address: " + transaction.ContractAddress);
         
         //Check BYTECODE and transaction status.
         Guard.IsNotNullOrEmpty(await Repository.Web3.Eth.GetCode.SendRequestAsync(transaction.ContractAddress));
-        Guard.IsEqualTo(transaction.Status.ToLong(), transactionNum);
+        Guard.IsEqualTo(transaction.Status.ToLong(), 1);
 
         uint sectionNumber = seedData.Deployment.Sections.OrderBy(_ => Guid.NewGuid()).FirstOrDefault();
         TestContext.WriteLine($"Trying to access contract and getting section {sectionNumber}...");
 
-        Section sectionData = await Repository.ReadSectionAsync(sectionNumber);
+        SectionEventDTO? sectionEventDTO = await Repository.ReadSectionAsync(sectionNumber);
+        Section sectionData = Mappings.SectionEventDTOToSection(sectionEventDTO);
         Section? expectedSection = seedData.Sections
             .Select(section => section)
             .FirstOrDefault(section => section.SectionID == sectionNumber);

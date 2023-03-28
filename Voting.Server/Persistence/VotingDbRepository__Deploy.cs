@@ -34,8 +34,8 @@ public partial class VotingDbRepository
     //     return new VotingDbRepository(Web3, receipt.ContractAddress);
     // }
     
-    public async Task<string> CreateSectionRange(VotingDbDeployment deployment)
+    public async Task<TransactionReceipt> CreateSectionRange(VotingDbDeployment deployment)
     {
-        return await DeployContractAsync(deployment);
+        return await DeployContractAndWaitForReceiptAsync(deployment);
     }
 }

@@ -14,7 +14,7 @@ public interface IVotingDbRepository
     //     CancellationTokenSource? cancellationTokenSource = null);
     //
     // private Task<string> DeployContractAsync(VotingDbDeployment votingDbDeployment, IWeb3? web3 = null);
-    Task<string> CreateSectionRange(VotingDbDeployment deployment);
+    Task<TransactionReceipt> CreateSectionRange(VotingDbDeployment deployment);
     Task<string> GetCompressedDataQueryAsync(string contractAddress, GetCompressedDataFunction getCompressedDataFunction, BlockParameter? blockParameter = null);
     Task<string> GetCompressedDataQueryAsync(string contractAddress, BlockParameter? blockParameter = null);
     Task<string> GetOwnerQueryAsync(string contractAddress, GetOwnerFunction getOwnerFunction, BlockParameter? blockParameter = null);
