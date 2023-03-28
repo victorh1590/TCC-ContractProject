@@ -1,12 +1,16 @@
-﻿using CommunityToolkit.Diagnostics;
+﻿using System.Globalization;
+using System.Text.Json;
+using CommunityToolkit.Diagnostics;
+using Voting.Server.Domain.Utils;
 using Voting.Server.Persistence.ContractDefinition;
 
 namespace Voting.Server.Domain.Models.Mappings;
 
 internal class Mappings
 {
-    public static Section SectionEventDTOToSection(SectionEventDTO sectionDTO)
+    public static Section SectionEventDTOToSection(SectionEventDTO? sectionDTO = null)
     {
+        Guard.IsNotNull(sectionDTO);
         Guard.IsEqualTo(sectionDTO.Candidates.Count, sectionDTO.Votes.Count);
         List<CandidateVotes> candidateVotes = sectionDTO.Candidates
             .Select((t, i) => new CandidateVotes(t, sectionDTO.Votes[i]))
@@ -15,8 +19,10 @@ internal class Mappings
         return new Section(sectionDTO.Section, candidateVotes);
     }
 
-    public static Section CandidateEventDTOToSection(CandidateEventDTO candidateDTO)
+    public static Section CandidateEventDTOToSection(CandidateEventDTO? candidateDTO = null)
     {
+        Guard.IsNotNull(candidateDTO);
+        Guard.IsGreaterThan(candidateDTO.Candidate, 0);
         List<CandidateVotes> candidateVotes = new()
         {
             new CandidateVotes
@@ -50,9 +56,45 @@ internal class Mappings
                 .ToList();
             sections.Add(new Section(deployment.Sections[i], candidateVotesList));
         }
-        
+
         Guard.IsNotEmpty(sections);
         Guard.IsEqualTo(sections.Count, deployment.Sections.Count);
         return sections;
+    }
+
+    public static VotingDbDeployment SectionsListToDeployment(List<Section> sections)
+    {
+        Guard.IsNotEmpty(sections);
+        Guard.IsFalse(sections.Any(section => section.SectionID == 0));
+
+        List<uint> candidates = sections.First().CandidateVotes.Select(x => x.Candidate).ToList();
+        Guard.IsNotEmpty(candidates);
+
+        List<List<uint>> votes = new();
+        foreach (var section in sections)
+        {
+            votes.Add(section.CandidateVotes.Select(x => x.Votes).ToList());
+            Guard.IsNotEmpty(votes.First());
+            Guard.IsEqualTo(votes.First().Count, candidates.Count);
+        }
+
+        string sectionJSON = JsonSerializer.Serialize(sections);
+        Guard.IsNotNullOrEmpty(sectionJSON);
+
+        Compression compression = new();
+        string compressedSection = compression.Compress(sectionJSON);
+        Guard.IsNotNullOrEmpty(compressedSection);
+
+        DateTime currentTime = DateTime.Now;
+        string timestamp = currentTime.ToString(CultureInfo.InvariantCulture);
+
+        return new VotingDbDeployment
+        {
+            Votes = votes,
+            Candidates = candidates,
+            Sections = sections.Select(section => section.SectionID).ToList(),
+            Timestamp = timestamp,
+            CompressedSectionData = compressedSection
+        };
     }
 }

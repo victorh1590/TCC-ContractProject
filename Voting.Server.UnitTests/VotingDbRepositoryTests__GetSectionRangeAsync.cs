@@ -12,16 +12,15 @@ using Voting.Server.UnitTests.TestNet.Ganache;
 
 namespace Voting.Server.UnitTests;
 
-[TestFixture]
-public class VotingDbRepositoryTests__GetSectionAsync
+public class VotingDbRepositoryTests__GetSectionRangeAsync
 {
     private TestNet<Ganache> TestNet { get; set; } = default!;
     private IConfiguration Config { get; set; } = default!;
     private AccountManager AccountManager { get; set; } = default!;
     private IWeb3ClientsManager ClientsManager { get; set; } = default!;
     private IVotingDbRepository Repository { get; set; } = default!;
-    // public string URL { get; set; }
-
+    public  Type { get; set; }
+    
     [OneTimeSetUp]
     public void OneTimeSetUp()
     {
@@ -41,32 +40,20 @@ public class VotingDbRepositoryTests__GetSectionAsync
     {
         TestNet.TearDown();
     }
-
+    
     [Test, Sequential]
-    public async Task GetSectionAsync_Should_Return_Correct_Data(
+    public async Task GetSectionRangeAsync_Should_Return_Correct_Data(
         [Values(10U, 20U, 30U, 50U, 100U)] uint numSections,
-        [Values(3U, 4U, 5U, 7U, 10U)] uint numCandidates,
-        [Range(1, 5, 1)] long transactionNum)
+        [Values(3U, 4U, 5U, 7U, 10U)] uint numCandidates)
     {
-        TimeSpan timeSpan = TimeSpan.FromSeconds(30); 
-        var accountsTask = Repository.Web3.Personal.ListAccounts.SendRequestAsync();
-        List<string> accounts = (await accountsTask.WaitAsync(timeSpan)).ToList();
-        Guard.IsNotNull(accounts);
-        Guard.IsNotEmpty(accounts);
-        CollectionAssert.AllItemsAreNotNull(accounts);
-        
-        TestContext.WriteLine("Accounts in chain: ");
-        accounts.ForEach(TestContext.WriteLine);
-
         SeedData seedData = SeedDataBuilder.GenerateNew(numSections, numCandidates);
 
-        TransactionReceipt transaction = await Repository.DeployContractAndWaitForReceiptAsync(seedData.Deployment);
-        TestContext.WriteLine("Contract Address: " + transaction.ContractAddress);
-        
-        //Check BYTECODE and transaction status.
-        Guard.IsNotNullOrEmpty(await Repository.Web3.Eth.GetCode.SendRequestAsync(transaction.ContractAddress));
-        Guard.IsEqualTo(transaction.Status.ToLong(), transactionNum);
-
+        Random rand = new Random();
+        List<uint> sectionNumberArr = new();
+        for (var i = 0; i < rand.NextInt64(2, numSections); i++)
+        {
+            sectionNumberArr.Add();
+        }
         uint sectionNumber = seedData.Deployment.Sections.OrderBy(_ => Guid.NewGuid()).FirstOrDefault();
         TestContext.WriteLine($"Trying to access contract and getting section {sectionNumber}...");
 
