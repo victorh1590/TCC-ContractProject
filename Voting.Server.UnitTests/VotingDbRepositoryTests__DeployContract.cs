@@ -13,8 +13,9 @@ using Voting.Server.UnitTests.TestNet.Ganache;
 
 namespace Voting.Server.UnitTests;
 
+[Order(1)]
 [TestFixture]
-public class VotingDbRepositoryTests__DeployContract
+public partial class VotingDbRepositoryTests
 {
     private TestNet<Ganache> TestNet { get; set; } = default!;
     private IConfiguration Config { get; set; } = default!;
@@ -62,8 +63,9 @@ public class VotingDbRepositoryTests__DeployContract
 
     [Theory]
     [Order(1)]
-    public async Task Valid_Contract_Is_Successfully_Deployed()
+    public async Task CreateSectionRange_Should_Deploy_Valid_Contract()
     {
+        //Generate seed data.
         SeedData seedData = SeedDataBuilder.GenerateNew(30, 4);
 
         //Successfully returns TransactionReceipt with valid ContractAddress and correct BlockNumber.
@@ -97,9 +99,9 @@ public class VotingDbRepositoryTests__DeployContract
     
     [Test]
     [Order(2)]
-    public async Task Invalid_Contract_Fails_To_Be_Deployed()
+    public async Task CreateSetionRange_Should_Fail_When_Invalid_Contract()
     {
-        //All data Invalid.
+        //Generate invalid seed data.
         VotingDbDeployment deployment = new VotingDbDeployment
         {
             Candidates = new List<uint>(),
