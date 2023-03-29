@@ -13,6 +13,9 @@ public static class SeedDataBuilder
     private static uint MaxVotes => 200;
     private static uint MaxCandidates => 30;
     private static uint MaxSections => 100;
+    public static uint MaxSectionID => 472500;
+    public static uint MaxCandidateNumber => 99;
+
     private static readonly Random Rand = new();
 
     public static SeedData GenerateNew(uint numSections, uint numCandidates)
@@ -39,7 +42,7 @@ public static class SeedDataBuilder
         deployment.Candidates = new List<uint>();
         for (int i = 0; i < numCandidates; i++)
         {
-            deployment.Candidates.Add(Convert.ToUInt32(Rand.NextInt64(1, 99)));
+            deployment.Candidates.Add(Convert.ToUInt32(Rand.NextInt64(1, MaxCandidateNumber)));
         }
     }
 
@@ -48,7 +51,7 @@ public static class SeedDataBuilder
         deployment.Sections = new List<uint>();
         for (int i = 0; i < numSections; i++)
         { 
-            deployment.Sections.Add(Convert.ToUInt32(Rand.NextInt64(1, 472500)));
+            deployment.Sections.Add(Convert.ToUInt32(Rand.NextInt64(1, MaxSectionID)));
         }
     }
     

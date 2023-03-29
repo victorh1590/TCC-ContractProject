@@ -15,7 +15,7 @@ namespace Voting.Server.UnitTests;
 
 [Order(1)]
 [TestFixture]
-public partial class VotingDbRepositoryTests
+public partial class VotingDbRepositoryTests__DeployContract
 {
     private TestNet<Ganache> TestNet { get; set; } = default!;
     private IConfiguration Config { get; set; } = default!;

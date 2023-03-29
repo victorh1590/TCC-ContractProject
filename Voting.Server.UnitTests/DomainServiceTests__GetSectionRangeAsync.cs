@@ -13,9 +13,9 @@ using Voting.Server.UnitTests.TestNet.Ganache;
 
 namespace Voting.Server.UnitTests;
 
-[Order(2)]
+[Order(3)]
 [TestFixture]
-public partial class DomainServiceTests
+public partial class DomainServiceTests__GetSectionRangeAsync
 {
     private TestNet<Ganache> TestNet { get; set; } = default!;
     private IConfiguration Config { get; set; } = default!;
