@@ -87,7 +87,7 @@ public partial class VotingDbRepositoryTests__ReadSectionAsync
     // [Order(4)]
     [Test, Sequential]
     public async Task ReadSectionAsync_Should_Return_Null_When_Looking_For_Invalid_Section(
-        [Values(10U, 20U, 30U)] uint numSections,
+        [Values(1U, 5U, 10U)] uint numSections,
         [Values(3U, 4U, 5U)] uint numCandidates)
     {
         Random rand = new Random();
@@ -111,5 +111,13 @@ public partial class VotingDbRepositoryTests__ReadSectionAsync
         
         //Assertions.
         Assert.That(sectionEventDTO, Is.Null);
+    }
+    
+    [Test, Sequential]
+    public void ReadSectionAsync_Should_Throw_Exception_When_SectionNum_Is_Zero_Or_No_Param()
+    {
+        //Assertions.
+        Assert.That(async () => await Repository.ReadSectionAsync(), Throws.InstanceOf<ArgumentException>());
+        Assert.That(async () => await Repository.ReadSectionAsync(0), Throws.InstanceOf<ArgumentException>());
     }
 }
