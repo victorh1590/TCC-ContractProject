@@ -90,7 +90,6 @@ public partial class VotingDbRepositoryTests__ReadSectionAsync
         [Values(1U, 5U, 10U)] uint numSections,
         [Values(3U, 4U, 5U)] uint numCandidates)
     {
-        Random rand = new Random();
         //Generate seed data.
         SeedData seedData = SeedDataBuilder.GenerateNew(numSections, numCandidates);
         
@@ -103,7 +102,7 @@ public partial class VotingDbRepositoryTests__ReadSectionAsync
         Guard.IsEqualTo(transaction.Status.ToLong(), 1);
 
         //Get valid random section number NOT IN seedData.
-        uint sectionNumber = Convert.ToUInt32(rand.NextInt64(SeedDataBuilder.MaxSectionID, uint.MaxValue - 1));
+        uint sectionNumber = TestContext.CurrentContext.Random.NextUInt(SeedDataBuilder.MaxSectionID, uint.MaxValue - 1);
         TestContext.WriteLine($"Trying to access contract and getting section {sectionNumber}...");
 
         //Calls method and convert results to JSON.

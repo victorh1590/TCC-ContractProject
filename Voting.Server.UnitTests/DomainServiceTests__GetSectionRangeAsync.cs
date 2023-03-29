@@ -55,6 +55,8 @@ public partial class DomainServiceTests__GetSectionRangeAsync
         TestNet.TearDown();
     }
     
+    //TODO use TestCaseSource in tests.
+
     [Order(1)]
     [Test, Sequential]
     public async Task GetSectionRangeAsync_Should_Return_Correct_Data_When_All_SectionNums_Are_Valid(
@@ -69,13 +71,12 @@ public partial class DomainServiceTests__GetSectionRangeAsync
         Guard.IsEqualTo(transaction.Status.ToLong(), 1);
         
         //Generate a list of sections to look for.
-        Random rand = new Random();
         int sectionsLength = seedData.Sections.Count;
         List<Section> expectedSections = new();
         expectedSections
             .AddRange(seedData.Sections
                 .OrderBy(_ => Guid.NewGuid())
-                .Take(rand.Next(1, sectionsLength))
+                .Take(TestContext.CurrentContext.Random.Next(1, sectionsLength))
                 .ToArray()
             );
         Guard.IsNotNull(expectedSections);
@@ -105,11 +106,10 @@ public partial class DomainServiceTests__GetSectionRangeAsync
     {
         //Using contracts from last test.
         //Generate a list of sections to look for and print sectionNums.
-        Random rand = new Random();
         List<uint> sectionNumbers = new();
         for (int i = 0; i < 10; i++)
         {
-           sectionNumbers.Add(Convert.ToUInt32(rand.NextInt64(SeedDataBuilder.MaxSectionID, uint.MaxValue - 1)));
+           sectionNumbers.Add(TestContext.CurrentContext.Random.NextUInt(SeedDataBuilder.MaxSectionID, uint.MaxValue - 1));
         }
 
         //Assertions.
@@ -137,12 +137,11 @@ public partial class DomainServiceTests__GetSectionRangeAsync
         Guard.IsEqualTo(transaction.Status.ToLong(), 1);
         
         //Generate a list of sections to look for.
-        Random rand = new Random();
         List<Section> expectedSectionsWithInvalids = new();
         expectedSectionsWithInvalids
             .AddRange(seedData.Sections
                 .OrderBy(_ => Guid.NewGuid())
-                .Take(rand.Next(1, seedData.Sections.Count - invalidDataVariance))
+                .Take(TestContext.CurrentContext.Random.Next(1, seedData.Sections.Count - invalidDataVariance))
                 .ToArray()
             );
         Guard.IsNotNull(expectedSectionsWithInvalids);
@@ -155,7 +154,7 @@ public partial class DomainServiceTests__GetSectionRangeAsync
         for (int i = 0; i < invalidDataVariance; i++)
         {
             expectedSectionsWithInvalids.Add(new Section(
-                Convert.ToUInt32(rand.NextInt64(SeedDataBuilder.MaxSectionID, uint.MaxValue - 1)),
+                TestContext.CurrentContext.Random.NextUInt(SeedDataBuilder.MaxSectionID, uint.MaxValue - 1),
                 new List<CandidateVotes>()));
         }
 
