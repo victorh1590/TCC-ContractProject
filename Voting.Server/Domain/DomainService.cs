@@ -57,7 +57,7 @@ internal class DomainService
     
     public async Task<Section> GetVotesByCandidateForSection(uint candidate = 0, uint sectionNumber = 0)
     {
-        CandidateEventDTO? result = await Repository.ReadVotesByCandidateAndSection(candidate, sectionNumber);
+        CandidateEventDTO? result = await Repository.ReadVotesByCandidateAndSectionAsync(candidate, sectionNumber);
         Section mappedResult = Mappings.CandidateEventDTOToSection(result);
         return mappedResult;
     }

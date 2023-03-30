@@ -46,7 +46,7 @@ public class VotingDbRepositoryTests__ReadSectionAsync
         TestNet.TearDown();
     }
 
-    [Order(3)]
+    [Order(1)]
     [Test, Sequential]
     public async Task ReadSectionAsync_Should_Return_Correct_Data(
         [Values(10U, 20U, 30U, 50U, 100U)] uint numSections,
@@ -85,7 +85,7 @@ public class VotingDbRepositoryTests__ReadSectionAsync
         CollectionAssert.AreEqual(expectedSection.CandidateVotes, sectionData.CandidateVotes);
     }
     
-    [Order(4)]
+    [Order(2)]
     [Test, Sequential]
     public async Task ReadSectionAsync_Should_Return_Null_When_Looking_For_Invalid_Section(
         [Values(1U, 5U, 10U)] uint numSections,
@@ -113,6 +113,7 @@ public class VotingDbRepositoryTests__ReadSectionAsync
         Assert.That(sectionEventDTO, Is.Null);
     }
     
+    [Order(3)]
     [Test, Sequential]
     public void ReadSectionAsync_Should_Throw_Exception_When_SectionNum_Is_Zero_Or_No_Param()
     {

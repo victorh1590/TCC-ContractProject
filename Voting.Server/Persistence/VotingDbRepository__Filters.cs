@@ -43,14 +43,14 @@ public partial class VotingDbRepository
         return sectionLog?.Event;
     }
 
-    public async Task<CandidateEventDTO?> ReadVotesByCandidateAndSection(uint candidate = 0, uint sectionNumber = 0)
+    public async Task<CandidateEventDTO?> ReadVotesByCandidateAndSectionAsync(uint candidate = 0, uint sectionNumber = 0)
     {
         Guard.IsNotEqualTo(candidate, 0);
         Guard.IsNotEqualTo(sectionNumber, 0);
         
         Event<CandidateEventDTO> candidateEventHandler = Web3.Eth.GetEvent<CandidateEventDTO>();
         GetFilterRangeSettings(FilterRange.FromEarliestToLatest, out BlockParameter from, out BlockParameter to);
-        NewFilterInput candidateEventFilter = candidateEventHandler.CreateFilterInput(sectionNumber, from, to);
+        NewFilterInput candidateEventFilter = candidateEventHandler.CreateFilterInput(candidate, sectionNumber, from, to);
         List<EventLog<CandidateEventDTO>>? candidateLogList = await candidateEventHandler.GetAllChangesAsync(candidateEventFilter);
         EventLog<CandidateEventDTO>? candidateLog = candidateLogList.FirstOrDefault();
         return candidateLog?.Event;

@@ -39,20 +39,28 @@ public static class SeedDataBuilder
     
     private static void GenerateCandidates(VotingDbDeployment deployment, uint numCandidates)
     {
-        deployment.Candidates = new List<uint>();
-        for (int i = 0; i < numCandidates; i++)
+        List<uint> candidatesToAdd = new();
+        while (candidatesToAdd.Count < numCandidates)
         {
-            deployment.Candidates.Add(Convert.ToUInt32(Rand.NextInt64(1, MaxCandidateNumber)));
+            uint candidate = Convert.ToUInt32(Rand.NextInt64(1, MaxCandidateNumber));
+            if (candidatesToAdd.Contains(candidate)) continue;
+            candidatesToAdd.Add(candidate);
         }
+
+        deployment.Candidates = candidatesToAdd;
     }
 
     private static void GenerateSections(VotingDbDeployment deployment, uint numSections)
     {
-        deployment.Sections = new List<uint>();
-        for (int i = 0; i < numSections; i++)
-        { 
-            deployment.Sections.Add(Convert.ToUInt32(Rand.NextInt64(1, MaxSectionID)));
+        List<uint> sectionsToAdd = new();
+        while (sectionsToAdd.Count < numSections)
+        {
+            uint section = Convert.ToUInt32(Rand.NextInt64(1, MaxSectionID));
+            if (sectionsToAdd.Contains(section)) continue;
+            sectionsToAdd.Add(section);
         }
+
+        deployment.Sections = sectionsToAdd;
     }
     
     private static void GenerateVotes(VotingDbDeployment deployment, uint numSections, uint numCandidates)
