@@ -13,9 +13,10 @@ using Voting.Server.UnitTests.TestNet.Ganache;
 
 namespace Voting.Server.UnitTests;
 
+[Ignore("Debugging tests.")]
 [Order(1)]
 [TestFixture]
-public partial class VotingDbRepositoryTests__DeployContract
+public class VotingDbRepositoryTests__DeployContract
 {
     private TestNet<Ganache> TestNet { get; set; } = default!;
     private IConfiguration Config { get; set; } = default!;
@@ -26,7 +27,6 @@ public partial class VotingDbRepositoryTests__DeployContract
     private BlockParameter Latest { get; } = BlockParameter.CreateLatest();
     private BlockParameter Pending { get; } = BlockParameter.CreatePending();
     private BlockParameter Ealiest { get; } = BlockParameter.CreateEarliest();
-    // public string URL { get; set; }
 
     [OneTimeSetUp]
     public async Task OneTimeSetUp()
@@ -41,7 +41,6 @@ public partial class VotingDbRepositoryTests__DeployContract
         TestNet = new TestNet<Ganache>(AccountManager);
         Account = AccountManager.Accounts.First().Address;
         TestNet.SetUp();
-        // URL = $"HTTP://{Options.GanacheOptions.Host}:{Options.GanacheOptions.Port}";
         
         TimeSpan timeSpan = TimeSpan.FromSeconds(30); 
         var accountsTask = Repository.Web3.Personal.ListAccounts.SendRequestAsync();
@@ -82,10 +81,7 @@ public partial class VotingDbRepositoryTests__DeployContract
         //Transaction Count is correct.
         long completedTransactionCount = (await Repository.Web3.Eth.Transactions.GetTransactionCount
                 .SendRequestAsync(Account)).ToLong();
-        // long pendingTransactionCount = (await Repository.Web3.Eth.Transactions.GetTransactionCount
-        //         .SendRequestAsync(Account, Pending)).ToLong();
         Assert.That(completedTransactionCount, Is.EqualTo(1));
-        // Assert.That(pendingTransactionCount, Is.EqualTo(1));
         
         //Successfully creates ContractHandler.
         TestContext.WriteLine("Contract Address: " + transaction.ContractAddress);

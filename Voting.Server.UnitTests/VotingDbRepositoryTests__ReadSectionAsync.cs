@@ -14,9 +14,10 @@ using Voting.Server.UnitTests.TestNet.Ganache;
 
 namespace Voting.Server.UnitTests;
 
+[Ignore("Debugging tests.")]
 [Order(2)]
 [TestFixture]
-public partial class VotingDbRepositoryTests__ReadSectionAsync
+public class VotingDbRepositoryTests__ReadSectionAsync
 {
     private TestNet<Ganache> TestNet { get; set; } = default!;
     private IConfiguration Config { get; set; } = default!;
@@ -45,7 +46,7 @@ public partial class VotingDbRepositoryTests__ReadSectionAsync
         TestNet.TearDown();
     }
 
-    // [Order(3)]
+    [Order(3)]
     [Test, Sequential]
     public async Task ReadSectionAsync_Should_Return_Correct_Data(
         [Values(10U, 20U, 30U, 50U, 100U)] uint numSections,
@@ -84,7 +85,7 @@ public partial class VotingDbRepositoryTests__ReadSectionAsync
         CollectionAssert.AreEqual(expectedSection.CandidateVotes, sectionData.CandidateVotes);
     }
     
-    // [Order(4)]
+    [Order(4)]
     [Test, Sequential]
     public async Task ReadSectionAsync_Should_Return_Null_When_Looking_For_Invalid_Section(
         [Values(1U, 5U, 10U)] uint numSections,

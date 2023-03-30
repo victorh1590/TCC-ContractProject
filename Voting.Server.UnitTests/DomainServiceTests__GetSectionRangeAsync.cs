@@ -1,4 +1,5 @@
-﻿using System.Text.Json;
+﻿using System.Collections;
+using System.Text.Json;
 using CommunityToolkit.Diagnostics;
 using Microsoft.Extensions.Configuration;
 using Nethereum.BlockchainProcessing.BlockStorage.Entities.Mapping;
@@ -15,7 +16,7 @@ namespace Voting.Server.UnitTests;
 
 [Order(3)]
 [TestFixture]
-public partial class DomainServiceTests__GetSectionRangeAsync
+public class DomainServiceTests__GetSectionRangeAsync
 {
     private TestNet<Ganache> TestNet { get; set; } = default!;
     private IConfiguration Config { get; set; } = default!;
@@ -36,7 +37,6 @@ public partial class DomainServiceTests__GetSectionRangeAsync
         TestNet = new TestNet<Ganache>(AccountManager);
         DomainService = new DomainService(Repository);
         TestNet.SetUp();
-        // URL = $"HTTP://{Options.GanacheOptions.Host}:{Options.GanacheOptions.Port}";
         
         TimeSpan timeSpan = TimeSpan.FromSeconds(30); 
         var accountsTask = Repository.Web3.Personal.ListAccounts.SendRequestAsync();
@@ -54,8 +54,6 @@ public partial class DomainServiceTests__GetSectionRangeAsync
     {
         TestNet.TearDown();
     }
-    
-    //TODO use TestCaseSource in tests.
 
     [Order(1)]
     [Test, Sequential]
@@ -65,7 +63,7 @@ public partial class DomainServiceTests__GetSectionRangeAsync
     {
         //Generate seed data.
         SeedData seedData = SeedDataBuilder.GenerateNew(numSections, numCandidates);
-
+        
         //Deploy Contract and test if transaction is completed.
         TransactionReceipt transaction = await Repository.CreateSectionRange(seedData.Deployment);
         Guard.IsEqualTo(transaction.Status.ToLong(), 1);
@@ -104,7 +102,6 @@ public partial class DomainServiceTests__GetSectionRangeAsync
     [Test, Repeat(5)]
     public void GetSectionRangeAsync_Should_Fail_When_All_SectionNums_Are_Invalid()
     {
-        //Using contracts from last test.
         //Generate a list of sections to look for and print sectionNums.
         List<uint> sectionNumbers = new();
         for (int i = 0; i < 10; i++)
@@ -127,10 +124,6 @@ public partial class DomainServiceTests__GetSectionRangeAsync
     {
         //Generate seed data.
         SeedData seedData = SeedDataBuilder.GenerateNew(numSections, numCandidates);
-        
-        //Prints Valid Sections:
-        TestContext.WriteLine("Valid Sections: ");
-        seedData.Sections.ForEach(section => TestContext.Write(section.SectionID));
 
         //Deploy Contract and test if transaction is completed.
         TransactionReceipt transaction = await Repository.CreateSectionRange(seedData.Deployment);
@@ -145,7 +138,7 @@ public partial class DomainServiceTests__GetSectionRangeAsync
                 .ToArray()
             );
         Guard.IsNotNull(expectedSectionsWithInvalids);
-
+    
         //Copies Valid Data
         List<Section> expectedSectionsValidOnly = new();
         expectedSectionsValidOnly.AddRange(expectedSectionsWithInvalids);
@@ -157,23 +150,14 @@ public partial class DomainServiceTests__GetSectionRangeAsync
                 TestContext.CurrentContext.Random.NextUInt(SeedDataBuilder.MaxSectionID, uint.MaxValue - 1),
                 new List<CandidateVotes>()));
         }
-
-        //Prints expected SectionIDs
-        uint[] sectionNumbers = expectedSectionsWithInvalids.Select(section => section.SectionID).ToArray();
-        TestContext.WriteLine($"Trying to access contract and getting UNKNOWN VALIDITY sections:");
-        foreach (var sectionNum in sectionNumbers)
-        {
-            TestContext.Write($" {sectionNum}");
-        }
-
+        
         //Calls method and convert results to JSON.
+        uint[] sectionNumbers = expectedSectionsWithInvalids.Select(section => section.SectionID).ToArray();
         List<Section> resultSections = await DomainService.GetSectionRangeAsync(sectionNumbers);
-
+    
         string resultJSON = JsonSerializer.Serialize(resultSections);
         string expectedJSON = JsonSerializer.Serialize(expectedSectionsValidOnly);
         
-        TestContext.WriteLine("Resulting JSON: " + resultJSON);
-
         //Assertions
         Assert.That(resultJSON, Is.EqualTo(expectedJSON));
         Assert.That(resultSections.Count, Is.EqualTo(expectedSectionsValidOnly.Count));
