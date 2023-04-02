@@ -14,6 +14,7 @@ using Voting.Server.UnitTests.TestNet.Ganache;
 
 namespace Voting.Server.UnitTests;
 
+[Ignore("Debugging")]
 [Order(4)]
 [TestFixture]
 public class VotingDbRepositoryTests__ReadVotesByCandidateAndSectionAsync
@@ -45,7 +46,7 @@ public class VotingDbRepositoryTests__ReadVotesByCandidateAndSectionAsync
         TestNet.TearDown();
     }
 
-    [Order(3)]
+    [Order(1)]
     [Test, Sequential]
     public async Task ReadVotesByCandidateAndSectionAsync_Should_Return_Correct_Data(
         [Values(10U, 20U, 30U, 50U, 100U)] uint numSections,
@@ -91,41 +92,52 @@ public class VotingDbRepositoryTests__ReadVotesByCandidateAndSectionAsync
         Assert.That(sectionData.SectionID, Is.EqualTo(expectedSection.SectionID));
         Assert.That(sectionData.CandidateVotes.First(), Is.EqualTo(expectedCandidateVotes));
     }
-    
-    // [Ignore("Debugging")]
-    // [Order(4)]
-    // [Test, Sequential]
-    // public async Task ReadSectionAsync_Should_Return_Null_When_Looking_For_Invalid_Section(
-    //     [Values(1U, 5U, 10U)] uint numSections,
-    //     [Values(3U, 4U, 5U)] uint numCandidates)
-    // {
-    //     //Generate seed data.
-    //     SeedData seedData = SeedDataBuilder.GenerateNew(numSections, numCandidates);
-    //     
-    //     //Deploy Contract
-    //     TransactionReceipt transaction = await Repository.CreateSectionRange(seedData.Deployment);
-    //     TestContext.WriteLine("Contract Address: " + transaction.ContractAddress);
-    //     
-    //     //Check BYTECODE and transaction status.
-    //     Guard.IsNotNullOrEmpty(await Repository.Web3.Eth.GetCode.SendRequestAsync(transaction.ContractAddress));
-    //     Guard.IsEqualTo(transaction.Status.ToLong(), 1);
-    //
-    //     //Get valid random section number NOT IN seedData.
-    //     uint sectionNumber = TestContext.CurrentContext.Random.NextUInt(SeedDataBuilder.MaxSectionID, uint.MaxValue - 1);
-    //     TestContext.WriteLine($"Trying to access contract and getting section {sectionNumber}...");
-    //
-    //     //Calls method and convert results to JSON.
-    //     SectionEventDTO? sectionEventDTO = await Repository.ReadSectionAsync(sectionNumber);
-    //     
-    //     //Assertions.
-    //     Assert.That(sectionEventDTO, Is.Null);
-    // }
-    //
-    // [Test, Sequential]
-    // public void ReadSectionAsync_Should_Throw_Exception_When_SectionNum_Is_Zero_Or_No_Param()
-    // {
-    //     //Assertions.
-    //     Assert.That(async () => await Repository.ReadSectionAsync(), Throws.InstanceOf<ArgumentException>());
-    //     Assert.That(async () => await Repository.ReadSectionAsync(0), Throws.InstanceOf<ArgumentException>());
-    // }
+
+    [Order(2)]
+    [Test, Sequential]
+    public async Task  ReadVotesByCandidateAndSectionAsync_Should_Return_Null_When_Candidate_Or_Section_Doesnt_Exist(
+        [Values(10U, 20U, 30U, 50U, 100U)] uint numSections,
+        [Values(3U, 4U, 5U, 7U, 10U)] uint numCandidates)
+    {
+        //Generate seed data.
+        SeedData seedData = SeedDataBuilder.GenerateNew(numSections, numCandidates);
+        
+        //Deploy Contract
+        TransactionReceipt transaction = await Repository.CreateSectionRange(seedData.Deployment);
+        TestContext.WriteLine("Contract Address: " + transaction.ContractAddress);
+        
+        //Check BYTECODE and transaction status.
+        Guard.IsNotNullOrEmpty(await Repository.Web3.Eth.GetCode.SendRequestAsync(transaction.ContractAddress));
+        Guard.IsEqualTo(transaction.Status.ToLong(), 1);
+
+        uint invalidSectionNumber = TestContext.CurrentContext.Random.NextUInt(SeedDataBuilder.MaxSectionID, uint.MaxValue - 1);
+        uint InvalidCandidateNumber = TestContext.CurrentContext.Random.NextUInt(SeedDataBuilder.MaxCandidateNumber, uint.MaxValue - 1);
+
+        //Calls method with invalid candidate.
+        CandidateEventDTO? resultInvalidCandidate = 
+            await Repository.ReadVotesByCandidateAndSectionAsync(InvalidCandidateNumber, seedData.Deployment.Sections.First());
+
+        //Calls method with invalid section.
+        CandidateEventDTO? resultInvalidSection = 
+            await Repository.ReadVotesByCandidateAndSectionAsync(seedData.Deployment.Candidates.First(), invalidSectionNumber);
+
+        //Calls method with invalid candidate and section.
+        CandidateEventDTO? resultInvalidCandidateAndSection = 
+            await Repository.ReadVotesByCandidateAndSectionAsync(InvalidCandidateNumber, invalidSectionNumber);
+
+        //Assertions.
+        Assert.That(resultInvalidCandidate, Is.Null);
+        Assert.That(resultInvalidSection, Is.Null);
+        Assert.That(resultInvalidCandidateAndSection, Is.Null);
+    }
+
+    [Order(3)]
+    [Test]
+    public void  ReadVotesByCandidateAndSectionAsync_Should_Throw_Exception_When_SectionNum_Is_Zero_Or_No_Param()
+    {
+        //Assertions.
+        Assert.That(async () => await Repository.ReadVotesByCandidateAndSectionAsync(), Throws.InstanceOf<ArgumentException>());
+        Assert.That(async () => await Repository.ReadVotesByCandidateAndSectionAsync(0), Throws.InstanceOf<ArgumentException>());
+        Assert.That(async () => await Repository.ReadVotesByCandidateAndSectionAsync(0, 0), Throws.InstanceOf<ArgumentException>());
+    }
 }

@@ -14,6 +14,7 @@ using CommunityToolkit.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using Voting.Server.Persistence.Clients;
 using Voting.Server.Persistence.ContractDefinition;
+using System.Runtime.CompilerServices;
 
 namespace Voting.Server.Persistence;
 

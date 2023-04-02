@@ -56,7 +56,7 @@ public partial class VotingDbRepository
         return candidateLog?.Event;
     }
     
-    internal async Task<MetadataEventDTO?> ReadMetadata(string contractAddress)
+    public async Task<MetadataEventDTO?> ReadMetadataAsync(string contractAddress)
     {
         Guard.IsNotEmpty(contractAddress);
 

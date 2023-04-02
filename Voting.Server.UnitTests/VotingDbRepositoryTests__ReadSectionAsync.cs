@@ -24,7 +24,6 @@ public class VotingDbRepositoryTests__ReadSectionAsync
     private AccountManager AccountManager { get; set; } = default!;
     private IWeb3ClientsManager ClientsManager { get; set; } = default!;
     private IVotingDbRepository Repository { get; set; } = default!;
-    // public string URL { get; set; }
     
     [OneTimeSetUp]
     public void OneTimeSetUp()
@@ -37,7 +36,6 @@ public class VotingDbRepositoryTests__ReadSectionAsync
         Repository = new VotingDbRepository(ClientsManager);
         TestNet = new TestNet<Ganache>(AccountManager);
         TestNet.SetUp();
-        // URL = $"HTTP://{Options.GanacheOptions.Host}:{Options.GanacheOptions.Port}";
     }
     
     [OneTimeTearDown]
