@@ -24,9 +24,6 @@ public class VotingDbRepositoryTests__ReadVotesByCandidateAndSectionAsync : IUse
     public IWeb3ClientsManager ClientsManager { get; set; } = default!;
     public IVotingDbRepository Repository { get; set; } = default!;
     public string Account { get; set; } = default!;
-    public BlockParameter Latest { get; } = BlockParameter.CreateLatest();
-    public BlockParameter Pending { get; } = BlockParameter.CreatePending();
-    public BlockParameter Ealiest { get; } = BlockParameter.CreateEarliest();
 
     [Order(1)]
     [Test, Sequential]
@@ -61,7 +58,7 @@ public class VotingDbRepositoryTests__ReadVotesByCandidateAndSectionAsync : IUse
 
         //Calls method and convert results to JSON.
         CandidateEventDTO? candidateEventDTO = 
-            await Repository.ReadVotesByCandidateAndSectionAsync(expectedCandidateVotes.Candidate, expectedSection.SectionID);
+            await Repository.ReadVotesByCandidateAndSectionAsync(expectedCandidateVotes.Candidate, expectedSection.SectionID, FilterRange.FromLatestToLatest);
         Section sectionData = Mappings.CandidateEventDTOToSection(candidateEventDTO);
         
         string resultJSON = JsonSerializer.Serialize(sectionData);
@@ -97,15 +94,15 @@ public class VotingDbRepositoryTests__ReadVotesByCandidateAndSectionAsync : IUse
 
         //Calls method with invalid candidate.
         CandidateEventDTO? resultInvalidCandidate = 
-            await Repository.ReadVotesByCandidateAndSectionAsync(InvalidCandidateNumber, seedData.Deployment.Sections.First());
+            await Repository.ReadVotesByCandidateAndSectionAsync(InvalidCandidateNumber, seedData.Deployment.Sections.First(), FilterRange.FromLatestToLatest);
 
         //Calls method with invalid section.
         CandidateEventDTO? resultInvalidSection = 
-            await Repository.ReadVotesByCandidateAndSectionAsync(seedData.Deployment.Candidates.First(), invalidSectionNumber);
+            await Repository.ReadVotesByCandidateAndSectionAsync(seedData.Deployment.Candidates.First(), invalidSectionNumber, FilterRange.FromLatestToLatest);
 
         //Calls method with invalid candidate and section.
         CandidateEventDTO? resultInvalidCandidateAndSection = 
-            await Repository.ReadVotesByCandidateAndSectionAsync(InvalidCandidateNumber, invalidSectionNumber);
+            await Repository.ReadVotesByCandidateAndSectionAsync(InvalidCandidateNumber, invalidSectionNumber, FilterRange.FromLatestToLatest);
 
         //Assertions.
         Assert.That(resultInvalidCandidate, Is.Null);

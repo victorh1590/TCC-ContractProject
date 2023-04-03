@@ -1,7 +1,6 @@
 using Nethereum.Contracts.ContractHandlers;
 using Nethereum.RPC.Eth.DTOs;
 using Nethereum.Web3;
-using Voting.Server.Domain.Models;
 using Voting.Server.Persistence.ContractDefinition;
 
 namespace Voting.Server.Persistence;
@@ -21,7 +20,7 @@ public interface IVotingDbRepository
     Task<string> GetOwnerQueryAsync(string contractAddress, BlockParameter? blockParameter = null);
     Task<string> GetTimestampQueryAsync(string contractAddress, GetTimestampFunction getTimestampFunction, BlockParameter? blockParameter = null);
     Task<string> GetTimestampQueryAsync(string contractAddress, BlockParameter? blockParameter = null);
-    Task<SectionEventDTO?> ReadSectionAsync(uint sectionNumber = 0);
-    Task<CandidateEventDTO?> ReadVotesByCandidateAndSectionAsync(uint candidate = 0, uint sectionNumber = 0);
-    Task<MetadataEventDTO?> ReadMetadataAsync(string contractAddress);
+    Task<SectionEventDTO?> ReadSectionAsync(uint sectionNumber = 0, FilterRange? range = null);
+    Task<CandidateEventDTO?> ReadVotesByCandidateAndSectionAsync(uint candidate = 0, uint sectionNumber = 0, FilterRange? range = null);
+    Task<MetadataEventDTO?> ReadMetadataAsync(string contractAddress, FilterRange? range = null);
 }

@@ -7,13 +7,14 @@ using Voting.Server.Persistence.ContractDefinition;
 
 namespace Voting.Server.Persistence;
 
+public enum FilterRange
+{
+    FromEarliestToLatest,
+    FromLatestToLatest
+}
+
 public partial class VotingDbRepository
 {
-    private enum FilterRange
-    {
-        FromEarliestToLatest,
-        FromLatestToLatest
-    }
 
     private static void GetFilterRangeSettings(FilterRange range, out BlockParameter from, out BlockParameter to)
     {
@@ -30,38 +31,38 @@ public partial class VotingDbRepository
                 break;
         }
     }
-    
-    public async Task<SectionEventDTO?> ReadSectionAsync(uint sectionNumber = 0)
+
+    public async Task<SectionEventDTO?> ReadSectionAsync(uint sectionNumber = 0, FilterRange? range = null)
     {
         Guard.IsNotEqualTo(sectionNumber, 0);
-        
+
         Event<SectionEventDTO> sectionEventHandler = Web3.Eth.GetEvent<SectionEventDTO>();
-        GetFilterRangeSettings(FilterRange.FromEarliestToLatest, out BlockParameter from, out BlockParameter to);
+        GetFilterRangeSettings(range ?? FilterRange.FromEarliestToLatest, out BlockParameter from, out BlockParameter to);
         NewFilterInput sectionEventFilter = sectionEventHandler.CreateFilterInput(sectionNumber, from, to);
         List<EventLog<SectionEventDTO>>? sectionLogList = await sectionEventHandler.GetAllChangesAsync(sectionEventFilter);
         EventLog<SectionEventDTO>? sectionLog = sectionLogList.FirstOrDefault();
         return sectionLog?.Event;
     }
 
-    public async Task<CandidateEventDTO?> ReadVotesByCandidateAndSectionAsync(uint candidate = 0, uint sectionNumber = 0)
+    public async Task<CandidateEventDTO?> ReadVotesByCandidateAndSectionAsync(uint candidate = 0, uint sectionNumber = 0, FilterRange? range = null)
     {
         Guard.IsNotEqualTo(candidate, 0);
         Guard.IsNotEqualTo(sectionNumber, 0);
-        
+
         Event<CandidateEventDTO> candidateEventHandler = Web3.Eth.GetEvent<CandidateEventDTO>();
-        GetFilterRangeSettings(FilterRange.FromEarliestToLatest, out BlockParameter from, out BlockParameter to);
+        GetFilterRangeSettings(range ?? FilterRange.FromEarliestToLatest, out BlockParameter from, out BlockParameter to);
         NewFilterInput candidateEventFilter = candidateEventHandler.CreateFilterInput(candidate, sectionNumber, from, to);
         List<EventLog<CandidateEventDTO>>? candidateLogList = await candidateEventHandler.GetAllChangesAsync(candidateEventFilter);
         EventLog<CandidateEventDTO>? candidateLog = candidateLogList.FirstOrDefault();
         return candidateLog?.Event;
     }
-    
-    public async Task<MetadataEventDTO?> ReadMetadataAsync(string contractAddress)
+
+    public async Task<MetadataEventDTO?> ReadMetadataAsync(string contractAddress, FilterRange? range = null)
     {
         Guard.IsNotEmpty(contractAddress);
 
         Event<MetadataEventDTO> metadataEventHandler = Web3.Eth.GetEvent<MetadataEventDTO>();
-        GetFilterRangeSettings(FilterRange.FromEarliestToLatest, out BlockParameter from, out BlockParameter to);
+        GetFilterRangeSettings(range ?? FilterRange.FromEarliestToLatest, out BlockParameter from, out BlockParameter to);
         NewFilterInput metadataEventFilter = metadataEventHandler.CreateFilterInput(contractAddress, from, to);
         List<EventLog<MetadataEventDTO>>? metadataLogList = await metadataEventHandler.GetAllChangesAsync(metadataEventFilter);
         EventLog<MetadataEventDTO>? metadataLog = metadataLogList.FirstOrDefault();

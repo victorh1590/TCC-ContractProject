@@ -3,6 +3,7 @@ using CommunityToolkit.Diagnostics;
 using Microsoft.Extensions.Configuration;
 using Nethereum.BlockchainProcessing.BlockStorage.Entities.Mapping;
 using Nethereum.RPC.Eth.DTOs;
+using NUnit.Framework;
 using Voting.Server.Domain.Models;
 using Voting.Server.Domain.Models.Mappings;
 using Voting.Server.Persistence;
@@ -24,9 +25,6 @@ public class VotingDbRepositoryTests__ReadSectionAsync : IUseBlockchainAndReposi
     public IWeb3ClientsManager ClientsManager { get; set; } = default!;
     public IVotingDbRepository Repository { get; set; } = default!;
     public string Account { get; set; } = default!;
-    public BlockParameter Latest { get; } = BlockParameter.CreateLatest();
-    public BlockParameter Pending { get; } = BlockParameter.CreatePending();
-    public BlockParameter Ealiest { get; } = BlockParameter.CreateEarliest();
 
     [Order(1)]
     [Test, Sequential]
@@ -50,7 +48,7 @@ public class VotingDbRepositoryTests__ReadSectionAsync : IUseBlockchainAndReposi
         TestContext.WriteLine($"Trying to access contract and getting section {sectionNumber}...");
 
         //Calls method and convert results to JSON.
-        SectionEventDTO? sectionEventDTO = await Repository.ReadSectionAsync(sectionNumber);
+        SectionEventDTO? sectionEventDTO = await Repository.ReadSectionAsync(sectionNumber, FilterRange.FromLatestToLatest);
         Section sectionData = Mappings.SectionEventDTOToSection(sectionEventDTO);
         Section? expectedSection = seedData.Sections
             .Select(section => section)
@@ -89,7 +87,7 @@ public class VotingDbRepositoryTests__ReadSectionAsync : IUseBlockchainAndReposi
         TestContext.WriteLine($"Trying to access contract and getting section {sectionNumber}...");
 
         //Calls method and convert results to JSON.
-        SectionEventDTO? sectionEventDTO = await Repository.ReadSectionAsync(sectionNumber);
+        SectionEventDTO? sectionEventDTO = await Repository.ReadSectionAsync(sectionNumber, FilterRange.FromLatestToLatest);
         
         //Assertions.
         Assert.That(sectionEventDTO, Is.Null);

@@ -22,9 +22,6 @@ public class VotingDbRepositoryTests__ReadMetadataAsync : IUseBlockchainAndRepos
     public IWeb3ClientsManager ClientsManager { get; set; } = default!;
     public IVotingDbRepository Repository { get; set; } = default!;
     public string Account { get; set; } = default!;
-    public BlockParameter Latest { get; } = BlockParameter.CreateLatest();
-    public BlockParameter Pending { get; } = BlockParameter.CreatePending();
-    public BlockParameter Ealiest { get; } = BlockParameter.CreateEarliest();
 
     [Order(1)]
     [Test, Sequential]
@@ -44,7 +41,7 @@ public class VotingDbRepositoryTests__ReadMetadataAsync : IUseBlockchainAndRepos
         Guard.IsEqualTo(transaction.Status.ToLong(), 1);
 
         //Calls method passing valid address.
-        MetadataEventDTO? metadataEventDTO = await Repository.ReadMetadataAsync(transaction.ContractAddress);
+        MetadataEventDTO? metadataEventDTO = await Repository.ReadMetadataAsync(transaction.ContractAddress, FilterRange.FromLatestToLatest);
 
         //Assertions.
         Assert.That(metadataEventDTO, Is.Not.Null);
@@ -86,7 +83,7 @@ public class VotingDbRepositoryTests__ReadMetadataAsync : IUseBlockchainAndRepos
         TestContext.WriteLine("Fake address length: " + fakeAddress.Length);
 
         //Calls method passing fake address.
-        MetadataEventDTO? metadataEventDTO = await Repository.ReadMetadataAsync(fakeAddress);
+        MetadataEventDTO? metadataEventDTO = await Repository.ReadMetadataAsync(fakeAddress, FilterRange.FromLatestToLatest);
 
         //Assertions
         Assert.That(metadataEventDTO, Is.Null);

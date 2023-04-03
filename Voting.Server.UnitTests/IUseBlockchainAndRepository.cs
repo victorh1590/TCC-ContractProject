@@ -16,8 +16,5 @@ interface IUseBlockchainAndRepositoryProps
     IWeb3ClientsManager ClientsManager { get; set; }
     IVotingDbRepository Repository { get; set; }
     string Account { get; set; }
-    BlockParameter Latest { get; }
-    BlockParameter Pending { get; }
-    BlockParameter Ealiest { get; }
 }
 
