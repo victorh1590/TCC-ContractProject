@@ -7,11 +7,11 @@ using Voting.Server.Persistence.Accounts;
 [assembly: InternalsVisibleTo("Voting.Server.UnitTests")]
 namespace Voting.Server.Persistence.Clients;
 
-internal class Web3ClientsManager : IWeb3ClientsManager
+public class Web3ClientsManager : IWeb3ClientsManager
 {
     public ImmutableList<Web3> Web3Clients { get; }
 
-    internal Web3ClientsManager(AccountManager accounts)
+    public Web3ClientsManager(AccountManager accounts)
     {
         Web3Clients = accounts.Accounts
             .Select(account => new Web3(account))

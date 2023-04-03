@@ -1,20 +1,11 @@
-﻿using System.Globalization;
-using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices.JavaScript;
-using System.Text.Json;
+﻿using System.Runtime.CompilerServices;
 using CommunityToolkit.Diagnostics;
 using Voting.Server.Persistence;
 using Voting.Server.Persistence.ContractDefinition;
-using Nethereum.ABI;
 using Nethereum.BlockchainProcessing.BlockStorage.Entities.Mapping;
-using Nethereum.Contracts;
-using Nethereum.Hex.HexConvertors.Extensions;
 using Nethereum.RPC.Eth.DTOs;
-using Nethereum.Web3;
-using Nethereum.Web3.Accounts;
 using Voting.Server.Domain.Models;
 using Voting.Server.Domain.Models.Mappings;
-using Voting.Server.Domain.Utils;
 
 [assembly: InternalsVisibleTo("Voting.Server.UnitTests")]
 namespace Voting.Server.Domain;

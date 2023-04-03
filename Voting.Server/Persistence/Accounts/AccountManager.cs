@@ -13,7 +13,7 @@ public class AccountManager : IAccountManager
     internal ImmutableList<Account> Accounts { get; }
     public ImmutableList<string> PublicKeys { get; }
     
-    public AccountManager(IConfiguration config)
+    internal AccountManager(IConfiguration config)
     {
         Guard.IsNotNull(config.GetSection("Accounts"));
 
