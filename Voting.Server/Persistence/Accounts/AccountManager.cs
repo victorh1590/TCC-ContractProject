@@ -8,12 +8,12 @@ using Nethereum.Web3.Accounts;
 [assembly: InternalsVisibleTo("Voting.Server.UnitTests")]
 namespace Voting.Server.Persistence.Accounts;
 
-internal class AccountManager : IAccountManager
+public class AccountManager : IAccountManager
 {
     internal ImmutableList<Account> Accounts { get; }
     public ImmutableList<string> PublicKeys { get; }
     
-    internal AccountManager(IConfiguration config)
+    public AccountManager(IConfiguration config)
     {
         Guard.IsNotNull(config.GetSection("Accounts"));
 

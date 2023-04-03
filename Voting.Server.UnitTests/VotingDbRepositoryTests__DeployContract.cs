@@ -1,4 +1,3 @@
-using CommunityToolkit.Diagnostics;
 using Microsoft.Extensions.Configuration;
 using Nethereum.BlockchainProcessing.BlockStorage.Entities.Mapping;
 using Nethereum.Contracts.ContractHandlers;
@@ -13,52 +12,19 @@ using Voting.Server.UnitTests.TestNet.Ganache;
 
 namespace Voting.Server.UnitTests;
 
-[Ignore("Debugging tests.")]
 [Order(1)]
 [TestFixture]
-public class VotingDbRepositoryTests__DeployContract
+public class VotingDbRepositoryTests__DeployContract : IUseBlockchainAndRepositoryProps
 {
-    private TestNet<Ganache> TestNet { get; set; } = default!;
-    private IConfiguration Config { get; set; } = default!;
-    private AccountManager AccountManager { get; set; } = default!;
-    private IWeb3ClientsManager ClientsManager { get; set; } = default!;
-    private IVotingDbRepository Repository { get; set; } = default!;
-    private string Account { get; set; } = default!;
-    private BlockParameter Latest { get; } = BlockParameter.CreateLatest();
-    private BlockParameter Pending { get; } = BlockParameter.CreatePending();
-    private BlockParameter Ealiest { get; } = BlockParameter.CreateEarliest();
-
-    [OneTimeSetUp]
-    public async Task OneTimeSetUp()
-    {
-        Config = new ConfigurationBuilder()
-            .AddUserSecrets<TestNet<Ganache>>()
-            .Build();
-        
-        AccountManager = new AccountManager(Config);
-        ClientsManager = new Web3ClientsManager(AccountManager);
-        Repository = new VotingDbRepository(ClientsManager);
-        TestNet = new TestNet<Ganache>(AccountManager);
-        Account = AccountManager.Accounts.First().Address;
-        TestNet.SetUp();
-        
-        TimeSpan timeSpan = TimeSpan.FromSeconds(30); 
-        var accountsTask = Repository.Web3.Personal.ListAccounts.SendRequestAsync();
-        List<string> accounts = (await accountsTask.WaitAsync(timeSpan) ?? Array.Empty<string>()).ToList();
-        Guard.IsNotNull(accounts);
-        Guard.IsNotEmpty(accounts);
-        accounts.ForEach(acc => Guard.IsNotNullOrEmpty(acc));
-        
-        TestContext.WriteLine("Accounts in chain: ");
-        accounts.ForEach(TestContext.WriteLine);
-        
-    }
-
-    [OneTimeTearDown]
-    public void OneTimeTearDown()
-    {
-        TestNet.TearDown();
-    }
+    public TestNet<Ganache> TestNet { get; set; } = default!;
+    public IConfiguration Config { get; set; } = default!;
+    public AccountManager AccountManager { get; set; } = default!;
+    public IWeb3ClientsManager ClientsManager { get; set; } = default!;
+    public IVotingDbRepository Repository { get; set; } = default!;
+    public string Account { get; set; } = default!;
+    public BlockParameter Latest { get; } = BlockParameter.CreateLatest();
+    public BlockParameter Pending { get; } = BlockParameter.CreatePending();
+    public BlockParameter Ealiest { get; } = BlockParameter.CreateEarliest();
 
     [Theory]
     [Order(1)]

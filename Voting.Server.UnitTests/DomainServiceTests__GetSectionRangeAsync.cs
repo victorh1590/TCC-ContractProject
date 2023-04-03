@@ -13,7 +13,6 @@ using Voting.Server.UnitTests.TestNet.Ganache;
 
 namespace Voting.Server.UnitTests;
 
-[Ignore("Debugging")]
 [Order(3)]
 [TestFixture]
 public class DomainServiceTests__GetSectionRangeAsync

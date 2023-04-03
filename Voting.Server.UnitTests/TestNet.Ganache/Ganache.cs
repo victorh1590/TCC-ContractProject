@@ -6,7 +6,7 @@ using Voting.Server.Persistence.Accounts;
 
 namespace Voting.Server.UnitTests.TestNet.Ganache;
 
-internal class Ganache : IGanache
+public class Ganache : IGanache
 {
   public IGanacheOptions Options { get; private set; }
   public AccountManager? AccountManager { get; private set;  }

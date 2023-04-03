@@ -1,10 +1,4 @@
 ﻿using Microsoft.Extensions.Configuration;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Numerics;
 using Voting.Server.Persistence.Accounts;
 using Voting.Server.Persistence.Clients;
 using Voting.Server.Persistence;
@@ -14,42 +8,24 @@ using Nethereum.RPC.Eth.DTOs;
 using Voting.Server.UnitTests.TestData;
 using Nethereum.BlockchainProcessing.BlockStorage.Entities.Mapping;
 using Voting.Server.Persistence.ContractDefinition;
-using Nethereum.Hex.HexConvertors.Extensions;
 using Nethereum.Util;
-using System.Globalization;
 
 namespace Voting.Server.UnitTests;
 
 [Order(5)]
 [TestFixture]
-public class VotingDbRepositoryTests__ReadMetadataAsync
+public class VotingDbRepositoryTests__ReadMetadataAsync : IUseBlockchainAndRepositoryProps
 {
-    private TestNet<Ganache> TestNet { get; set; } = default!;
-    private IConfiguration Config { get; set; } = default!;
-    private AccountManager AccountManager { get; set; } = default!;
-    private IWeb3ClientsManager ClientsManager { get; set; } = default!;
-    private VotingDbRepository Repository { get; set; } = default!;
+    public TestNet<Ganache> TestNet { get; set; } = default!;
+    public IConfiguration Config { get; set; } = default!;
+    public AccountManager AccountManager { get; set; } = default!;
+    public IWeb3ClientsManager ClientsManager { get; set; } = default!;
+    public IVotingDbRepository Repository { get; set; } = default!;
+    public string Account { get; set; } = default!;
+    public BlockParameter Latest { get; } = BlockParameter.CreateLatest();
+    public BlockParameter Pending { get; } = BlockParameter.CreatePending();
+    public BlockParameter Ealiest { get; } = BlockParameter.CreateEarliest();
 
-    [OneTimeSetUp]
-    public void OneTimeSetUp()
-    {
-        Config = new ConfigurationBuilder()
-            .AddUserSecrets<TestNet<Ganache>>()
-            .Build();
-        AccountManager = new AccountManager(Config);
-        ClientsManager = new Web3ClientsManager(AccountManager);
-        Repository = new VotingDbRepository(ClientsManager);
-        TestNet = new TestNet<Ganache>(AccountManager);
-        TestNet.SetUp();
-    }
-
-    [OneTimeTearDown]
-    public void OneTimeTearDown()
-    {
-        TestNet.TearDown();
-    }
-
-    [Ignore("Debugging")]
     [Order(1)]
     [Test, Sequential]
     public async Task ReadMetadataAsync_Should_Return_Correct_Data(
@@ -67,8 +43,10 @@ public class VotingDbRepositoryTests__ReadMetadataAsync
         Guard.IsNotNullOrEmpty(await Repository.Web3.Eth.GetCode.SendRequestAsync(transaction.ContractAddress));
         Guard.IsEqualTo(transaction.Status.ToLong(), 1);
 
+        //Calls method passing valid address.
         MetadataEventDTO? metadataEventDTO = await Repository.ReadMetadataAsync(transaction.ContractAddress);
 
+        //Assertions.
         Assert.That(metadataEventDTO, Is.Not.Null);
         Assert.That(metadataEventDTO.ContractAddress.ToLowerInvariant(), Is.EqualTo(transaction.ContractAddress));
         Assert.That(metadataEventDTO.Block.ToString(), Is.EqualTo(transaction.BlockNumber.ToString()));
@@ -107,8 +85,10 @@ public class VotingDbRepositoryTests__ReadMetadataAsync
         TestContext.WriteLine("Fake address: " + fakeAddress);
         TestContext.WriteLine("Fake address length: " + fakeAddress.Length);
 
+        //Calls method passing fake address.
         MetadataEventDTO? metadataEventDTO = await Repository.ReadMetadataAsync(fakeAddress);
 
+        //Assertions
         Assert.That(metadataEventDTO, Is.Null);
     }
 }

@@ -5,13 +5,13 @@ using Voting.Server.UnitTests.TestNet.Ganache;
 
 namespace Voting.Server.UnitTests;
 
-internal class TestNet<T> where T : IGanache, new()
+public class TestNet<T> where T : IGanache, new()
 {
     private IGanache Blockchain { get; }
     private IGanacheOptions Options { get; } 
     private AccountManager AccountManager { get; }
 
-    internal TestNet(AccountManager accountManager)
+    public TestNet(AccountManager accountManager)
     {
         AccountManager = accountManager;
         Blockchain = new T();

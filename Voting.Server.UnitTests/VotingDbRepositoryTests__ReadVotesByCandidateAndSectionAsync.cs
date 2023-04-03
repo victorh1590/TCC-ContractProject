@@ -14,37 +14,19 @@ using Voting.Server.UnitTests.TestNet.Ganache;
 
 namespace Voting.Server.UnitTests;
 
-[Ignore("Debugging")]
 [Order(4)]
 [TestFixture]
-public class VotingDbRepositoryTests__ReadVotesByCandidateAndSectionAsync
+public class VotingDbRepositoryTests__ReadVotesByCandidateAndSectionAsync : IUseBlockchainAndRepositoryProps
 {
-    private TestNet<Ganache> TestNet { get; set; } = default!;
-    private IConfiguration Config { get; set; } = default!;
-    private AccountManager AccountManager { get; set; } = default!;
-    private IWeb3ClientsManager ClientsManager { get; set; } = default!;
-    private IVotingDbRepository Repository { get; set; } = default!;
-    // public string URL { get; set; }
-    
-    [OneTimeSetUp]
-    public void OneTimeSetUp()
-    {
-        Config = new ConfigurationBuilder()
-            .AddUserSecrets<TestNet<Ganache>>()
-            .Build();
-        AccountManager = new AccountManager(Config);
-        ClientsManager = new Web3ClientsManager(AccountManager);
-        Repository = new VotingDbRepository(ClientsManager);
-        TestNet = new TestNet<Ganache>(AccountManager);
-        TestNet.SetUp();
-        // URL = $"HTTP://{Options.GanacheOptions.Host}:{Options.GanacheOptions.Port}";
-    }
-    
-    [OneTimeTearDown]
-    public void OneTimeTearDown()
-    {
-        TestNet.TearDown();
-    }
+    public TestNet<Ganache> TestNet { get; set; } = default!;
+    public IConfiguration Config { get; set; } = default!;
+    public AccountManager AccountManager { get; set; } = default!;
+    public IWeb3ClientsManager ClientsManager { get; set; } = default!;
+    public IVotingDbRepository Repository { get; set; } = default!;
+    public string Account { get; set; } = default!;
+    public BlockParameter Latest { get; } = BlockParameter.CreateLatest();
+    public BlockParameter Pending { get; } = BlockParameter.CreatePending();
+    public BlockParameter Ealiest { get; } = BlockParameter.CreateEarliest();
 
     [Order(1)]
     [Test, Sequential]

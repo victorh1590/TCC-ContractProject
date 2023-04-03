@@ -2,7 +2,7 @@
 
 namespace Voting.Server.UnitTests.TestNet.Ganache;
 
-internal interface IGanache
+public interface IGanache
 {
     IGanacheOptions Options { get; }
     AccountManager? AccountManager { get; }
