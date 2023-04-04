@@ -4,6 +4,7 @@ using Microsoft.Extensions.Configuration;
 using Nethereum.BlockchainProcessing.BlockStorage.Entities.Mapping;
 using Nethereum.RPC.Eth.DTOs;
 using NUnit.Framework;
+using NUnit.Framework.Internal;
 using Voting.Server.Domain.Models;
 using Voting.Server.Domain.Models.Mappings;
 using Voting.Server.Persistence;
@@ -25,6 +26,7 @@ public class VotingDbRepositoryTests__ReadSectionAsync : IUseBlockchainAndReposi
     public IWeb3ClientsManager ClientsManager { get; set; } = default!;
     public IVotingDbRepository Repository { get; set; } = default!;
     public string Account { get; set; } = default!;
+    private readonly SeedDataBuilder _seedDataBuilder = new();
 
     [Order(1)]
     [Test, Sequential]
@@ -33,7 +35,7 @@ public class VotingDbRepositoryTests__ReadSectionAsync : IUseBlockchainAndReposi
         [Values(3U, 4U, 5U, 7U, 10U)] uint numCandidates)
     {
         //Generate seed data.
-        SeedData seedData = SeedDataBuilder.GenerateNew(numSections, numCandidates);
+        SeedData seedData = _seedDataBuilder.GenerateNew(numSections, numCandidates);
         
         //Deploy Contract
         TransactionReceipt transaction = await Repository.CreateSectionRange(seedData.Deployment);
@@ -72,7 +74,7 @@ public class VotingDbRepositoryTests__ReadSectionAsync : IUseBlockchainAndReposi
         [Values(3U, 4U, 5U)] uint numCandidates)
     {
         //Generate seed data.
-        SeedData seedData = SeedDataBuilder.GenerateNew(numSections, numCandidates);
+        SeedData seedData = _seedDataBuilder.GenerateNew(numSections, numCandidates);
         
         //Deploy Contract
         TransactionReceipt transaction = await Repository.CreateSectionRange(seedData.Deployment);
@@ -81,17 +83,18 @@ public class VotingDbRepositoryTests__ReadSectionAsync : IUseBlockchainAndReposi
         //Check BYTECODE and transaction status.
         Guard.IsNotNullOrEmpty(await Repository.Web3.Eth.GetCode.SendRequestAsync(transaction.ContractAddress));
         Guard.IsEqualTo(transaction.Status.ToLong(), 1);
-
+    
         //Get valid random section number NOT IN seedData.
         uint sectionNumber = TestContext.CurrentContext.Random.NextUInt(SeedDataBuilder.MaxSectionID, uint.MaxValue - 1);
         TestContext.WriteLine($"Trying to access contract and getting section {sectionNumber}...");
-
+    
         //Calls method and convert results to JSON.
         SectionEventDTO? sectionEventDTO = await Repository.ReadSectionAsync(sectionNumber, FilterRange.FromLatestToLatest);
         
         //Assertions.
         Assert.That(sectionEventDTO, Is.Null);
     }
+    
     
     [Order(3)]
     [Test]

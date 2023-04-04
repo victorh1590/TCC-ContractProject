@@ -8,17 +8,18 @@ using Voting.Server.Persistence.ContractDefinition;
 
 namespace Voting.Server.UnitTests.TestData;
 
-public static class SeedDataBuilder
+public class SeedDataBuilder
 {
     private static uint MaxVotes => 200;
-    private static uint MaxCandidates => 30;
+    private static uint MaxCandidates => 10;
     private static uint MaxSections => 100;
     public static uint MaxSectionID => 472500;
-    public static uint MaxCandidateNumber => 99;
+    public static uint MaxCandidateNumber => 1000;
+    private static uint MaxDeploymentBuffer => 30;
+    private readonly Random _rand = new();
+    private List<VotingDbDeployment> _deploymentsGenerated = new();
 
-    private static readonly Random Rand = new();
-
-    public static SeedData GenerateNew(uint numSections, uint numCandidates)
+    public SeedData GenerateNew(uint numSections, uint numCandidates)
     {
         Guard.IsGreaterThan(numSections, 0);
         Guard.IsGreaterThan(numCandidates, 0);
@@ -34,36 +35,42 @@ public static class SeedDataBuilder
         List<Section> sections = GenerateSectionsList(deployment);
         string sectionsJSON = GenerateSectionsJSON(sections);
         GenerateCompressedSectionData(sectionsJSON, deployment);
+        _deploymentsGenerated.Add(deployment);
+        if (_deploymentsGenerated.Count >= MaxDeploymentBuffer) _deploymentsGenerated = new List<VotingDbDeployment>();
         return new SeedData(deployment, sections, sectionsJSON);
     }
     
-    private static void GenerateCandidates(VotingDbDeployment deployment, uint numCandidates)
+    private void GenerateCandidates(VotingDbDeployment deployment, uint numCandidates)
     {
         List<uint> candidatesToAdd = new();
         while (candidatesToAdd.Count < numCandidates)
         {
-            uint candidate = Convert.ToUInt32(Rand.NextInt64(1, MaxCandidateNumber));
-            if (candidatesToAdd.Contains(candidate)) continue;
+            uint candidate = Convert.ToUInt32(_rand.NextInt64(1, MaxCandidateNumber));
+            bool pastDeploymentContainsCandidate =
+                _deploymentsGenerated?.Any(pastDeployment => pastDeployment.Candidates.Contains(candidate)) ?? false;
+            if (candidatesToAdd.Contains(candidate) || pastDeploymentContainsCandidate) continue; 
             candidatesToAdd.Add(candidate);
         }
 
         deployment.Candidates = candidatesToAdd;
     }
 
-    private static void GenerateSections(VotingDbDeployment deployment, uint numSections)
+    private void GenerateSections(VotingDbDeployment deployment, uint numSections)
     {
         List<uint> sectionsToAdd = new();
         while (sectionsToAdd.Count < numSections)
         {
-            uint section = Convert.ToUInt32(Rand.NextInt64(1, MaxSectionID));
-            if (sectionsToAdd.Contains(section)) continue;
+            uint section = Convert.ToUInt32(_rand.NextInt64(1, MaxSectionID));
+            bool pastDeploymentContainSection = 
+                _deploymentsGenerated?.Any(pastDeployment => pastDeployment.Sections.Contains(section)) ?? false;
+            if (sectionsToAdd.Contains(section) || pastDeploymentContainSection) continue;
             sectionsToAdd.Add(section);
         }
 
         deployment.Sections = sectionsToAdd;
     }
     
-    private static void GenerateVotes(VotingDbDeployment deployment, uint numSections, uint numCandidates)
+    private void GenerateVotes(VotingDbDeployment deployment, uint numSections, uint numCandidates)
     {
         deployment.Votes = new List<List<uint>>();
         for (int i = 0; i < numSections; i++)
@@ -71,24 +78,24 @@ public static class SeedDataBuilder
             List<uint> tempVotes = new((int)numCandidates);
             for (int j = 0; j < numCandidates; j++)
             {
-                tempVotes.Add(Convert.ToUInt32(Rand.NextInt64(1, MaxVotes)));
+                tempVotes.Add(Convert.ToUInt32(_rand.NextInt64(1, MaxVotes)));
             }
             deployment.Votes.Add(tempVotes);
         }
     }
     
-    private static void GenerateTimeStamp(VotingDbDeployment deployment)
+    private void GenerateTimeStamp(VotingDbDeployment deployment)
     {
         DateTime currentTime = DateTime.Now;
         deployment.Timestamp = currentTime.ToString(CultureInfo.InvariantCulture);
     }
 
-    private static List<Section> GenerateSectionsList(VotingDbDeployment deployment)
+    private List<Section> GenerateSectionsList(VotingDbDeployment deployment)
     {
         return new List<Section>(Mappings.DeploymentToSections(deployment));
     }
 
-    private static string GenerateSectionsJSON(List<Section> sections)
+    private string GenerateSectionsJSON(List<Section> sections)
     {
         Guard.IsNotNull(sections);
         Guard.IsNotEmpty(sections);
@@ -97,7 +104,7 @@ public static class SeedDataBuilder
         return sectionsJSON;
     }
     
-    private static void GenerateCompressedSectionData(string sectionsJSON, VotingDbDeployment deployment)
+    private void GenerateCompressedSectionData(string sectionsJSON, VotingDbDeployment deployment)
     {
         Compression compression = new();
         string compressedSection = compression.Compress(sectionsJSON);

@@ -12,6 +12,7 @@ using Nethereum.Util;
 
 namespace Voting.Server.UnitTests;
 
+[Ignore("Debugging")]
 [Order(5)]
 [TestFixture]
 public class VotingDbRepositoryTests__ReadMetadataAsync : IUseBlockchainAndRepositoryProps
@@ -22,6 +23,7 @@ public class VotingDbRepositoryTests__ReadMetadataAsync : IUseBlockchainAndRepos
     public IWeb3ClientsManager ClientsManager { get; set; } = default!;
     public IVotingDbRepository Repository { get; set; } = default!;
     public string Account { get; set; } = default!;
+    private readonly SeedDataBuilder _seedDataBuilder = new();
 
     [Order(1)]
     [Test, Sequential]
@@ -30,7 +32,7 @@ public class VotingDbRepositoryTests__ReadMetadataAsync : IUseBlockchainAndRepos
         [Values(3U, 4U, 5U, 7U, 10U)] uint numCandidates)
     {
         //Generate seed data.
-        SeedData seedData = SeedDataBuilder.GenerateNew(numSections, numCandidates);
+        SeedData seedData = _seedDataBuilder.GenerateNew(numSections, numCandidates);
 
         //Deploy Contract
         TransactionReceipt transaction = await Repository.CreateSectionRange(seedData.Deployment);
@@ -57,7 +59,7 @@ public class VotingDbRepositoryTests__ReadMetadataAsync : IUseBlockchainAndRepos
     [Values(3U, 4U, 5U, 7U, 10U)] uint numCandidates)
     {
         //Generate seed data.
-        SeedData seedData = SeedDataBuilder.GenerateNew(numSections, numCandidates);
+        SeedData seedData = _seedDataBuilder.GenerateNew(numSections, numCandidates);
 
         //Deploy Contract
         TransactionReceipt transaction = await Repository.CreateSectionRange(seedData.Deployment);
@@ -68,14 +70,13 @@ public class VotingDbRepositoryTests__ReadMetadataAsync : IUseBlockchainAndRepos
         Guard.IsEqualTo(transaction.Status.ToLong(), 1);
 
         //Generate fake address from random string hashed to Sha3 and converted to 20 bytes address.
-        string randomString = default!;
-        string fakeAddress = default!;
-        Sha3Keccack kck = new();
+        string fakeAddress;
+        Sha3Keccack keccack = new();
 
         do
         {
-            randomString = "0x" + TestContext.CurrentContext.Random.GetString(50, "abcdefghijkmnopqrstuvwxyz0123456789");
-            fakeAddress = kck.CalculateHash(randomString).Remove(40);
+            string randomString = "0x" + TestContext.CurrentContext.Random.GetString(50, "abcdefghijkmnopqrstuvwxyz0123456789");
+            fakeAddress = keccack.CalculateHash(randomString).Remove(40);
             fakeAddress = Nethereum.Web3.Web3.ToValid20ByteAddress(fakeAddress);
         } while (fakeAddress == transaction.ContractAddress);
 

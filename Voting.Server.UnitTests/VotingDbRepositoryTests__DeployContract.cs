@@ -25,14 +25,15 @@ public class VotingDbRepositoryTests__DeployContract : IUseBlockchainAndReposito
     public BlockParameter Latest { get; } = BlockParameter.CreateLatest();
     public BlockParameter Pending { get; } = BlockParameter.CreatePending();
     public BlockParameter Ealiest { get; } = BlockParameter.CreateEarliest();
-
+    private readonly SeedDataBuilder _seedDataBuilder = new();
+    
     [Theory]
     [Order(1)]
     public async Task CreateSectionRange_Should_Deploy_Valid_Contract()
     {
         //Generate seed data.
-        SeedData seedData = SeedDataBuilder.GenerateNew(30, 4);
-
+        SeedData seedData = _seedDataBuilder.GenerateNew(30, 4);
+        
         //Successfully returns TransactionReceipt with valid ContractAddress and correct BlockNumber.
         TransactionReceipt transaction = await Repository.CreateSectionRange(seedData.Deployment);
         Assert.That(transaction, Is.Not.Null.Or.Empty);
@@ -61,7 +62,7 @@ public class VotingDbRepositoryTests__DeployContract : IUseBlockchainAndReposito
     
     [Test]
     [Order(2)]
-    public async Task CreateSetionRange_Should_Fail_When_Invalid_Contract()
+    public async Task CreateSectionRange_Should_Fail_When_Invalid_Contract()
     {
         //Generate invalid seed data.
         VotingDbDeployment deployment = new VotingDbDeployment
