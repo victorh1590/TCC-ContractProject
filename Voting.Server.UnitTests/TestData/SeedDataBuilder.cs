@@ -17,7 +17,7 @@ public class SeedDataBuilder
     public static uint MaxCandidateNumber => 1000;
     private static uint MaxDeploymentBuffer => 30;
     private readonly Random _rand = new();
-    private List<VotingDbDeployment> _deploymentsGenerated = new();
+    private readonly List<VotingDbDeployment> _deploymentsGenerated = new();
 
     public SeedData GenerateNew(uint numSections, uint numCandidates)
     {
