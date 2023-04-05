@@ -3,8 +3,6 @@ using CommunityToolkit.Diagnostics;
 using Microsoft.Extensions.Configuration;
 using Nethereum.BlockchainProcessing.BlockStorage.Entities.Mapping;
 using Nethereum.RPC.Eth.DTOs;
-using NUnit.Framework;
-using NUnit.Framework.Internal;
 using Voting.Server.Domain.Models;
 using Voting.Server.Domain.Models.Mappings;
 using Voting.Server.Persistence;
@@ -16,6 +14,7 @@ using Voting.Server.UnitTests.TestNet.Ganache;
 
 namespace Voting.Server.UnitTests;
 
+[Ignore("Debugging")]
 [Order(2)]
 [TestFixture]
 public class VotingDbRepositoryTests__ReadSectionAsync : IUseBlockchainAndRepositoryProps

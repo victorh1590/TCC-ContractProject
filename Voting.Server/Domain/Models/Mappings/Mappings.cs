@@ -13,7 +13,7 @@ internal class Mappings
         Guard.IsNotNull(sectionDTO);
         Guard.IsEqualTo(sectionDTO.Candidates.Count, sectionDTO.Votes.Count);
         List<CandidateVotes> candidateVotes = sectionDTO.Candidates
-            .Select((t, i) => new CandidateVotes(t, sectionDTO.Votes[i]))
+            .Select((candidateNum, index) => new CandidateVotes(candidateNum, sectionDTO.Votes[index]))
             .ToList();
 
         return new Section(sectionDTO.Section, candidateVotes);

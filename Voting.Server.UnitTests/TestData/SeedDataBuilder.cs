@@ -28,6 +28,7 @@ public class SeedDataBuilder
 
         VotingDbDeployment deployment = new();
         
+        Guard.IsLessThanOrEqualTo(_deploymentsGenerated.Count, MaxDeploymentBuffer, "Make a new Builder instance.");
         GenerateCandidates(deployment, numCandidates);
         GenerateSections(deployment, numSections);
         GenerateVotes(deployment, numSections, numCandidates);
@@ -36,7 +37,6 @@ public class SeedDataBuilder
         string sectionsJSON = GenerateSectionsJSON(sections);
         GenerateCompressedSectionData(sectionsJSON, deployment);
         _deploymentsGenerated.Add(deployment);
-        if (_deploymentsGenerated.Count >= MaxDeploymentBuffer) _deploymentsGenerated = new List<VotingDbDeployment>();
         return new SeedData(deployment, sections, sectionsJSON);
     }
     
