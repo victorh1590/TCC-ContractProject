@@ -44,9 +44,49 @@ public partial class MappingsTests
     public void CandidateEventDTOToSection_Should_Fail_When_Candidate_Number_Is_Zero()
     {
         //Arrange
-        //Generate seed data.
         Mock<CandidateEventDTO> candidateEventDTOMock = new Mock<CandidateEventDTO>();
         candidateEventDTOMock.Setup(dto => dto.Candidate).Returns(0U);
+
+        //Assertions
+        Assert.That(() => Mappings.CandidateEventDTOToSection(candidateEventDTOMock.Object), 
+            Throws.TypeOf<ArgumentOutOfRangeException>());
+    }
+    
+    [Test]
+    public void CandidateEventDTOToSection_Should_Fail_When_Section_Or_Candidate_Are_Zero()
+    {
+        //Arrange
+        //Candidate is zero.
+        Mock<CandidateEventDTO> candidateEventDTOMock = new Mock<CandidateEventDTO>();
+        candidateEventDTOMock.Setup(dto => dto.Section)
+            .Returns(TestContext.CurrentContext.Random.NextUInt(1, 472500));
+        candidateEventDTOMock.Setup(dto => dto.Candidate).Returns(0U);
+        candidateEventDTOMock.Setup(dto => dto.Votes).Returns(0U);
+        
+        //Section is zero.
+        Mock<CandidateEventDTO> candidateEventDTOMock2 = new Mock<CandidateEventDTO>();
+        candidateEventDTOMock2.Setup(dto => dto.Section).Returns(0U);
+        candidateEventDTOMock2.Setup(dto => dto.Candidate)
+            .Returns(TestContext.CurrentContext.Random.NextUInt(1, 99));
+        candidateEventDTOMock2.Setup(dto => dto.Votes).Returns(0U);
+
+        //Assertions
+        Assert.That(() => Mappings.CandidateEventDTOToSection(candidateEventDTOMock.Object), 
+            Throws.TypeOf<ArgumentOutOfRangeException>());
+        Assert.That(() => Mappings.CandidateEventDTOToSection(candidateEventDTOMock2.Object), 
+            Throws.TypeOf<ArgumentOutOfRangeException>());
+    }
+    
+    [Test]
+    public void CandidateEventDTOToSection_Should_Fail_When_Candidate_And_Section_Are_Both_Default()
+    {
+        //Arrange
+        //Candidate is default(zero is default for uint).
+        Mock<CandidateEventDTO> candidateEventDTOMock = new Mock<CandidateEventDTO>();
+        candidateEventDTOMock.Setup(dto => dto.Section).Returns((uint)default!);
+        candidateEventDTOMock.Setup(dto => dto.Candidate).Returns((uint)default!);
+        candidateEventDTOMock.Setup(dto => dto.Votes)
+            .Returns(TestContext.CurrentContext.Random.NextUInt(1, 99));
 
         //Assertions
         Assert.That(() => Mappings.CandidateEventDTOToSection(candidateEventDTOMock.Object), 

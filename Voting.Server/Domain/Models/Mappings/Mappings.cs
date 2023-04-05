@@ -11,17 +11,20 @@ internal class Mappings
     public static Section SectionEventDTOToSection(SectionEventDTO? sectionDTO = null)
     {
         Guard.IsNotNull(sectionDTO);
+        Guard.IsGreaterThan(sectionDTO.Section, 0);
         Guard.IsEqualTo(sectionDTO.Candidates.Count, sectionDTO.Votes.Count);
         List<CandidateVotes> candidateVotes = sectionDTO.Candidates
             .Select((candidateNum, index) => new CandidateVotes(candidateNum, sectionDTO.Votes[index]))
             .ToList();
-
+        
+        Guard.IsNotEmpty(candidateVotes);
         return new Section(sectionDTO.Section, candidateVotes);
     }
 
     public static Section CandidateEventDTOToSection(CandidateEventDTO? candidateDTO = null)
     {
         Guard.IsNotNull(candidateDTO);
+        Guard.IsGreaterThan(candidateDTO.Section, 0);
         Guard.IsGreaterThan(candidateDTO.Candidate, 0);
         List<CandidateVotes> candidateVotes = new()
         {
@@ -31,6 +34,8 @@ internal class Mappings
                 Votes = candidateDTO.Votes
             }
         };
+        
+        Guard.IsNotEmpty(candidateVotes);
         return new Section(candidateDTO.Section, candidateVotes);
     }
 

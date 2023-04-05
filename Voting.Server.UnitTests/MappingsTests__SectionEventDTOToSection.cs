@@ -49,9 +49,67 @@ public partial class MappingsTests
         sectionEventDTOMock.Setup(dto => dto.Votes).Returns(seedData.Deployment.Votes[randomSectionIndex]);
 
         //Assertions
-        Assert.That(() => Mappings.SectionEventDTOToSection(sectionEventDTOMock.Object), Throws.TypeOf<ArgumentException>());
+        Assert.That(() => Mappings.SectionEventDTOToSection(sectionEventDTOMock.Object), 
+            Throws.TypeOf<ArgumentException>());
+    }
+
+    [Test]
+    public void SectionEventDTOToSection_Should_Fail_When_Candidate_And_Votes_Arrays_Are_Empty()
+    {
+        //Arrange
+        Mock<SectionEventDTO> sectionEventDTOMock = new Mock<SectionEventDTO>();
+        sectionEventDTOMock.Setup(dto => dto.Section)
+            .Returns(TestContext.CurrentContext.Random.NextUInt(1, 472500));
+        sectionEventDTOMock.Setup(dto => dto.Candidates).Returns(new List<uint>());
+        sectionEventDTOMock.Setup(dto => dto.Votes).Returns(new List<uint>());
+
+        //Assertions
+        Assert.That(() => Mappings.SectionEventDTOToSection(sectionEventDTOMock.Object), 
+            Throws.TypeOf<ArgumentException>());
     }
     
+    [Test]
+    public void SectionEventDTOToSection_Should_Fail_When_Candidate_Or_Votes_Arrays_Are_Empty()
+    {
+        //Arrange
+        //Votes is empty.
+        Mock<SectionEventDTO> sectionEventDTOMock = new Mock<SectionEventDTO>();
+        sectionEventDTOMock.Setup(dto => dto.Section)
+            .Returns(TestContext.CurrentContext.Random.NextUInt(1, 472500));
+        sectionEventDTOMock.Setup(dto => dto.Candidates)
+            .Returns(new List<uint> { TestContext.CurrentContext.Random.NextUInt(1, 99) } );
+        sectionEventDTOMock.Setup(dto => dto.Votes).Returns(new List<uint>());
+
+        //Candidates is empty.
+        Mock<SectionEventDTO> sectionEventDTOMock2 = new Mock<SectionEventDTO>();
+        sectionEventDTOMock2.Setup(dto => dto.Section)
+            .Returns(TestContext.CurrentContext.Random.NextUInt(1, 472500));
+        sectionEventDTOMock2.Setup(dto => dto.Candidates).Returns(new List<uint>() );
+        sectionEventDTOMock2.Setup(dto => dto.Votes)
+            .Returns(new List<uint> { 0U });
+        //Assertions
+        Assert.That(() => Mappings.SectionEventDTOToSection(sectionEventDTOMock.Object), 
+            Throws.TypeOf<ArgumentException>());
+        Assert.That(() => Mappings.SectionEventDTOToSection(sectionEventDTOMock2.Object), 
+            Throws.TypeOf<ArgumentException>());
+    }
+    
+    [Test]
+    public void SectionEventDTOToSection_Should_Fail_When_Section_Is_Zero()
+    {
+        //Arrange
+        Mock<SectionEventDTO> sectionEventDTOMock = new Mock<SectionEventDTO>();
+        sectionEventDTOMock.Setup(dto => dto.Section).Returns(0);
+        sectionEventDTOMock.Setup(dto => dto.Candidates)
+            .Returns(new List<uint> { TestContext.CurrentContext.Random.NextUInt(1, 99) } );
+        sectionEventDTOMock.Setup(dto => dto.Votes)
+            .Returns(new List<uint> { 0U });
+
+        //Assertions
+        Assert.That(() => Mappings.SectionEventDTOToSection(sectionEventDTOMock.Object), 
+            Throws.TypeOf<ArgumentOutOfRangeException>());
+    }
+
     [Test]
     public void SectionEventDTOToSection_Should_Fail_When_Argument_Null()
     {
