@@ -164,8 +164,7 @@ public partial class DomainServiceTests
         Guard.IsNotNull(expectedSectionsWithInvalids);
     
         //Copies Valid Data
-        List<Section> expectedSectionsValidOnly = new();
-        expectedSectionsValidOnly.AddRange(expectedSectionsWithInvalids);
+        List<Section> expectedSectionsValidOnly = new(expectedSectionsWithInvalids);
     
         //Add Invalid Data
         for (int i = 0; i < invalidDataVariance; i++)

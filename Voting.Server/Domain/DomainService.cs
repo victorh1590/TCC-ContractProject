@@ -64,16 +64,17 @@ internal class DomainService
 
     internal async Task<List<Section>> RemoveRedundantSectionsAsync(List<Section> sections)
     {
+        List<uint> sectionsToRemove = new();
         foreach (var section in sections)
         {
             bool sectionExists = await SectionExistsAsync(section.SectionID);
-            if (!sectionExists)
+            if (sectionExists)
             {
-                sections.Remove(section);
+                sectionsToRemove.Add(section.SectionID);
             }
         }
 
-        return sections;
+        return sections.Where(section => !sectionsToRemove.Contains(section.SectionID)).ToList();
     }
     
     internal async Task<bool> SectionExistsAsync(uint sectionNumber = 0)

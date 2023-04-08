@@ -1,5 +1,4 @@
-﻿using Voting.Server.Domain.Models;
-using Voting.Server.UnitTests.TestData;
+﻿using Voting.Server.UnitTests.TestData;
 
 namespace Voting.Server.UnitTests;
 
@@ -25,5 +24,11 @@ public partial class DomainServiceTests
         Assert.That(async () => await _domainService.SectionExistsAsync(
                 TestContext.CurrentContext.Random.NextUInt(SeedDataBuilder.MaxSectionID, uint.MaxValue - 1)), 
             Is.False);
+    }
+    
+    [Test]
+    public void SectionExistsAsync_Should_Return_False_No_Parameter()
+    {
+        Assert.That(async () => await _domainService.SectionExistsAsync(), Is.False);
     }
 }
