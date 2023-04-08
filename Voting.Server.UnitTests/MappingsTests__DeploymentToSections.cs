@@ -18,11 +18,15 @@ public partial class MappingsTests
         SeedData seedData = _seedDataBuilder.GenerateNew(30, 5);
         List<Section> expectedSections = seedData.Sections;
         Mock<VotingDbDeployment> deploymentMock = new Mock<VotingDbDeployment>();
-        deploymentMock.Setup(dto => dto.Candidates).Returns(seedData.Deployment.Candidates);
-        deploymentMock.Setup(dto => dto.Votes).Returns(seedData.Deployment.Votes);
-        deploymentMock.Setup(dto => dto.Sections).Returns(seedData.Deployment.Sections);
-        deploymentMock.Setup(dto => dto.Timestamp).Returns(seedData.Deployment.Timestamp);
-        deploymentMock.Setup(dto => dto.CompressedSectionData)
+        deploymentMock.Setup(deployment => deployment.Candidates)
+            .Returns(seedData.Deployment.Candidates);
+        deploymentMock.Setup(deployment => deployment.Votes)
+            .Returns(seedData.Deployment.Votes);
+        deploymentMock.Setup(deployment => deployment.Sections)
+            .Returns(seedData.Deployment.Sections);
+        deploymentMock.Setup(deployment => deployment.Timestamp)
+            .Returns(seedData.Deployment.Timestamp);
+        deploymentMock.Setup(deployment => deployment.CompressedSectionData)
             .Returns(seedData.Deployment.CompressedSectionData);
 
         //Act
@@ -47,11 +51,15 @@ public partial class MappingsTests
 
         //Candidates empty mock
         Mock<VotingDbDeployment> deploymentMock = new Mock<VotingDbDeployment>();
-        deploymentMock.Setup(dto => dto.Candidates).Returns(new List<uint>());
-        deploymentMock.Setup(dto => dto.Votes).Returns(seedData.Deployment.Votes);
-        deploymentMock.Setup(dto => dto.Sections).Returns(seedData.Deployment.Sections);
-        deploymentMock.Setup(dto => dto.Timestamp).Returns(seedData.Deployment.Timestamp);
-        deploymentMock.Setup(dto => dto.CompressedSectionData)
+        deploymentMock.Setup(deployment => deployment.Candidates)
+            .Returns(new List<uint>());
+        deploymentMock.Setup(deployment => deployment.Votes)
+            .Returns(seedData.Deployment.Votes);
+        deploymentMock.Setup(deployment => deployment.Sections)
+            .Returns(seedData.Deployment.Sections);
+        deploymentMock.Setup(deployment => deployment.Timestamp)
+            .Returns(seedData.Deployment.Timestamp);
+        deploymentMock.Setup(deployment => deployment.CompressedSectionData)
             .Returns(seedData.Deployment.CompressedSectionData);
 
         //Empty Candidates
@@ -59,14 +67,18 @@ public partial class MappingsTests
             Throws.TypeOf<ArgumentException>());
 
         //Empty Votes.
-        deploymentMock.Setup(dto => dto.Candidates).Returns(seedData.Deployment.Candidates);
-        deploymentMock.Setup(dto => dto.Votes).Returns(new List<List<uint>>());
+        deploymentMock.Setup(deployment => deployment.Candidates)
+            .Returns(seedData.Deployment.Candidates);
+        deploymentMock.Setup(deployment => deployment.Votes)
+            .Returns(new List<List<uint>>());
         Assert.That(() => Mappings.DeploymentToSections(deploymentMock.Object), 
             Throws.TypeOf<ArgumentException>());
 
         //Empty Sections.
-        deploymentMock.Setup(dto => dto.Votes).Returns(seedData.Deployment.Votes);
-        deploymentMock.Setup(dto => dto.Sections).Returns(new List<uint>());   
+        deploymentMock.Setup(deployment => deployment.Votes)
+            .Returns(seedData.Deployment.Votes);
+        deploymentMock.Setup(deployment => deployment.Sections)
+            .Returns(new List<uint>());   
         Assert.That(() => Mappings.DeploymentToSections(deploymentMock.Object), 
             Throws.TypeOf<ArgumentException>());
     }
@@ -81,14 +93,19 @@ public partial class MappingsTests
 
         //Candidates empty mock
         Mock<VotingDbDeployment> deploymentMock = new Mock<VotingDbDeployment>();
-        //Votes.Count = 1
-        deploymentMock.Setup(dto => dto.Votes).Returns(seedData2.Deployment.Votes);
-        //Sections.Count = 30
-        deploymentMock.Setup(dto => dto.Sections).Returns(seedData1.Deployment.Sections);
-        deploymentMock.Setup(dto => dto.Timestamp).Returns(seedData1.Deployment.Timestamp);
-        deploymentMock.Setup(dto => dto.Candidates).Returns(seedData1.Deployment.Candidates);
-        deploymentMock.Setup(dto => dto.CompressedSectionData)
+
+        deploymentMock.Setup(deployment => deployment.Timestamp)
+            .Returns(seedData1.Deployment.Timestamp);
+        deploymentMock.Setup(deployment => deployment.Candidates)
+            .Returns(seedData1.Deployment.Candidates);
+        deploymentMock.Setup(deployment => deployment.CompressedSectionData)
             .Returns(seedData1.Deployment.CompressedSectionData);
+        //Votes.Count = 1
+        deploymentMock.Setup(deployment => deployment.Votes)
+            .Returns(seedData2.Deployment.Votes);
+        //Sections.Count = 30
+        deploymentMock.Setup(deployment => deployment.Sections)
+            .Returns(seedData1.Deployment.Sections);
 
         //Empty Candidates
         Assert.That(() => Mappings.DeploymentToSections(deploymentMock.Object), 
@@ -105,14 +122,19 @@ public partial class MappingsTests
 
         //Candidates empty mock
         Mock<VotingDbDeployment> deploymentMock = new Mock<VotingDbDeployment>();
+
+        deploymentMock.Setup(deployment => deployment.Sections)
+            .Returns(seedData1.Deployment.Sections);
+        deploymentMock.Setup(deployment => deployment.Timestamp)
+            .Returns(seedData1.Deployment.Timestamp);
+        deploymentMock.Setup(deployment => deployment.CompressedSectionData)
+            .Returns(seedData1.Deployment.CompressedSectionData); 
         //Votes[0].Count = 1
-        deploymentMock.Setup(dto => dto.Votes).Returns(seedData2.Deployment.Votes);
+        deploymentMock.Setup(deployment => deployment.Votes)
+            .Returns(seedData2.Deployment.Votes);
         //Candidates.Count = 5
-        deploymentMock.Setup(dto => dto.Candidates).Returns(seedData1.Deployment.Candidates);
-        deploymentMock.Setup(dto => dto.Sections).Returns(seedData1.Deployment.Sections);
-        deploymentMock.Setup(dto => dto.Timestamp).Returns(seedData1.Deployment.Timestamp);
-        deploymentMock.Setup(dto => dto.CompressedSectionData)
-            .Returns(seedData1.Deployment.CompressedSectionData);
+        deploymentMock.Setup(deployment => deployment.Candidates)
+            .Returns(seedData1.Deployment.Candidates);
 
         //Empty Candidates
         Assert.That(() => Mappings.DeploymentToSections(deploymentMock.Object), 
