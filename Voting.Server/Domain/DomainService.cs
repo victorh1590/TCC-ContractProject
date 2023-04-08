@@ -53,20 +53,20 @@ internal class DomainService
         return mappedResult;
     }
     
-    public async void InsertSections(List<Section> sections)
+    public async void InsertSectionsAsync(List<Section> sections)
     {
-        List<Section> uniqueSections = await RemoveRedundantSections(sections);
+        List<Section> uniqueSections = await RemoveRedundantSectionsAsync(sections);
         Guard.IsNotEmpty(uniqueSections);
         VotingDbDeployment deployment = Mappings.SectionsListToDeployment(uniqueSections);
         TransactionReceipt receipt =  await Repository.CreateSectionRange(deployment);
         Guard.IsEqualTo(receipt.Status.ToLong(), 1);
     }
 
-    private async Task<List<Section>> RemoveRedundantSections(List<Section> sections)
+    internal async Task<List<Section>> RemoveRedundantSectionsAsync(List<Section> sections)
     {
         foreach (var section in sections)
         {
-            bool sectionExists = await SectionExists(section.SectionID);
+            bool sectionExists = await SectionExistsAsync(section.SectionID);
             if (!sectionExists)
             {
                 sections.Remove(section);
@@ -76,7 +76,7 @@ internal class DomainService
         return sections;
     }
     
-    private async Task<bool> SectionExists(uint sectionNumber = 0)
+    internal async Task<bool> SectionExistsAsync(uint sectionNumber = 0)
     {
         SectionEventDTO? result = await Repository.ReadSectionAsync(sectionNumber);
         return result != null && result.Section == sectionNumber;

@@ -12,7 +12,7 @@ namespace Voting.Server.UnitTests;
 // [Ignore("Debugging")]
 // [Order(3)]
 [TestFixture]
-public class DomainServiceTests__GetSectionRangeAsync
+public partial class DomainServiceTests
 {
     // private TestNet<Ganache> TestNet { get; set; } = default!;
     // private IConfiguration Config { get; set; } = default!;
@@ -93,9 +93,10 @@ public class DomainServiceTests__GetSectionRangeAsync
     {
         _seedData = default!;
         _mockRepository = default!;
+        _domainService = default!;
     }
 
-    [Order(1)]
+    // [Order(1)]
     [Test]
     [Repeat(10)]
     public async Task GetSectionRangeAsync_Should_Return_Correct_Data_When_All_SectionNums_Are_Valid()
@@ -129,7 +130,7 @@ public class DomainServiceTests__GetSectionRangeAsync
             expectedSections.Select(item => item.SectionID).ToArray());
     }
     
-    [Order(2)]
+    // [Order(2)]
     [Test]
     [Repeat(5)]
     public void GetSectionRangeAsync_Should_Fail_When_All_SectionNums_Are_Invalid()
@@ -147,7 +148,7 @@ public class DomainServiceTests__GetSectionRangeAsync
             Throws.InstanceOf<ArgumentException>());
     }
     
-    [Order(3)]
+    // [Order(3)]
     [Test, Sequential]
     public async Task GetSectionRangeAsync_Should_Return_Partial_Data_When_Part_Of_The_Sections_Are_Invalid(
         [Range(1, 5, 1)] int invalidDataVariance)
