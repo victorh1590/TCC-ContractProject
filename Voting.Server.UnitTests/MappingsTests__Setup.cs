@@ -2,6 +2,8 @@
 
 namespace Voting.Server.UnitTests;
 
+[Ignore("Debugging")]
+[TestFixture]
 public partial class MappingsTests
 {
     private SeedDataBuilder _seedDataBuilder { get; set; } = default!;

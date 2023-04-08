@@ -7,7 +7,6 @@ using Voting.Server.Persistence.ContractDefinition;
 
 namespace Voting.Server.UnitTests;
 
-[TestFixture]
 public partial class MappingsTests
 {
     [Test]
