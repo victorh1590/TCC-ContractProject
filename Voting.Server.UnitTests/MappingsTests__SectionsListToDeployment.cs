@@ -4,6 +4,7 @@ using Voting.Server.Domain.Models;
 using Voting.Server.Domain.Models.Mappings;
 using Voting.Server.Persistence.ContractDefinition;
 using System.Globalization;
+using Moq;
 
 namespace Voting.Server.UnitTests;
 public partial class MappingsTests
@@ -34,11 +35,84 @@ public partial class MappingsTests
         Assert.That(result.Timestamp, Is.EqualTo(resultDate.ToString(CultureInfo.InvariantCulture)));
         Assert.That(result.CompressedSectionData, Is.EqualTo(expectedDeployment.CompressedSectionData));
     }
-    
+
     [Test]
     public void SectionsListToDeployment_Should_Fail_If_Sections_Is_Empty()
     {
         Assert.That(() => Mappings.SectionsListToDeployment(new List<Section>()), 
             Throws.TypeOf<ArgumentException>());
+    }
+
+    [Test]
+    public void SectionsListToDeployment_Should_Fail_When_CandidateVotes_Is_Empty()
+    {
+        //Generate seed data.
+        SeedData seedData = _seedDataBuilder.GenerateNew(30, 5);
+        List<Section> badSectionsList = seedData.Sections
+            .Select(section => new Section(section.SectionID, new List<CandidateVotes>()))
+            .ToList();
+
+        Assert.That(() => Mappings.SectionsListToDeployment(badSectionsList), 
+            Throws.TypeOf<ArgumentException>());
+    }
+
+    [Theory]
+    public void SectionsListToDeployment_Should_Fail_When_Any_CandidateVotes_Is_Empty()
+    {
+        //Generate seed data.
+        SeedData seedData1 = _seedDataBuilder.GenerateNew(30, 5);
+        SeedData seedData2 = _seedDataBuilder.GenerateNew(1, 1);
+        List<Section> badSectionsList = seedData1.Sections;
+
+        //First CandidateVotes is empty.
+        badSectionsList.First().CandidateVotes = new List<CandidateVotes>();
+        Assert.That(() => Mappings.SectionsListToDeployment(badSectionsList), 
+            Throws.TypeOf<ArgumentException>());
+
+        //Last CandidateVotes is empty.
+        badSectionsList = seedData1.Sections;
+        badSectionsList.Last().CandidateVotes = new List<CandidateVotes>();
+        Assert.That(() => Mappings.SectionsListToDeployment(badSectionsList), 
+            Throws.TypeOf<ArgumentException>());
+
+        //5x Random between first and last is empty.
+        for(int i = 0; i < 5; i++)
+        {
+            badSectionsList = seedData1.Sections;
+            badSectionsList[TestContext.CurrentContext.Random.Next(1, badSectionsList.Count - 1)]
+                .CandidateVotes = new List<CandidateVotes>();
+            Assert.That(() => Mappings.SectionsListToDeployment(badSectionsList), 
+                Throws.TypeOf<ArgumentException>());
+        }
+    }
+
+    [Theory]
+    public void SectionsListToDeployment_Should_Fail_When_Candidates_Count_Is_Inconsistent()
+    {
+        //Generate seed data.
+        SeedData seedData1 = _seedDataBuilder.GenerateNew(30, 5);
+        SeedData seedData2 = _seedDataBuilder.GenerateNew(1, 1);
+        List<Section> badSectionsList = seedData1.Sections;
+
+        //First have different size.
+        badSectionsList.First().CandidateVotes = seedData2.Sections.First().CandidateVotes;
+        Assert.That(() => Mappings.SectionsListToDeployment(badSectionsList), 
+            Throws.TypeOf<ArgumentException>());
+
+        //Last have different size.
+        badSectionsList = seedData1.Sections;
+        badSectionsList.Last().CandidateVotes = seedData2.Sections.First().CandidateVotes;
+        Assert.That(() => Mappings.SectionsListToDeployment(badSectionsList), 
+            Throws.TypeOf<ArgumentException>());
+
+        //5x Random between first and last have different size.
+        for(int i = 0; i < 5; i++)
+        {
+            badSectionsList = seedData1.Sections;
+            badSectionsList[TestContext.CurrentContext.Random.Next(1, badSectionsList.Count - 1)]
+                .CandidateVotes = seedData2.Sections.First().CandidateVotes;
+            Assert.That(() => Mappings.SectionsListToDeployment(badSectionsList), 
+                Throws.TypeOf<ArgumentException>());
+        }
     }
 }

@@ -71,16 +71,17 @@ internal class Mappings
     {
         Guard.IsNotEmpty(sections);
         Guard.IsFalse(sections.Any(section => section.SectionID == 0));
+        Guard.IsFalse(sections.Any(section => section.CandidateVotes.Count == 0));
 
         List<uint> candidates = sections.First().CandidateVotes.Select(x => x.Candidate).ToList();
         Guard.IsNotEmpty(candidates);
+        Guard.IsFalse(sections.Any(section => section.CandidateVotes.Count != candidates.Count));
+
 
         List<List<uint>> votes = new();
         foreach (var section in sections)
         {
             votes.Add(section.CandidateVotes.Select(x => x.Votes).ToList());
-            Guard.IsNotEmpty(votes.First());
-            Guard.IsEqualTo(votes.First().Count, candidates.Count);
         }
 
         string sectionJSON = JsonSerializer.Serialize(sections);
