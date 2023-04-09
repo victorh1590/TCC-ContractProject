@@ -1,6 +1,4 @@
 ﻿using System.Text.Json;
-using Moq;
-using Voting.Server.Domain;
 using Voting.Server.Domain.Models;
 using Voting.Server.UnitTests.TestData;
 
@@ -10,16 +8,16 @@ public partial class DomainServiceTests
 {
     [Test]
     [Repeat(10)]
-    public async Task RemoveRedundantSections_Should_Remove_Redundant_Sections_Correctly()
+    public async Task RemoveRedundantSectionsAsync_Should_Remove_Redundant_Sections_Correctly()
     {
         //Arrange
         SeedData seedData2 = _seedDataBuilder.GenerateNew(10U, 5U);
         List<Section> entrySeedData = seedData2.Sections;
 
-        //Copy entrySeedData.
+        //Copy new seedData so we can keep track of the original data after changes
         List<Section> expectedSections = new List<Section>(entrySeedData);
         
-        //Mix existing sections with sections already inserted.
+        //Mix existing sections with sections already inserted
         entrySeedData.AddRange(_seedData.Sections
             .OrderBy(_ => Guid.NewGuid())
             .Take(TestContext.CurrentContext.Random.Next(0, _seedData.Sections.Count))
@@ -31,8 +29,6 @@ public partial class DomainServiceTests
         expectedSections.Sort((x, y) => x.SectionID > y.SectionID ? 1 : -1);
         string resultJSON = JsonSerializer.Serialize(result);
         string expectedJSON = JsonSerializer.Serialize(expectedSections);
-        
-        TestContext.WriteLine(resultJSON);
         
         //Assertions
         Assert.That(resultJSON, Is.EqualTo(expectedJSON));
@@ -46,12 +42,12 @@ public partial class DomainServiceTests
     
     [Test]
     [Repeat(5)]
-    public async Task RemoveRedundantSections_Should_Not_Remove_Sections_If_All_New()
+    public async Task RemoveRedundantSectionsAsync_Should_Not_Remove_Sections_If_All_New()
     {
         //Arrange
         SeedData seedData2 = _seedDataBuilder.GenerateNew(10U, 5U);
 
-        //Copy entrySeedData.
+        //Copy new seedData so we can keep track of the original data after changes
         List<Section> expectedSections = new List<Section>(seedData2.Sections);
 
         //Act
@@ -60,8 +56,6 @@ public partial class DomainServiceTests
         expectedSections.Sort((x, y) => x.SectionID > y.SectionID ? 1 : -1);
         string resultJSON = JsonSerializer.Serialize(result);
         string expectedJSON = JsonSerializer.Serialize(expectedSections);
-        
-        TestContext.WriteLine(resultJSON);
         
         //Assertions
         Assert.That(resultJSON, Is.EqualTo(expectedJSON));
@@ -74,10 +68,10 @@ public partial class DomainServiceTests
     }
     
     [Test]
-    public async Task RemoveRedundantSections_Should_Return_Empty_When_No_New_Sections()
+    public async Task RemoveRedundantSectionsAsync_Should_Return_Empty_When_No_New_Sections()
     {
         //Arrange
-        //New list
+        //New empty list
         List<Section> expectedSections = new List<Section>();
 
         //Act
@@ -96,10 +90,10 @@ public partial class DomainServiceTests
     }
     
     [Test]
-    public async Task RemoveRedundantSections_Should_Return_Empty_When_Sections_Passed_Is_Empty()
+    public async Task RemoveRedundantSectionsAsync_Should_Return_Empty_When_Sections_Passed_Is_Empty()
     {
         //Arrange
-        //Copy entrySeedData.
+        //New empty list
         List<Section> expectedSections = new List<Section>();
 
         //Act
