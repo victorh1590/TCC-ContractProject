@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-
-namespace Voting.Server.Tests.Utils.TestData;
+﻿namespace Voting.Server.Tests.Utils.TestData;
 
 internal static class SeedDataOld
 {

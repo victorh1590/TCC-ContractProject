@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Text.Json;
+﻿using System.Text.Json;
 using Voting.Server.Domain.Models;
 using Voting.Server.Persistence.ContractDefinition;
 using CommunityToolkit.Diagnostics;
