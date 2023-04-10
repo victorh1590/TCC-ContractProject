@@ -30,13 +30,13 @@ public class TestNet<T> where T : IGanache, new()
         configuration.Bind(Options);
     }
     
-    public void SetUp()
+    public async Task<string> SetUp()
     {
-        Blockchain.Start(Options, AccountManager);
+        return await Blockchain.Start(Options, AccountManager);
     }
     
-    public void TearDown()
+    public async Task TearDown()
     {
-        Blockchain.Stop();
+        await Blockchain.Stop();
     }
 }

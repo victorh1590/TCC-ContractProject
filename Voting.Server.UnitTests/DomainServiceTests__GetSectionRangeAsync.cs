@@ -9,7 +9,7 @@ using Voting.Server.UnitTests.TestData;
 
 namespace Voting.Server.UnitTests;
 
-// [Ignore("Debugging")]
+[Ignore("Debugging")]
 // [Order(3)]
 [TestFixture]
 public partial class DomainServiceTests

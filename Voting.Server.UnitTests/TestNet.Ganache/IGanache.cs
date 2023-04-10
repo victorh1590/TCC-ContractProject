@@ -6,8 +6,6 @@ public interface IGanache
 {
     IGanacheOptions Options { get; }
     AccountManager? AccountManager { get; }
-    void Start(IGanacheOptions opts, AccountManager accountManager);
-    void Stop();
-    void KillProcessTree(int pid);
-    string GetExecutionString();
+    Task<string> Start(IGanacheOptions opts, AccountManager accountManager);
+    Task Stop();
 }

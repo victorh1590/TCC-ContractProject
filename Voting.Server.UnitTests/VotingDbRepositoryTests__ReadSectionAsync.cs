@@ -14,7 +14,6 @@ using Voting.Server.UnitTests.TestNet.Ganache;
 
 namespace Voting.Server.UnitTests;
 
-[Ignore("Debugging")]
 [Order(2)]
 [TestFixture]
 public class VotingDbRepositoryTests__ReadSectionAsync : IUseBlockchainAndRepositoryProps

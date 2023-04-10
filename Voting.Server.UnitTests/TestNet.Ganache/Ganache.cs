@@ -1,107 +1,74 @@
-﻿using System.Diagnostics;
-using System.Management;
-using System.Text;
-using CommunityToolkit.Diagnostics;
+﻿using System.Text.RegularExpressions;
+using DotNet.Testcontainers.Builders;
+using DotNet.Testcontainers.Configurations;
+using DotNet.Testcontainers.Containers;
 using Voting.Server.Persistence.Accounts;
 
 namespace Voting.Server.UnitTests.TestNet.Ganache;
 
 public class Ganache : IGanache
 {
-  public IGanacheOptions Options { get; private set; }
-  public AccountManager? AccountManager { get; private set;  }
-  private Process? Proc { get; set; }
+    public IGanacheOptions Options { get; private set; }
+    public AccountManager? AccountManager { get; private set; }
+    public IContainer Container { get; private set; }
 
-  public Ganache()
-  {
-    Options = new GanacheOptions();
-    AccountManager = null;
-    Proc = null;
-  }
-
-  public void Start(IGanacheOptions opts, AccountManager accountManager)
-  {
-    Guard.IsTrue(OperatingSystem.IsWindows());
-
-    Options = opts;
-    AccountManager = accountManager;
-
-    ProcessStartInfo startInfo = new ProcessStartInfo
+    public Ganache()
     {
-      FileName = Options.GanacheEnvironmentOptions.Terminal,
-      UseShellExecute = true,
-      WindowStyle = ProcessWindowStyle.Normal,
-      Arguments = GetExecutionString()
-    };
-    Proc = Process.Start(startInfo) ?? throw new SystemException("Process failed to start.");
-  }
-
-  public void Stop()
-  {
-    Guard.IsTrue(OperatingSystem.IsWindows());
-    // TestContext.WriteLine("Press enter to stop...");
-    // TestContext.ReadLine();
-    if(Proc == null) return;
-    KillProcessTree(Proc.Id);
-    Proc = null;
-    try
-    {
-      File.Delete(Path.Join(Directory.GetCurrentDirectory(), Options.GanacheSetupOptions.AccountKeysPath));
+        Options = new GanacheOptions();
+        AccountManager = null;
+        Container = default!;
     }
-    catch (Exception err) 
-      when (err is ArgumentException 
-                or ArgumentNullException 
-                or DirectoryNotFoundException 
-                or IOException 
-                or NotSupportedException 
-                or PathTooLongException 
-                or UnauthorizedAccessException)
-    {
-      Console.WriteLine("Failed to remove Accounts file.");
-      throw;
-    }
-  }
 
-  public void KillProcessTree(int pid)
-  {
-    Guard.IsTrue(OperatingSystem.IsWindows());
-#pragma warning disable CA1416 // Guard.IsTrue(OperatingSystem.IsWindows()) ensures it's running on Windows.
-    if (pid == 0) return;
-    ManagementObjectSearcher lookup = new ManagementObjectSearcher("SELECT * FROM Win32_Process WHERE ParentProcessID=" + pid);
-    ManagementObjectCollection procList = lookup.Get();
-    foreach (ManagementBaseObject proc in procList)
+    public async Task<string> Start(IGanacheOptions opts, AccountManager accountManager)
     {
-        KillProcessTree(Convert.ToInt32(proc["ProcessID"]));
-    }
-    try
-    {
-        Process.GetProcessById(pid).Kill();
-    }
-    catch (Exception err) 
-      when (err is InvalidOperationException or ArgumentException)
-    {
-      Console.WriteLine("Failed to stop process tree.");
-      throw;
-    }
-#pragma warning restore CA1416
-  }
+        Options = opts;
+        AccountManager = accountManager;
+        Container = new ContainerBuilder()
+            .WithName(Guid.NewGuid().ToString("D"))
+            .WithImage(@"trufflesuite/ganache")
+            .WithExposedPort(Options.GanacheSetupOptions.Port)
+            .WithPortBinding(Options.GanacheSetupOptions.Port, true)
+            .WithCommand(GetExecutionString())
+            // .WithEnvironment("NODE_ENV", "production")
+            .WithWaitStrategy(
+                Wait.ForUnixContainer()
+                    .UntilMessageIsLogged(new Regex(@"RPC Listening on .*",
+                        RegexOptions.Compiled | RegexOptions.IgnoreCase)))
+            .Build();
 
-  public string GetExecutionString()
-  {
-    StringBuilder sb = new StringBuilder();
-    sb.Append($"/K ganache");
-    sb.Append($" --server.host={Options.GanacheSetupOptions.Host}");
-    sb.Append($" --server.port={Options.GanacheSetupOptions.Port}");
-    sb.Append($" --chain.chainId={Options.GanacheSetupOptions.ChainID}");
-    sb.Append($" --miner.blockTime={Options.GanacheSetupOptions.BlockTime}");
-    sb.Append($" --miner.defaultGasPrice={Options.GanacheSetupOptions.DefaultGasPrice}");
-    sb.Append($" --miner.blockGasLimit={Options.GanacheSetupOptions.BlockGasLimit}");
-    sb.Append($" --miner.defaultTransactionGasLimit={Options.GanacheSetupOptions.DefaultTransactionGasLimit}");
-    sb.Append($" --wallet.accounts={AccountManager?.Accounts.First().PrivateKey + ",0x3635C9ADC5DEA00000"}");
-    sb.Append($" --wallet.accountKeysPath={Options.GanacheSetupOptions.AccountKeysPath}");
-    sb.Append($" --miner.instamine=eager");
-    // sb.Append($" --wallet.totalAccounts={Options.GanacheOptions.TotalAccounts}");
-    sb.Append($" --chain.hardfork=\"berlin\"");
-    return sb.ToString();
-  }
+        await Container.StartAsync();
+
+        UriBuilder URL = new UriBuilder(
+            "http", 
+            Container.Hostname, 
+            Container.GetMappedPublicPort(Options.GanacheSetupOptions.Port));
+        return URL.ToString();
+    }
+
+    public async Task Stop()
+    {
+        await Container.StopAsync();
+        await Container.DisposeAsync();
+    }
+
+    private string[] GetExecutionString()
+    {
+        List<string> args = new();
+        args.AddRange(new[]{"--server.port", $"{Options.GanacheSetupOptions.Port}"});
+        args.AddRange(new[] { "--miner.blockTime", $"{Options.GanacheSetupOptions.BlockTime}" });
+        args.AddRange(new[] { "--miner.defaultGasPrice", $"{Options.GanacheSetupOptions.DefaultGasPrice}" });
+        args.AddRange(new[] { "--miner.blockGasLimit", $"{Options.GanacheSetupOptions.BlockGasLimit}" });
+        args.AddRange(new[]
+            { "--miner.defaultTransactionGasLimit", $"{Options.GanacheSetupOptions.DefaultTransactionGasLimit}" });
+        args.AddRange(new[]
+            { "--wallet.accounts", $"{AccountManager?.Accounts.First().PrivateKey + ",0x3635C9ADC5DEA00000"}" });
+        args.AddRange(new[] { "--miner.instamine", $"eager" });
+        args.AddRange(new[] { "--chain.hardfork", $"\"berlin\"" });
+        // args.AddRange(new[]{"--wallet.totalAccounts", $"{Options.GanacheSetupOptions.TotalAccounts}"});
+        // args.AddRange(new[] { "--wallet.accountKeysPath", $"{Options.GanacheSetupOptions.AccountKeysPath}" });
+        // args.AddRange(new[]{"--chain.chainId", $"{Options.GanacheSetupOptions.ChainID}"});
+        // args.AddRange(new[]{"--server.host", $"{Options.GanacheSetupOptions.Host}"});
+
+        return args.ToArray();
+    }
 }

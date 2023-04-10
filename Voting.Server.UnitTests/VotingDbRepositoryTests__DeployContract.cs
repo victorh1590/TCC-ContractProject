@@ -12,7 +12,6 @@ using Voting.Server.UnitTests.TestNet.Ganache;
 
 namespace Voting.Server.UnitTests;
 
-[Ignore("Debugging")]
 [Order(1)]
 [TestFixture]
 public class VotingDbRepositoryTests__DeployContract : IUseBlockchainAndRepositoryProps
@@ -28,10 +27,11 @@ public class VotingDbRepositoryTests__DeployContract : IUseBlockchainAndReposito
     public BlockParameter Ealiest { get; } = BlockParameter.CreateEarliest();
     private readonly SeedDataBuilder _seedDataBuilder = new();
     
-    [Theory]
     [Order(1)]
+    [Theory]
     public async Task CreateSectionRange_Should_Deploy_Valid_Contract()
     {
+        Thread.Sleep(5000);
         //Generate seed data.
         SeedData seedData = _seedDataBuilder.GenerateNew(30, 4);
         
@@ -61,8 +61,8 @@ public class VotingDbRepositoryTests__DeployContract : IUseBlockchainAndReposito
         Assert.That(compressedDataResult, Is.EqualTo(seedData.Deployment.CompressedSectionData));
     }
     
-    [Test]
     [Order(2)]
+    [Test]
     public async Task CreateSectionRange_Should_Fail_When_Invalid_Contract()
     {
         //Generate invalid seed data.
