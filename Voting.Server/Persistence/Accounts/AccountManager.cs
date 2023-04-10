@@ -5,7 +5,8 @@ using Nethereum.HdWallet;
 using Nethereum.Signer;
 using Nethereum.Web3.Accounts;
 
-[assembly: InternalsVisibleTo("Voting.Server.UnitTests")]
+[assembly: InternalsVisibleTo("Voting.Server.Tests.Unit")]
+[assembly: InternalsVisibleTo("Voting.Server.Tests.Integration")]
 namespace Voting.Server.Persistence.Accounts;
 
 public class AccountManager : IAccountManager

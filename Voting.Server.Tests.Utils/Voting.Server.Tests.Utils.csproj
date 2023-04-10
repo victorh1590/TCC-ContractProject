@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net7.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <UserSecretsId>7d5aad5a-654f-4397-be39-c823eb40f5c8</UserSecretsId>
+        <IsPackable>false</IsPackable>
+        <RootNamespace>Voting.Server.Tests.Utils</RootNamespace>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\Voting.Server\Voting.Server.csproj" />
+    </ItemGroup>
+</Project>

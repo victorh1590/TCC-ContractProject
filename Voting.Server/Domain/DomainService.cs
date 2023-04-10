@@ -7,7 +7,9 @@ using Nethereum.RPC.Eth.DTOs;
 using Voting.Server.Domain.Models;
 using Voting.Server.Domain.Models.Mappings;
 
-[assembly: InternalsVisibleTo("Voting.Server.UnitTests")]
+[assembly: InternalsVisibleTo("Voting.Server.Tests.Unit")]
+[assembly: InternalsVisibleTo("Voting.Server.Tests.Integration")]
+[assembly: InternalsVisibleTo("Voting.Server.Tests.Utils")]
 namespace Voting.Server.Domain;
 
 internal class DomainService
