@@ -3,7 +3,7 @@ using Voting.Server.Domain.Models;
 using Voting.Server.Domain.Models.Mappings;
 using Voting.Server.Persistence.ContractDefinition;
 using System.Globalization;
-using Voting.Server.Tests.Utils.TestData;
+using Voting.Server.Tests.Utils;
 
 namespace Voting.Server.Tests.Unit;
 public partial class MappingsTests

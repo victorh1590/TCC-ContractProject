@@ -1,7 +1,7 @@
 ﻿using System.Text.Json;
 using CommunityToolkit.Diagnostics;
 using Voting.Server.Domain.Models;
-using Voting.Server.Tests.Utils.TestData;
+using Voting.Server.Tests.Utils;
 
 namespace Voting.Server.Tests.Unit;
 

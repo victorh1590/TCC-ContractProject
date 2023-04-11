@@ -10,7 +10,7 @@ using Voting.Server.Persistence.Accounts;
 using Voting.Server.Persistence.Clients;
 using Voting.Server.Persistence.ContractDefinition;
 using Voting.Server.Tests.Integration.TestNet.Ganache;
-using Voting.Server.Tests.Utils.TestData;
+using Voting.Server.Tests.Utils;
 using Voting.Server.UnitTests;
 
 namespace Voting.Server.Tests.Integration;

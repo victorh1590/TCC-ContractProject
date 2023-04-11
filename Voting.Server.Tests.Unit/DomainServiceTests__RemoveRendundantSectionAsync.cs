@@ -1,6 +1,6 @@
 ﻿using System.Text.Json;
 using Voting.Server.Domain.Models;
-using Voting.Server.Tests.Utils.TestData;
+using Voting.Server.Tests.Utils;
 
 namespace Voting.Server.Tests.Unit;
 

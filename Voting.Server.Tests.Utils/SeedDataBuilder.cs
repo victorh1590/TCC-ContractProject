@@ -1,14 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
 using System.Text.Json;
+using CommunityToolkit.Diagnostics;
 using Voting.Server.Domain.Models;
 using Voting.Server.Domain.Models.Mappings;
 using Voting.Server.Domain.Utils;
 using Voting.Server.Persistence.ContractDefinition;
-using CommunityToolkit.Diagnostics;
 
-namespace Voting.Server.Tests.Utils.TestData;
+namespace Voting.Server.Tests.Utils;
 
 public class SeedDataBuilder
 {

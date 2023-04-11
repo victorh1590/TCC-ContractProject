@@ -2,7 +2,7 @@
 using Voting.Server.Domain;
 using Voting.Server.Persistence;
 using Voting.Server.Persistence.ContractDefinition;
-using Voting.Server.Tests.Utils.TestData;
+using Voting.Server.Tests.Utils;
 
 namespace Voting.Server.Tests.Unit;
 
