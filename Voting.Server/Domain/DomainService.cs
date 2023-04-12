@@ -55,7 +55,7 @@ internal class DomainService
         return mappedResult;
     }
     
-    public async void InsertSectionsAsync(List<Section> sections)
+    public async Task InsertSectionsAsync(List<Section> sections)
     {
         List<Section> uniqueSections = await RemoveRedundantSectionsAsync(sections);
         Guard.IsNotEmpty(uniqueSections);

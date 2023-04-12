@@ -47,15 +47,15 @@ public class VotingDbRepositoryTests__ReadSectionAsync : IUseBlockchainAndReposi
         //Get valid random section number.
         uint sectionNumber = seedData.Deployment.Sections.OrderBy(_ => Guid.NewGuid()).FirstOrDefault();
         TestContext.WriteLine($"Trying to access contract and getting section {sectionNumber}...");
-
-        //Calls method and convert results to JSON.
-        SectionEventDTO? sectionEventDTO = await Repository.ReadSectionAsync(sectionNumber, FilterRange.FromLatestToLatest);
-        Section sectionData = Mappings.SectionEventDTOToSection(sectionEventDTO);
         Section? expectedSection = seedData.Sections
             .Select(section => section)
             .FirstOrDefault(section => section.SectionID == sectionNumber);
         Guard.IsNotNull(expectedSection);
-        
+
+        //Calls method and convert results to JSON.
+        SectionEventDTO? sectionEventDTO = await Repository.ReadSectionAsync(sectionNumber, FilterRange.FromLatestToLatest);
+        Section sectionData = Mappings.SectionEventDTOToSection(sectionEventDTO);
+
         string resultJSON = JsonSerializer.Serialize(sectionData);
         string expectedJSON = JsonSerializer.Serialize(expectedSection);
         TestContext.WriteLine(resultJSON);
