@@ -13,6 +13,7 @@ public class Ganache : IGanache
     public IGanacheOptions Options { get; private set; }
     public AccountManager? AccountManager { get; private set; }
     public IContainer Container { get; private set; }
+    public string URL { get; private set; }
 
     public Ganache(AccountManager accountManager)
     {
@@ -35,7 +36,7 @@ public class Ganache : IGanache
         configuration.Bind(Options);
     }
 
-    public async Task<string> Start()
+    public async Task Start()
     {
         Container = new ContainerBuilder()
             .WithName(Guid.NewGuid().ToString("D"))
@@ -49,9 +50,11 @@ public class Ganache : IGanache
 
         await Container.StartAsync();
 
-        return 
-            new UriBuilder("http", Container.Hostname, Container.GetMappedPublicPort(Options.GanacheSetupOptions.Port))
+        URL = new UriBuilder("http", Container.Hostname, Container.GetMappedPublicPort(Options.GanacheSetupOptions.Port))
             .ToString();
+        // return 
+        //     new UriBuilder("http", Container.Hostname, Container.GetMappedPublicPort(Options.GanacheSetupOptions.Port))
+        //     .ToString();
     }
 
     public async Task Stop()

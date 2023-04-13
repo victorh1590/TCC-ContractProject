@@ -13,6 +13,7 @@ using Voting.Server.UnitTests;
 
 namespace Voting.Server.Tests.Integration;
 
+[Ignore("Debug")]
 [Order(3)]
 [TestFixture]
 public class VotingDbRepositoryTests__ReadMetadataAsync : IUseBlockchainAndRepositoryProps

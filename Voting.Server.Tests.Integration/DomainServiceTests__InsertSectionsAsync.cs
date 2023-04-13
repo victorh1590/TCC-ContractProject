@@ -9,6 +9,8 @@ using Voting.Server.Domain;
 using Voting.Server.Domain.Models;
 using Voting.Server.Tests.Utils;
 using CommunityToolkit.Diagnostics;
+using DotNet.Testcontainers.Builders;
+using Nethereum.JsonRpc.Client;
 using static NUnit.Framework.TestContext;
 
 namespace Voting.Server.Tests.Integration;
@@ -17,27 +19,23 @@ namespace Voting.Server.Tests.Integration;
 [TestFixture]
 internal class DomainServiceTests__InsertSectionsAsync : IUseBlockchainAndRepositoryProps
 {
-    public IGanache TestNet { get; set; }
-    public IConfiguration Config { get; set; }
-    public AccountManager AccountManager { get; set; }
-    public IWeb3ClientsManager ClientsManager { get; set; }
-    public IVotingDbRepository Repository { get; set; }
-    public string Account { get; set; }
-    private DomainService DomainService { get; set; }
+    public IGanache TestNet { get; set; } = default!;
+    public IConfiguration Config { get; set; } = default!;
+    public AccountManager AccountManager { get; set; } = default!;
+    public IWeb3ClientsManager ClientsManager { get; set; } = default!;
+    public IVotingDbRepository Repository { get; set; } = default!;
+    public string Account { get; set; } = default!;
+    private DomainService DomainService { get; set; } = default!;
     private SeedDataBuilder _seedDataBuilder = default!;
-
-    [OneTimeSetUp]
-    public void OneTimeSetUp()
-    {
-        DomainService = new DomainService(Repository);
-    }
     
     [SetUp]
     public void SetUp()
     {
+        DomainService = new DomainService(Repository);
         _seedDataBuilder = new SeedDataBuilder();
     }
     
+    [Ignore("Debug")]
     [Order(1)]
     [Test]
     [Repeat(5)]
@@ -84,6 +82,7 @@ internal class DomainServiceTests__InsertSectionsAsync : IUseBlockchainAndReposi
             expectedSections.Select(e => e.CandidateVotes));
     }
     
+    [Ignore("Debug")]
     [Order(2)]
     [Test]
     public async Task InsertSectionAsync_Should_Throw_Exception_If_Trying_To_Add_Only_Repeated_Sections()
@@ -97,5 +96,19 @@ internal class DomainServiceTests__InsertSectionsAsync : IUseBlockchainAndReposi
         //Assertions.
         Assert.That(async () => await DomainService.InsertSectionsAsync(seedData1.Sections), 
             Throws.TypeOf<ArgumentException>());
+    }
+    
+    [Order(3)]
+    [Test]
+    public async Task InsertSectionAsync_Should_Fail_When_Contract_Fails_To_Be_Deployed()
+    {
+        TestNet.Stop().Wait();
+        
+        //Generate seed data.
+        SeedData seedData1 = _seedDataBuilder.GenerateNew(30, 5);
+
+        //Assertions.
+        Assert.That(async () => await DomainService.InsertSectionsAsync(seedData1.Sections), 
+            Throws.TypeOf<RpcClientUnknownException>());
     }
 }

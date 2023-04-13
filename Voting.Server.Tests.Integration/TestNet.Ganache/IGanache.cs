@@ -7,6 +7,7 @@ public interface IGanache
 {
     IGanacheOptions Options { get; }
     AccountManager? AccountManager { get; }
-    Task<string> Start();
+    string URL { get; }
+    Task Start();
     Task Stop();
 }

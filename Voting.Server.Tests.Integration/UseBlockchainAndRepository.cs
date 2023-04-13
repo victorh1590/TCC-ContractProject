@@ -30,8 +30,8 @@ public class UseBlockchainAndRepository : TestActionAttribute
         obj.AccountManager = new AccountManager(obj.Config);
         obj.TestNet = new Ganache(obj.AccountManager);
         obj.Account = obj.AccountManager.Accounts.First().Address;
-        string URL = obj.TestNet.Start().Result;
-        Dictionary<string, string> clientConfigDict = new() { { "URL", URL } };
+        Task.WaitAll(obj.TestNet.Start());
+        Dictionary<string, string> clientConfigDict = new() { { "URL", obj.TestNet.URL } };
         IConfiguration clientConfig = new ConfigurationBuilder()
             .AddInMemoryCollection(clientConfigDict)
             .Build();
@@ -43,7 +43,7 @@ public class UseBlockchainAndRepository : TestActionAttribute
     {
         IUseBlockchainAndRepositoryProps obj = details.Fixture as IUseBlockchainAndRepositoryProps
             ?? throw new NullReferenceException();
-        obj.TestNet.Stop().Wait();
+        obj.TestNet.Stop();
     }
 
     public override ActionTargets Targets => ActionTargets.Suite;

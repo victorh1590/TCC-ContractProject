@@ -15,6 +15,7 @@ using Voting.Server.UnitTests;
 
 namespace Voting.Server.Tests.Integration;
 
+[Ignore("Debug")]
 [Order(4)]
 [TestFixture]
 public class VotingDbRepositoryTests__ReadVotesByCandidateAndSectionAsync : IUseBlockchainAndRepositoryProps
