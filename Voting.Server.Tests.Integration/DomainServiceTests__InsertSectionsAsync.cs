@@ -8,8 +8,6 @@ using Voting.Server.UnitTests;
 using Voting.Server.Domain;
 using Voting.Server.Domain.Models;
 using Voting.Server.Tests.Utils;
-using CommunityToolkit.Diagnostics;
-using DotNet.Testcontainers.Builders;
 using Nethereum.JsonRpc.Client;
 using static NUnit.Framework.TestContext;
 
@@ -26,16 +24,14 @@ internal class DomainServiceTests__InsertSectionsAsync : IUseBlockchainAndReposi
     public IVotingDbRepository Repository { get; set; } = default!;
     public string Account { get; set; } = default!;
     private DomainService DomainService { get; set; } = default!;
-    private SeedDataBuilder _seedDataBuilder = default!;
+    private SeedDataBuilder _seedDataBuilder = new();
     
     [SetUp]
     public void SetUp()
     {
         DomainService = new DomainService(Repository);
-        _seedDataBuilder = new SeedDataBuilder();
     }
     
-    [Ignore("Debug")]
     [Order(1)]
     [Test]
     [Repeat(5)]
@@ -47,7 +43,7 @@ internal class DomainServiceTests__InsertSectionsAsync : IUseBlockchainAndReposi
         SeedData seedData2 = _seedDataBuilder.GenerateNew(30, 5);
         
         //Make expected sectionsList from seedData1 and 2.
-        List<Section> expectedSections = seedData1.Sections;
+        List<Section> expectedSections = new(seedData1.Sections);
         expectedSections.AddRange(seedData2.Sections);
 
         //Add sections from seedData1 to seedData2 to test if redundancy will be removed.
@@ -63,11 +59,8 @@ internal class DomainServiceTests__InsertSectionsAsync : IUseBlockchainAndReposi
         List<Section> resultSections = await DomainService.GetSectionRangeAsync(expectedSections
             .Select(s => s.SectionID)
             .ToArray());
-
         string resultJSON = JsonSerializer.Serialize(resultSections);
         string expectedJSON = JsonSerializer.Serialize(expectedSections);
-        WriteLine(resultJSON);
-        WriteLine("Expected: " + expectedJSON);
 
         //Assertions.
         Assert.That(resultSections, Is.Not.Null.Or.Empty);
@@ -82,7 +75,6 @@ internal class DomainServiceTests__InsertSectionsAsync : IUseBlockchainAndReposi
             expectedSections.Select(e => e.CandidateVotes));
     }
     
-    [Ignore("Debug")]
     [Order(2)]
     [Test]
     public async Task InsertSectionAsync_Should_Throw_Exception_If_Trying_To_Add_Only_Repeated_Sections()
@@ -100,15 +92,15 @@ internal class DomainServiceTests__InsertSectionsAsync : IUseBlockchainAndReposi
     
     [Order(3)]
     [Test]
-    public async Task InsertSectionAsync_Should_Fail_When_Contract_Fails_To_Be_Deployed()
+    public void InsertSectionAsync_Should_Fail_When_Contract_Fails_To_Be_Deployed()
     {
         TestNet.Stop().Wait();
         
         //Generate seed data.
-        SeedData seedData1 = _seedDataBuilder.GenerateNew(30, 5);
+        SeedData seedData = _seedDataBuilder.GenerateNew(30, 5);
 
         //Assertions.
-        Assert.That(async () => await DomainService.InsertSectionsAsync(seedData1.Sections), 
+        Assert.That(async () => await DomainService.InsertSectionsAsync(seedData.Sections), 
             Throws.TypeOf<RpcClientUnknownException>());
     }
 }

@@ -1,6 +1,7 @@
 ﻿using System.Text.Json;
 using Voting.Server.Domain.Models;
 using Voting.Server.Tests.Utils;
+using static NUnit.Framework.TestContext;
 
 namespace Voting.Server.Tests.Unit;
 
@@ -12,15 +13,15 @@ public partial class DomainServiceTests
     {
         //Arrange
         SeedData seedData2 = _seedDataBuilder.GenerateNew(10U, 5U);
-        List<Section> entrySeedData = seedData2.Sections;
+        List<Section> entrySeedData = new(seedData2.Sections);
 
         //Copy new seedData so we can keep track of the original data after changes
-        List<Section> expectedSections = new List<Section>(entrySeedData);
+        List<Section> expectedSections = new(entrySeedData);
         
         //Mix existing sections with sections already inserted
         entrySeedData.AddRange(_seedData.Sections
             .OrderBy(_ => Guid.NewGuid())
-            .Take(TestContext.CurrentContext.Random.Next(0, _seedData.Sections.Count))
+            .Take(CurrentContext.Random.Next(0, _seedData.Sections.Count))
         );
         
         //Act
@@ -48,7 +49,7 @@ public partial class DomainServiceTests
         SeedData seedData2 = _seedDataBuilder.GenerateNew(10U, 5U);
 
         //Copy new seedData so we can keep track of the original data after changes
-        List<Section> expectedSections = new List<Section>(seedData2.Sections);
+        List<Section> expectedSections = new(seedData2.Sections);
 
         //Act
         List<Section> result = await _domainService.RemoveRedundantSectionsAsync(expectedSections);
@@ -94,7 +95,7 @@ public partial class DomainServiceTests
     {
         //Arrange
         //New empty list
-        List<Section> expectedSections = new List<Section>();
+        List<Section> expectedSections = new();
 
         //Act
         List<Section> result = await _domainService.RemoveRedundantSectionsAsync(expectedSections);

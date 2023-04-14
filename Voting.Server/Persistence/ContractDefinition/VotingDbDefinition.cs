@@ -1,19 +1,12 @@
 #nullable disable
 
-using System;
-using System.Threading.Tasks;
-using System.Collections.Generic;
 using System.Numerics;
-using Nethereum.Hex.HexTypes;
 using Nethereum.ABI.FunctionEncoding.Attributes;
-using Nethereum.RPC.Eth.DTOs;
-using Nethereum.Contracts.CQS;
 using Nethereum.Contracts;
-using System.Threading;
 
 namespace Voting.Server.Persistence.ContractDefinition;
 
-public partial class VotingDbDeployment : VotingDbDeploymentBase
+public partial class VotingDbDeployment : VotingDbDeploymentBase, ICloneable
 {
     public VotingDbDeployment() : base(BYTECODE)
     {
@@ -21,6 +14,23 @@ public partial class VotingDbDeployment : VotingDbDeploymentBase
 
     public VotingDbDeployment(string byteCode) : base(byteCode)
     {
+    }
+
+    private VotingDbDeployment DeepClone()
+    {
+        return new VotingDbDeploymentBase
+        {
+            Votes = new List<List<uint>>(Votes),
+            Candidates = new List<uint>(Candidates),
+            Sections = new List<uint>(Sections),
+            Timestamp = new string(Timestamp),
+            CompressedSectionData = new string(CompressedSectionData)
+        } as VotingDbDeployment;
+    }
+
+    public object Clone()
+    {
+        return DeepClone();
     }
 }
 

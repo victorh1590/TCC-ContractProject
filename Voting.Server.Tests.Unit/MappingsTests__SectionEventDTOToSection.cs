@@ -1,9 +1,11 @@
 ﻿using Moq;
 using System.Text.Json;
+using CommunityToolkit.Diagnostics;
 using Voting.Server.Domain.Models;
 using Voting.Server.Domain.Models.Mappings;
 using Voting.Server.Persistence.ContractDefinition;
 using Voting.Server.Tests.Utils;
+using static NUnit.Framework.TestContext;
 
 namespace Voting.Server.Tests.Unit;
 
@@ -15,8 +17,9 @@ public partial class MappingsTests
     {
         //Arrange
         //Generate seed data.
-        SeedData seedData = _seedDataBuilder.GenerateNew(30, 5);
-        Section expectedSection = seedData.Sections[randomSectionIndex];
+        SeedData seedData = SeedDataBuilder.GenerateNew(30, 5);
+        Section? expectedSection = seedData.Sections[randomSectionIndex].Clone() as Section;
+        Guard.IsNotNull(expectedSection);
         Mock<SectionEventDTO> sectionEventDTOMock = new Mock<SectionEventDTO>();
         sectionEventDTOMock.Setup(dto => dto.Section).Returns(seedData.Deployment.Sections[randomSectionIndex]);
         sectionEventDTOMock.Setup(dto => dto.Candidates).Returns(seedData.Deployment.Candidates);
@@ -40,8 +43,8 @@ public partial class MappingsTests
     {
         //Arrange
         //Generate seed data.
-        SeedData seedData = _seedDataBuilder.GenerateNew(30, 5);
-        SeedData seedData2 = _seedDataBuilder.GenerateNew(1, randomCandidatesSize);
+        SeedData seedData = SeedDataBuilder.GenerateNew(30, 5);
+        SeedData seedData2 = SeedDataBuilder.GenerateNew(1, randomCandidatesSize);
         Mock<SectionEventDTO> sectionEventDTOMock = new Mock<SectionEventDTO>();
         sectionEventDTOMock.Setup(dto => dto.Section).Returns(seedData.Deployment.Sections[randomSectionIndex]);
         sectionEventDTOMock.Setup(dto => dto.Candidates).Returns(seedData2.Deployment.Candidates);
@@ -58,7 +61,7 @@ public partial class MappingsTests
         //Arrange
         Mock<SectionEventDTO> sectionEventDTOMock = new Mock<SectionEventDTO>();
         sectionEventDTOMock.Setup(dto => dto.Section)
-            .Returns(TestContext.CurrentContext.Random.NextUInt(1, 472500));
+            .Returns(CurrentContext.Random.NextUInt(1, 472500));
         sectionEventDTOMock.Setup(dto => dto.Candidates).Returns(new List<uint>());
         sectionEventDTOMock.Setup(dto => dto.Votes).Returns(new List<uint>());
 
@@ -74,15 +77,15 @@ public partial class MappingsTests
         //Votes is empty.
         Mock<SectionEventDTO> sectionEventDTOMock = new Mock<SectionEventDTO>();
         sectionEventDTOMock.Setup(dto => dto.Section)
-            .Returns(TestContext.CurrentContext.Random.NextUInt(1, 472500));
+            .Returns(CurrentContext.Random.NextUInt(1, 472500));
         sectionEventDTOMock.Setup(dto => dto.Candidates)
-            .Returns(new List<uint> { TestContext.CurrentContext.Random.NextUInt(1, 99) } );
+            .Returns(new List<uint> { CurrentContext.Random.NextUInt(1, 99) } );
         sectionEventDTOMock.Setup(dto => dto.Votes).Returns(new List<uint>());
 
         //Candidates is empty.
         Mock<SectionEventDTO> sectionEventDTOMock2 = new Mock<SectionEventDTO>();
         sectionEventDTOMock2.Setup(dto => dto.Section)
-            .Returns(TestContext.CurrentContext.Random.NextUInt(1, 472500));
+            .Returns(CurrentContext.Random.NextUInt(1, 472500));
         sectionEventDTOMock2.Setup(dto => dto.Candidates).Returns(new List<uint>() );
         sectionEventDTOMock2.Setup(dto => dto.Votes)
             .Returns(new List<uint> { 0U });
@@ -100,7 +103,7 @@ public partial class MappingsTests
         Mock<SectionEventDTO> sectionEventDTOMock = new Mock<SectionEventDTO>();
         sectionEventDTOMock.Setup(dto => dto.Section).Returns(0);
         sectionEventDTOMock.Setup(dto => dto.Candidates)
-            .Returns(new List<uint> { TestContext.CurrentContext.Random.NextUInt(1, 99) } );
+            .Returns(new List<uint> { CurrentContext.Random.NextUInt(1, 99) } );
         sectionEventDTOMock.Setup(dto => dto.Votes)
             .Returns(new List<uint> { 0U });
 

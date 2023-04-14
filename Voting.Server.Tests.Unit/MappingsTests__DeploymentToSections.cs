@@ -15,8 +15,8 @@ public partial class MappingsTests
     {
         //Arrange
         //Generate seed data.
-        SeedData seedData = _seedDataBuilder.GenerateNew(30, 5);
-        List<Section> expectedSections = seedData.Sections;
+        SeedData seedData = SeedDataBuilder.GenerateNew(30, 5);
+        List<Section> expectedSections = new(seedData.Sections);
         Mock<VotingDbDeployment> deploymentMock = new Mock<VotingDbDeployment>();
         deploymentMock.Setup(deployment => deployment.Candidates)
             .Returns(seedData.Deployment.Candidates);
@@ -47,7 +47,7 @@ public partial class MappingsTests
     {
         //Arrange
         //Generate seed data.
-        SeedData seedData = _seedDataBuilder.GenerateNew(30, 5);
+        SeedData seedData = SeedDataBuilder.GenerateNew(30, 5);
 
         //Candidates empty mock
         Mock<VotingDbDeployment> deploymentMock = new Mock<VotingDbDeployment>();
@@ -88,8 +88,8 @@ public partial class MappingsTests
     {
         //Arrange
         //Generate seed data.
-        SeedData seedData1 = _seedDataBuilder.GenerateNew(30, 5); 
-        SeedData seedData2 = _seedDataBuilder.GenerateNew(1, 5);
+        SeedData seedData1 = SeedDataBuilder.GenerateNew(30, 5); 
+        SeedData seedData2 = SeedDataBuilder.GenerateNew(1, 5);
 
         //Candidates empty mock
         Mock<VotingDbDeployment> deploymentMock = new Mock<VotingDbDeployment>();
@@ -117,8 +117,8 @@ public partial class MappingsTests
     {
         //Arrange
         //Generate seed data.
-        SeedData seedData1 = _seedDataBuilder.GenerateNew(30, 5); 
-        SeedData seedData2 = _seedDataBuilder.GenerateNew(30, 1);
+        SeedData seedData1 = SeedDataBuilder.GenerateNew(30, 5); 
+        SeedData seedData2 = SeedDataBuilder.GenerateNew(30, 1);
 
         //Candidates empty mock
         Mock<VotingDbDeployment> deploymentMock = new Mock<VotingDbDeployment>();

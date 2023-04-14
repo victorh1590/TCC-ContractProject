@@ -5,15 +5,14 @@ using DotNet.Testcontainers.Builders;
 using DotNet.Testcontainers.Containers;
 using Microsoft.Extensions.Configuration;
 using Voting.Server.Persistence.Accounts;
-
 namespace Voting.Server.Tests.Integration.TestNet.Ganache;
 
 public class Ganache : IGanache
 {
-    public IGanacheOptions Options { get; private set; }
-    public AccountManager? AccountManager { get; private set; }
-    public IContainer Container { get; private set; }
-    public string URL { get; private set; }
+    public IGanacheOptions Options { get; }
+    public AccountManager? AccountManager { get; }
+    private IContainer Container { get; set; }
+    public string? URL { get; private set; }
 
     public Ganache(AccountManager accountManager)
     {
@@ -52,9 +51,6 @@ public class Ganache : IGanache
 
         URL = new UriBuilder("http", Container.Hostname, Container.GetMappedPublicPort(Options.GanacheSetupOptions.Port))
             .ToString();
-        // return 
-        //     new UriBuilder("http", Container.Hostname, Container.GetMappedPublicPort(Options.GanacheSetupOptions.Port))
-        //     .ToString();
     }
 
     public async Task Stop()

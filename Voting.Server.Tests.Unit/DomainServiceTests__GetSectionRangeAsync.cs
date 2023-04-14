@@ -2,6 +2,7 @@
 using CommunityToolkit.Diagnostics;
 using Voting.Server.Domain.Models;
 using Voting.Server.Tests.Utils;
+using static NUnit.Framework.TestContext;
 
 namespace Voting.Server.Tests.Unit;
 
@@ -16,7 +17,7 @@ public partial class DomainServiceTests
         expectedSections
             .AddRange(_seedData.Sections
                 .OrderBy(_ => Guid.NewGuid())
-                .Take(TestContext.CurrentContext.Random.Next(1, _seedData.Sections.Count))
+                .Take(CurrentContext.Random.Next(1, _seedData.Sections.Count))
                 .ToArray()
             );
         Guard.IsNotNull(expectedSections);
@@ -48,7 +49,7 @@ public partial class DomainServiceTests
         List<uint> sectionNumbers = new();
         for (int i = 0; i < 10; i++)
         {
-            sectionNumbers.Add(TestContext.CurrentContext.Random.NextUInt(SeedDataBuilder.MaxSectionID, uint.MaxValue - 1));
+            sectionNumbers.Add(CurrentContext.Random.NextUInt(SeedDataBuilder.MaxSectionID, uint.MaxValue - 1));
         }
     
         //Assertions.
@@ -66,7 +67,7 @@ public partial class DomainServiceTests
         expectedSectionsWithInvalids
             .AddRange(_seedData.Sections
                 .OrderBy(_ => Guid.NewGuid())
-                .Take(TestContext.CurrentContext.Random.Next(1, _seedData.Sections.Count - invalidDataVariance))
+                .Take(CurrentContext.Random.Next(1, _seedData.Sections.Count - invalidDataVariance))
                 .ToArray()
             );
         Guard.IsNotNull(expectedSectionsWithInvalids);
@@ -78,7 +79,7 @@ public partial class DomainServiceTests
         for (int i = 0; i < invalidDataVariance; i++)
         {
             expectedSectionsWithInvalids.Add(new Section(
-                TestContext.CurrentContext.Random.NextUInt(SeedDataBuilder.MaxSectionID, uint.MaxValue - 1),
+                CurrentContext.Random.NextUInt(SeedDataBuilder.MaxSectionID, uint.MaxValue - 1),
                 new List<CandidateVotes>()));
         }
     

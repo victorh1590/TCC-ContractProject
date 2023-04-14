@@ -23,7 +23,7 @@ public class UseBlockchainAndRepository : TestActionAttribute
     {
         IUseBlockchainAndRepositoryProps obj = details.Fixture as IUseBlockchainAndRepositoryProps
             ?? throw new NullReferenceException();
-    
+
         obj.Config = new ConfigurationBuilder()
             .AddUserSecrets<Ganache>()
             .Build();

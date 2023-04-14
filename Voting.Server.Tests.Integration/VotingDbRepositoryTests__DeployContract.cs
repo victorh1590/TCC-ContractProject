@@ -10,6 +10,7 @@ using Voting.Server.Persistence.ContractDefinition;
 using Voting.Server.Tests.Integration.TestNet.Ganache;
 using Voting.Server.Tests.Utils;
 using Voting.Server.UnitTests;
+using static NUnit.Framework.TestContext;
 
 namespace Voting.Server.Tests.Integration;
 
@@ -53,7 +54,7 @@ public class VotingDbRepositoryTests__DeployContract : IUseBlockchainAndReposito
         Assert.That(completedTransactionCount, Is.EqualTo(1));
         
         //Successfully creates ContractHandler.
-        TestContext.WriteLine("Contract Address: " + transaction.ContractAddress);
+        WriteLine("Contract Address: " + transaction.ContractAddress);
         ContractHandler handler = Repository.Web3.Eth.GetContractHandler(transaction.ContractAddress);
         Assert.That(handler, Is.Not.Null);
         

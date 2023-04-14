@@ -4,6 +4,8 @@ using Voting.Server.Domain.Models;
 using Voting.Server.Domain.Models.Mappings;
 using Voting.Server.Persistence.ContractDefinition;
 using Voting.Server.Tests.Utils;
+using CommunityToolkit.Diagnostics;
+using static NUnit.Framework.TestContext;
 
 namespace Voting.Server.Tests.Unit;
 
@@ -16,8 +18,9 @@ public partial class MappingsTests
     {
         //Arrange
         //Generate seed data.
-        SeedData seedData = _seedDataBuilder.GenerateNew(30, 5);
-        Section expectedSection = seedData.Sections[randomSectionIndex];
+        SeedData seedData = SeedDataBuilder.GenerateNew(30, 5);
+        Section? expectedSection = seedData.Sections[randomSectionIndex].Clone() as Section;
+        Guard.IsNotNull(expectedSection);
         expectedSection.CandidateVotes = expectedSection.CandidateVotes
             .Where(candidateVotes => candidateVotes.Candidate == seedData.Deployment.Candidates[randomCandidateIndex])
             .ToList();
@@ -59,7 +62,7 @@ public partial class MappingsTests
         //Candidate is zero.
         Mock<CandidateEventDTO> candidateEventDTOMock = new Mock<CandidateEventDTO>();
         candidateEventDTOMock.Setup(dto => dto.Section)
-            .Returns(TestContext.CurrentContext.Random.NextUInt(1, 472500));
+            .Returns(CurrentContext.Random.NextUInt(1, 472500));
         candidateEventDTOMock.Setup(dto => dto.Candidate).Returns(0U);
         candidateEventDTOMock.Setup(dto => dto.Votes).Returns(0U);
         
@@ -67,7 +70,7 @@ public partial class MappingsTests
         Mock<CandidateEventDTO> candidateEventDTOMock2 = new Mock<CandidateEventDTO>();
         candidateEventDTOMock2.Setup(dto => dto.Section).Returns(0U);
         candidateEventDTOMock2.Setup(dto => dto.Candidate)
-            .Returns(TestContext.CurrentContext.Random.NextUInt(1, 99));
+            .Returns(CurrentContext.Random.NextUInt(1, 99));
         candidateEventDTOMock2.Setup(dto => dto.Votes).Returns(0U);
 
         //Assertions
@@ -86,7 +89,7 @@ public partial class MappingsTests
         candidateEventDTOMock.Setup(dto => dto.Section).Returns((uint)default!);
         candidateEventDTOMock.Setup(dto => dto.Candidate).Returns((uint)default!);
         candidateEventDTOMock.Setup(dto => dto.Votes)
-            .Returns(TestContext.CurrentContext.Random.NextUInt(1, 99));
+            .Returns(CurrentContext.Random.NextUInt(1, 99));
 
         //Assertions
         Assert.That(() => Mappings.CandidateEventDTOToSection(candidateEventDTOMock.Object), 

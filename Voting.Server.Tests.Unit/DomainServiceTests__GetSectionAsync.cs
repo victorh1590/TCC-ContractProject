@@ -1,6 +1,7 @@
 ﻿using System.Text.Json;
 using Voting.Server.Domain.Models;
 using Voting.Server.Tests.Utils;
+using static NUnit.Framework.TestContext;
 
 namespace Voting.Server.Tests.Unit;
 
@@ -32,7 +33,7 @@ public partial class DomainServiceTests
     public void GetSectionAsync_Should_Fail_When_SectionID_Is_Invalid()
     {
         Assert.That(async () => await _domainService.GetSectionAsync(
-                TestContext.CurrentContext.Random.NextUInt(SeedDataBuilder.MaxSectionID, uint.MaxValue - 1)), 
+                CurrentContext.Random.NextUInt(SeedDataBuilder.MaxSectionID, uint.MaxValue - 1)), 
             Throws.TypeOf<ArgumentException>().Or.TypeOf<ArgumentNullException>());
     }
 }

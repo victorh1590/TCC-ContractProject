@@ -12,10 +12,10 @@ using Voting.Server.Persistence.ContractDefinition;
 using Voting.Server.Tests.Integration.TestNet.Ganache;
 using Voting.Server.Tests.Utils;
 using Voting.Server.UnitTests;
+using static NUnit.Framework.TestContext;
 
 namespace Voting.Server.Tests.Integration;
 
-[Ignore("Debug")]
 [Order(2)]
 [TestFixture]
 public class VotingDbRepositoryTests__ReadSectionAsync : IUseBlockchainAndRepositoryProps
@@ -39,7 +39,7 @@ public class VotingDbRepositoryTests__ReadSectionAsync : IUseBlockchainAndReposi
         
         //Deploy Contract
         TransactionReceipt transaction = await Repository.CreateSectionRange(seedData.Deployment);
-        TestContext.WriteLine("Contract Address: " + transaction.ContractAddress);
+        WriteLine("Contract Address: " + transaction.ContractAddress);
         
         //Check BYTECODE and transaction status.
         Guard.IsNotNullOrEmpty(await Repository.Web3.Eth.GetCode.SendRequestAsync(transaction.ContractAddress));
@@ -47,7 +47,7 @@ public class VotingDbRepositoryTests__ReadSectionAsync : IUseBlockchainAndReposi
 
         //Get valid random section number.
         uint sectionNumber = seedData.Deployment.Sections.OrderBy(_ => Guid.NewGuid()).FirstOrDefault();
-        TestContext.WriteLine($"Trying to access contract and getting section {sectionNumber}...");
+        WriteLine($"Trying to access contract and getting section {sectionNumber}...");
         Section? expectedSection = seedData.Sections
             .Select(section => section)
             .FirstOrDefault(section => section.SectionID == sectionNumber);
@@ -59,8 +59,8 @@ public class VotingDbRepositoryTests__ReadSectionAsync : IUseBlockchainAndReposi
 
         string resultJSON = JsonSerializer.Serialize(sectionData);
         string expectedJSON = JsonSerializer.Serialize(expectedSection);
-        TestContext.WriteLine(resultJSON);
-        TestContext.WriteLine("Expected: " + expectedJSON);
+        WriteLine(resultJSON);
+        WriteLine("Expected: " + expectedJSON);
 
         //Assertions.
         Assert.That(resultJSON, Is.EqualTo(expectedJSON));
@@ -78,15 +78,15 @@ public class VotingDbRepositoryTests__ReadSectionAsync : IUseBlockchainAndReposi
         
         //Deploy Contract
         TransactionReceipt transaction = await Repository.CreateSectionRange(seedData.Deployment);
-        TestContext.WriteLine("Contract Address: " + transaction.ContractAddress);
+        WriteLine("Contract Address: " + transaction.ContractAddress);
         
         //Check BYTECODE and transaction status.
         Guard.IsNotNullOrEmpty(await Repository.Web3.Eth.GetCode.SendRequestAsync(transaction.ContractAddress));
         Guard.IsEqualTo(transaction.Status.ToLong(), 1);
     
         //Get valid random section number NOT IN seedData.
-        uint sectionNumber = TestContext.CurrentContext.Random.NextUInt(SeedDataBuilder.MaxSectionID, uint.MaxValue - 1);
-        TestContext.WriteLine($"Trying to access contract and getting section {sectionNumber}...");
+        uint sectionNumber = CurrentContext.Random.NextUInt(SeedDataBuilder.MaxSectionID, uint.MaxValue - 1);
+        WriteLine($"Trying to access contract and getting section {sectionNumber}...");
     
         //Calls method and convert results to JSON.
         SectionEventDTO? sectionEventDTO = await Repository.ReadSectionAsync(sectionNumber, FilterRange.FromLatestToLatest);

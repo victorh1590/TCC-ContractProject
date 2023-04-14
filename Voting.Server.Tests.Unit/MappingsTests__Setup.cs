@@ -5,11 +5,11 @@ namespace Voting.Server.Tests.Unit;
 [TestFixture]
 public partial class MappingsTests
 {
-    private SeedDataBuilder _seedDataBuilder { get; set; } = default!;
+    private SeedDataBuilder SeedDataBuilder { get; set; } = default!;
 
     [SetUp]
     public void SetUp()
     {
-        _seedDataBuilder = new SeedDataBuilder();
+        SeedDataBuilder = new SeedDataBuilder();
     }
 }

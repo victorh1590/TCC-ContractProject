@@ -10,10 +10,10 @@ using Voting.Server.Persistence.ContractDefinition;
 using Voting.Server.Tests.Integration.TestNet.Ganache;
 using Voting.Server.Tests.Utils;
 using Voting.Server.UnitTests;
+using static NUnit.Framework.TestContext;
 
 namespace Voting.Server.Tests.Integration;
 
-[Ignore("Debug")]
 [Order(3)]
 [TestFixture]
 public class VotingDbRepositoryTests__ReadMetadataAsync : IUseBlockchainAndRepositoryProps
@@ -37,7 +37,7 @@ public class VotingDbRepositoryTests__ReadMetadataAsync : IUseBlockchainAndRepos
 
         //Deploy Contract
         TransactionReceipt transaction = await Repository.CreateSectionRange(seedData.Deployment);
-        TestContext.WriteLine("Contract Address: " + transaction.ContractAddress);
+        WriteLine("Contract Address: " + transaction.ContractAddress);
 
         //Check BYTECODE and transaction status.
         Guard.IsNotNullOrEmpty(await Repository.Web3.Eth.GetCode.SendRequestAsync(transaction.ContractAddress));
@@ -64,7 +64,7 @@ public class VotingDbRepositoryTests__ReadMetadataAsync : IUseBlockchainAndRepos
 
         //Deploy Contract
         TransactionReceipt transaction = await Repository.CreateSectionRange(seedData.Deployment);
-        TestContext.WriteLine("Contract Address: " + transaction.ContractAddress);
+        WriteLine("Contract Address: " + transaction.ContractAddress);
 
         //Check BYTECODE and transaction status.
         Guard.IsNotNullOrEmpty(await Repository.Web3.Eth.GetCode.SendRequestAsync(transaction.ContractAddress));
@@ -76,13 +76,13 @@ public class VotingDbRepositoryTests__ReadMetadataAsync : IUseBlockchainAndRepos
 
         do
         {
-            string randomString = "0x" + TestContext.CurrentContext.Random.GetString(50, "abcdefghijkmnopqrstuvwxyz0123456789");
+            string randomString = "0x" + CurrentContext.Random.GetString(50, "abcdefghijkmnopqrstuvwxyz0123456789");
             fakeAddress = keccack.CalculateHash(randomString).Remove(40);
             fakeAddress = Nethereum.Web3.Web3.ToValid20ByteAddress(fakeAddress);
         } while (fakeAddress == transaction.ContractAddress);
 
-        TestContext.WriteLine("Fake address: " + fakeAddress);
-        TestContext.WriteLine("Fake address length: " + fakeAddress.Length);
+        WriteLine("Fake address: " + fakeAddress);
+        WriteLine("Fake address length: " + fakeAddress.Length);
 
         //Calls method passing fake address.
         MetadataEventDTO? metadataEventDTO = await Repository.ReadMetadataAsync(fakeAddress, FilterRange.FromLatestToLatest);

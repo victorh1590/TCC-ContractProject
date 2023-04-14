@@ -12,10 +12,10 @@ using Voting.Server.Persistence.ContractDefinition;
 using Voting.Server.Tests.Integration.TestNet.Ganache;
 using Voting.Server.Tests.Utils;
 using Voting.Server.UnitTests;
+using static NUnit.Framework.TestContext;
 
 namespace Voting.Server.Tests.Integration;
 
-[Ignore("Debug")]
 [Order(4)]
 [TestFixture]
 public class VotingDbRepositoryTests__ReadVotesByCandidateAndSectionAsync : IUseBlockchainAndRepositoryProps
@@ -39,7 +39,7 @@ public class VotingDbRepositoryTests__ReadVotesByCandidateAndSectionAsync : IUse
         
         //Deploy Contract
         TransactionReceipt transaction = await Repository.CreateSectionRange(seedData.Deployment);
-        TestContext.WriteLine("Contract Address: " + transaction.ContractAddress);
+        WriteLine("Contract Address: " + transaction.ContractAddress);
         
         //Check BYTECODE and transaction status.
         Guard.IsNotNullOrEmpty(await Repository.Web3.Eth.GetCode.SendRequestAsync(transaction.ContractAddress));
@@ -56,8 +56,8 @@ public class VotingDbRepositoryTests__ReadVotesByCandidateAndSectionAsync : IUse
         expectedSection.CandidateVotes.RemoveAll(cv=> cv.Candidate != expectedCandidateVotes.Candidate);
 
         //Prints SectionID and Candidate
-        TestContext.WriteLine($"Trying to access contract and getting section {expectedSection.SectionID}...");
-        TestContext.WriteLine($"Trying to access contract and getting section {expectedCandidateVotes.Candidate}...");
+        WriteLine($"Trying to access contract and getting section {expectedSection.SectionID}...");
+        WriteLine($"Trying to access contract and getting section {expectedCandidateVotes.Candidate}...");
 
         //Calls method and convert results to JSON.
         CandidateEventDTO? candidateEventDTO = 
@@ -66,8 +66,8 @@ public class VotingDbRepositoryTests__ReadVotesByCandidateAndSectionAsync : IUse
         
         string resultJSON = JsonSerializer.Serialize(sectionData);
         string expectedJSON = JsonSerializer.Serialize(expectedSection);
-        TestContext.WriteLine(resultJSON);
-        TestContext.WriteLine("Expected: " + expectedJSON);
+        WriteLine(resultJSON);
+        WriteLine("Expected: " + expectedJSON);
 
         //Assertions.
         Assert.That(resultJSON, Is.EqualTo(expectedJSON));
@@ -86,14 +86,14 @@ public class VotingDbRepositoryTests__ReadVotesByCandidateAndSectionAsync : IUse
         
         //Deploy Contract
         TransactionReceipt transaction = await Repository.CreateSectionRange(seedData.Deployment);
-        TestContext.WriteLine("Contract Address: " + transaction.ContractAddress);
+        WriteLine("Contract Address: " + transaction.ContractAddress);
         
         //Check BYTECODE and transaction status.
         Guard.IsNotNullOrEmpty(await Repository.Web3.Eth.GetCode.SendRequestAsync(transaction.ContractAddress));
         Guard.IsEqualTo(transaction.Status.ToLong(), 1);
 
-        uint invalidSectionNumber = TestContext.CurrentContext.Random.NextUInt(SeedDataBuilder.MaxSectionID, uint.MaxValue - 1);
-        uint InvalidCandidateNumber = TestContext.CurrentContext.Random.NextUInt(SeedDataBuilder.MaxCandidateNumber, uint.MaxValue - 1);
+        uint invalidSectionNumber = CurrentContext.Random.NextUInt(SeedDataBuilder.MaxSectionID, uint.MaxValue - 1);
+        uint InvalidCandidateNumber = CurrentContext.Random.NextUInt(SeedDataBuilder.MaxCandidateNumber, uint.MaxValue - 1);
 
         //Calls method with invalid candidate.
         CandidateEventDTO? resultInvalidCandidate = 
