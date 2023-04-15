@@ -42,11 +42,13 @@ internal class DomainService
         return sectionVotesList;
     }
 
-    // public async Task GetVotesByCandidate(uint candidate = 0)
-    // {
-    //     //TODO return SectionVotes[i].Votes["Name"]
-    // }
-    //
+    public async Task<List<Section>> GetVotesByCandidate(uint candidate = 0)
+    {
+        List<CandidateEventDTO> result = await Repository.ReadVotesByCandidateAsync(candidate);
+        List<Section> votesByCandidate = Mappings.CandidateEventDTOListToSectionList(result);
+        return votesByCandidate;
+    }
+    
     
     public async Task<Section> GetVotesByCandidateForSection(uint candidate = 0, uint sectionNumber = 0)
     {

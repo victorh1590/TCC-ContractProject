@@ -21,6 +21,7 @@ public interface IVotingDbRepository
     Task<string> GetTimestampQueryAsync(string contractAddress, GetTimestampFunction getTimestampFunction, BlockParameter? blockParameter = null);
     Task<string> GetTimestampQueryAsync(string contractAddress, BlockParameter? blockParameter = null);
     Task<SectionEventDTO?> ReadSectionAsync(uint sectionNumber = 0, FilterRange? range = null);
-    Task<CandidateEventDTO?> ReadVotesByCandidateAndSectionAsync(uint candidate = 0, uint sectionNumber = 0, FilterRange? range = null);
+    Task<CandidateEventDTO?> ReadVotesByCandidateAndSectionAsync(uint candidateNumber = 0, uint sectionNumber = 0, FilterRange? range = null);
+    Task<List<CandidateEventDTO>> ReadVotesByCandidateAsync(uint candidateNumber = 0, FilterRange? range = null);
     Task<MetadataEventDTO?> ReadMetadataAsync(string contractAddress, FilterRange? range = null);
 }

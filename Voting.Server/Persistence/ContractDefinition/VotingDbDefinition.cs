@@ -18,14 +18,14 @@ public partial class VotingDbDeployment : VotingDbDeploymentBase, ICloneable
 
     private VotingDbDeployment DeepClone()
     {
-        return new VotingDbDeploymentBase
+        return new VotingDbDeployment
         {
             Votes = new List<List<uint>>(Votes),
             Candidates = new List<uint>(Candidates),
             Sections = new List<uint>(Sections),
             Timestamp = new string(Timestamp),
             CompressedSectionData = new string(CompressedSectionData)
-        } as VotingDbDeployment;
+        };
     }
 
     public object Clone()

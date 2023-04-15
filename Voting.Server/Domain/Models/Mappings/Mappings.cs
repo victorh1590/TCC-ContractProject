@@ -38,6 +38,22 @@ internal class Mappings
         Guard.IsNotEmpty(candidateVotes);
         return new Section(candidateDTO.Section, candidateVotes);
     }
+    
+    //TODO test.
+    public static List<Section> CandidateEventDTOListToSectionList(List<CandidateEventDTO>? candidateDTOList = null)
+    {
+        Guard.IsNotNull(candidateDTOList);
+        Guard.IsNotEmpty(candidateDTOList);
+        List<Section> sections = new();
+        candidateDTOList.ForEach(dto =>
+        {
+            sections.Add(CandidateEventDTOToSection(dto));
+        });
+        
+        Guard.IsNotEmpty(sections);
+        Guard.IsEqualTo(sections.Count, candidateDTOList.Count);
+        return sections;
+    }
 
     public static List<Section> DeploymentToSections(VotingDbDeployment deployment)
     {

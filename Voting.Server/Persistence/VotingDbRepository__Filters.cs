@@ -44,17 +44,31 @@ public partial class VotingDbRepository
         return sectionLog?.Event;
     }
 
-    public async Task<CandidateEventDTO?> ReadVotesByCandidateAndSectionAsync(uint candidate = 0, uint sectionNumber = 0, FilterRange? range = null)
+    public async Task<CandidateEventDTO?> ReadVotesByCandidateAndSectionAsync(
+        uint candidateNumber = 0, uint sectionNumber = 0, FilterRange? range = null)
     {
-        Guard.IsNotEqualTo(candidate, 0);
+        Guard.IsNotEqualTo(candidateNumber, 0);
         Guard.IsNotEqualTo(sectionNumber, 0);
 
         Event<CandidateEventDTO> candidateEventHandler = Web3.Eth.GetEvent<CandidateEventDTO>();
         GetFilterRangeSettings(range ?? FilterRange.FromEarliestToLatest, out BlockParameter from, out BlockParameter to);
-        NewFilterInput candidateEventFilter = candidateEventHandler.CreateFilterInput(candidate, sectionNumber, from, to);
+        NewFilterInput candidateEventFilter = candidateEventHandler
+            .CreateFilterInput(candidateNumber, sectionNumber, from, to);
         List<EventLog<CandidateEventDTO>>? candidateLogList = await candidateEventHandler.GetAllChangesAsync(candidateEventFilter);
         EventLog<CandidateEventDTO>? candidateLog = candidateLogList.FirstOrDefault();
         return candidateLog?.Event;
+    }
+    
+    public async Task<List<CandidateEventDTO>> ReadVotesByCandidateAsync(uint candidateNumber = 0, FilterRange? range = null)
+    {
+        Guard.IsNotEqualTo(candidateNumber, 0);
+
+        Event<CandidateEventDTO> candidateEventHandler = Web3.Eth.GetEvent<CandidateEventDTO>();
+        GetFilterRangeSettings(range ?? FilterRange.FromEarliestToLatest, out BlockParameter from, out BlockParameter to);
+        NewFilterInput candidateEventFilter = candidateEventHandler.CreateFilterInput(candidateNumber, from, to);
+        List<EventLog<CandidateEventDTO>>? candidateLogList = await candidateEventHandler.GetAllChangesAsync(candidateEventFilter);
+        List<CandidateEventDTO> eventLogList = candidateLogList.Select(eventLog => eventLog.Event).ToList();
+        return eventLogList;
     }
 
     public async Task<MetadataEventDTO?> ReadMetadataAsync(string contractAddress, FilterRange? range = null)
