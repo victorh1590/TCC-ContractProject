@@ -42,17 +42,17 @@ internal class DomainService
         return sectionVotesList;
     }
 
-    public async Task<List<Section>> GetVotesByCandidate(uint candidate = 0)
+    public async Task<List<Section>> GetVotesByCandidateAsync(uint candidateNumber = 0)
     {
-        List<CandidateEventDTO> result = await Repository.ReadVotesByCandidateAsync(candidate);
+        List<CandidateEventDTO> result = await Repository.ReadVotesByCandidateAsync(candidateNumber);
         List<Section> votesByCandidate = Mappings.CandidateEventDTOListToSectionList(result);
         return votesByCandidate;
     }
     
     
-    public async Task<Section> GetVotesByCandidateForSection(uint candidate = 0, uint sectionNumber = 0)
+    public async Task<Section> GetVotesByCandidateForSectionAsync(uint candidateNumber = 0, uint sectionNumber = 0)
     {
-        CandidateEventDTO? result = await Repository.ReadVotesByCandidateAndSectionAsync(candidate, sectionNumber);
+        CandidateEventDTO? result = await Repository.ReadVotesByCandidateAndSectionAsync(candidateNumber, sectionNumber);
         Section mappedResult = Mappings.CandidateEventDTOToSection(result);
         return mappedResult;
     }

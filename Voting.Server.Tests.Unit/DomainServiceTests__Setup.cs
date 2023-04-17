@@ -21,17 +21,34 @@ public partial class DomainServiceTests
         
         //Generate seed data.
         _seedData = _seedDataBuilder.GenerateNew(10U, 5U);
+        
+        //Generate sectionEventDTOs
         List<SectionEventDTO> sectionEventDTOs = new List<SectionEventDTO>();
         foreach (var section in _seedData.Sections)
         {
-            SectionEventDTO dto = new SectionEventDTO()
+            SectionEventDTO dto = new SectionEventDTO
             {
                 ContractAddress = "",
                 Section = section.SectionID,
-                Candidates = section.CandidateVotes.Select(x => x.Candidate).ToList(),
-                Votes = section.CandidateVotes.Select(x => x.Votes).ToList()
+                Candidates = section.CandidateVotes.Select(cv => cv.Candidate).ToList(),
+                Votes = section.CandidateVotes.Select(cv => cv.Votes).ToList()
             };
             sectionEventDTOs.Add(dto);
+        }
+
+        //Generate candidateEventDTOs
+        List<CandidateEventDTO> candidateEventDTOs = new List<CandidateEventDTO>();
+        foreach (var section in _seedData.Sections)
+        {
+            candidateEventDTOs.AddRange(section.CandidateVotes.Select(cv => 
+                new CandidateEventDTO
+                {
+                    Candidate = cv.Candidate, 
+                    Votes = cv.Votes, 
+                    Section = section.SectionID, 
+                    ContractAddress = ""
+                })
+            );
         }
 
         //Mock Repository
@@ -40,8 +57,15 @@ public partial class DomainServiceTests
             .Setup(repo=> repo.ReadSectionAsync(
                 It.IsIn<uint>(_seedData.Deployment.Sections), It.IsAny<FilterRange?>()))
             .Returns<uint, FilterRange>((sectionNum, _ ) => 
-                Task.FromResult(sectionEventDTOs.FirstOrDefault(x => x.Section == sectionNum)));
-        
+                Task.FromResult(sectionEventDTOs.FirstOrDefault(dto => dto.Section == sectionNum)));
+        _mockRepository.Setup(repo => repo.ReadVotesByCandidateAndSectionAsync(
+                It.IsIn<uint>(_seedData.Deployment.Candidates), 
+                It.IsIn<uint>(_seedData.Deployment.Sections), 
+                It.IsAny<FilterRange?>()))
+            .Returns<uint, uint, FilterRange>((candidateNum, sectionNum, _) =>
+                Task.FromResult(candidateEventDTOs.FirstOrDefault(dto => 
+                    dto.Section == sectionNum && dto.Candidate == candidateNum)));
+            
         //Instantiate DomainService
         _domainService = new DomainService(_mockRepository.Object);
     }
