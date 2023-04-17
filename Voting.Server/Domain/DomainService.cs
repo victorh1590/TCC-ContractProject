@@ -57,6 +57,21 @@ internal class DomainService
         return mappedResult;
     }
     
+    //TODO Test
+    public async Task<long> GetTotalVotesByCandidateAsync(uint candidateNumber = 0)
+    {
+        List<Section> result = await GetVotesByCandidateAsync(candidateNumber);
+        Guard.IsNotEmpty(result);
+        return result.Select(r => r.CandidateVotes.First()).Sum(cv => cv.Candidate);
+    }
+
+    //TODO Test
+    public async Task<long> GetTotalVotesBySectionAsync(uint sectionNumber = 0)
+    {
+        Section result = await GetSectionAsync(sectionNumber);
+        return result.CandidateVotes.Sum(cv => cv.Votes);
+    }
+    
     public async Task InsertSectionsAsync(List<Section> sections)
     {
         List<Section> uniqueSections = await RemoveRedundantSectionsAsync(sections);

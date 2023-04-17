@@ -55,8 +55,7 @@ public partial class DomainServiceTests
 
         //Mock Repository
         _mockRepository = new Mock<IVotingDbRepository>();
-        _mockRepository
-            .Setup(repo=> repo.ReadSectionAsync(
+        _mockRepository.Setup(repo=> repo.ReadSectionAsync(
                 It.IsIn<uint>(_seedData.Deployment.Sections), It.IsAny<FilterRange?>()))
             .Returns<uint, FilterRange>((sectionNum, _ ) => 
                 Task.FromResult(_sectionEventDTOs.FirstOrDefault(dto => dto.Section == sectionNum)));
