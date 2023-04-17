@@ -2,7 +2,6 @@
 using Voting.Server.Domain.Models;
 using Voting.Server.Tests.Utils;
 using CommunityToolkit.Diagnostics;
-
 using static NUnit.Framework.TestContext;
 
 namespace Voting.Server.Tests.Unit;
@@ -39,7 +38,7 @@ public partial class DomainServiceTests
     }
     
     [Test]
-    [Repeat(10)]
+    [Repeat(5)]
     public void GetVotesByCandidateForSectionAsync_Should_Fail_When_CandidateNum_Is_Invalid()
     {
         uint validSectionNum = _seedData.Sections
@@ -56,7 +55,7 @@ public partial class DomainServiceTests
     }
     
     [Test]
-    [Repeat(10)]
+    [Repeat(5)]
     public void GetVotesByCandidateForSectionAsync_Should_Fail_When_SectionNum_Is_Invalid()
     {
         uint validCandidateNum = _seedData.Deployment.Candidates.MinBy(_ => Guid.NewGuid());

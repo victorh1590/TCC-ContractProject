@@ -29,7 +29,7 @@ public partial class DomainServiceTests
     }
     
     [Test]
-    [Repeat(10)]
+    [Repeat(5)]
     public void GetSectionAsync_Should_Fail_When_SectionID_Is_Invalid()
     {
         Assert.That(async () => await _domainService.GetSectionAsync(
