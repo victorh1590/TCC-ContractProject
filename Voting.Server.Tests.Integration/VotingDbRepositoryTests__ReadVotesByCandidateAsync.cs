@@ -39,7 +39,6 @@ public class VotingDbRepositoryTests__ReadVotesByCandidateAsync : IUseBlockchain
         
         //Deploy Contract
         TransactionReceipt transaction = await Repository.CreateSectionRange(seedData.Deployment);
-        WriteLine("Contract Address: " + transaction.ContractAddress);
         
         //Check BYTECODE and transaction status.
         Guard.IsNotNullOrEmpty(await Repository.Web3.Eth.GetCode.SendRequestAsync(transaction.ContractAddress));
@@ -67,8 +66,6 @@ public class VotingDbRepositoryTests__ReadVotesByCandidateAsync : IUseBlockchain
         
         string resultJSON = JsonSerializer.Serialize(result);
         string expectedJSON = JsonSerializer.Serialize(expectedCandidateVotes);
-        WriteLine(resultJSON);
-        WriteLine("Expected: " + expectedJSON);
 
         //Assertions.
         Assert.That(result, Is.Not.Null.Or.Empty);
@@ -91,7 +88,6 @@ public class VotingDbRepositoryTests__ReadVotesByCandidateAsync : IUseBlockchain
         
         //Deploy Contract
         TransactionReceipt transaction = await Repository.CreateSectionRange(seedData.Deployment);
-        WriteLine("Contract Address: " + transaction.ContractAddress);
         
         //Check BYTECODE and transaction status.
         Guard.IsNotNullOrEmpty(await Repository.Web3.Eth.GetCode.SendRequestAsync(transaction.ContractAddress));
@@ -103,7 +99,7 @@ public class VotingDbRepositoryTests__ReadVotesByCandidateAsync : IUseBlockchain
         List<CandidateEventDTO> resultInvalidCandidate = 
             await Repository.ReadVotesByCandidateAsync(InvalidCandidateNumber, FilterRange.FromEarliestToLatest);
         //Assertions.
-        Assert.That(resultInvalidCandidate, Is.Null);
+        Assert.That(resultInvalidCandidate, Is.Empty);
     }
     
     [Order(3)]

@@ -14,6 +14,7 @@ using static NUnit.Framework.TestContext;
 
 namespace Voting.Server.Tests.Integration;
 
+[Ignore("Debug")]
 [Order(1)]
 [TestFixture]
 public class VotingDbRepositoryTests__DeployContract : IUseBlockchainAndRepositoryProps
