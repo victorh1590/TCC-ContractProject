@@ -64,7 +64,6 @@ internal class DomainService
         return result.Select(section => section.CandidateVotes.Single()).Sum(cv => cv.Votes);
     }
 
-    //TODO Test
     public async Task<long> GetTotalVotesBySectionAsync(uint sectionNumber = 0)
     {
         Section result = await GetSectionAsync(sectionNumber);
