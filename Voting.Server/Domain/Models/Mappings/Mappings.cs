@@ -39,7 +39,6 @@ internal class Mappings
         return new Section(candidateDTO.Section, candidateVotes);
     }
     
-    //TODO test.
     public static List<Section> CandidateEventDTOListToSectionList(List<CandidateEventDTO>? candidateDTOList = null)
     {
         Guard.IsNotNull(candidateDTOList);
@@ -64,7 +63,6 @@ internal class Mappings
         Guard.IsEqualTo(deployment.Votes.First().Count, deployment.Candidates.Count);
         
         List<Section> sections = new();
-        // List<CandidateVotes> candidateVotesList = new();
         for (int i = 0; i < deployment.Votes.Count; i++)
         {
             List<CandidateVotes> candidateVotesList = deployment.Votes[i]

@@ -14,7 +14,7 @@ using static NUnit.Framework.TestContext;
 
 namespace Voting.Server.Tests.Integration;
 
-[Ignore("Debug")]
+// [Ignore("Debug")]
 [Order(3)]
 [TestFixture]
 public class VotingDbRepositoryTests__ReadMetadataAsync : IUseBlockchainAndRepositoryProps
@@ -38,20 +38,21 @@ public class VotingDbRepositoryTests__ReadMetadataAsync : IUseBlockchainAndRepos
 
         //Deploy Contract
         TransactionReceipt transaction = await Repository.CreateSectionRange(seedData.Deployment);
-        WriteLine("Contract Address: " + transaction.ContractAddress);
 
         //Check BYTECODE and transaction status.
         Guard.IsNotNullOrEmpty(await Repository.Web3.Eth.GetCode.SendRequestAsync(transaction.ContractAddress));
         Guard.IsEqualTo(transaction.Status.ToLong(), 1);
 
         //Calls method passing valid address.
-        MetadataEventDTO? metadataEventDTO = await Repository.ReadMetadataAsync(transaction.ContractAddress, FilterRange.FromLatestToLatest);
+        MetadataEventDTO? resultMetadataEventDTO = await Repository.ReadMetadataAsync(transaction.ContractAddress, FilterRange.FromLatestToLatest);
 
         //Assertions.
-        Assert.That(metadataEventDTO, Is.Not.Null);
-        Assert.That(metadataEventDTO.ContractAddress.ToLowerInvariant(), Is.EqualTo(transaction.ContractAddress));
-        Assert.That(metadataEventDTO.Block.ToString(), Is.EqualTo(transaction.BlockNumber.ToString()));
-        CollectionAssert.AreEquivalent(metadataEventDTO.Sections, seedData.Deployment.Sections);
+        Assert.That(resultMetadataEventDTO, Is.Not.Null);
+        Assert.That(resultMetadataEventDTO.ContractAddress.ToLowerInvariant(), Is.Not.SameAs(transaction.ContractAddress));
+        Assert.That(resultMetadataEventDTO.ContractAddress.ToLowerInvariant(), Is.EqualTo(transaction.ContractAddress));
+        Assert.That(resultMetadataEventDTO.Block.ToString(), Is.EqualTo(transaction.BlockNumber.ToString()));
+        Assert.That(resultMetadataEventDTO.Sections, Is.Not.SameAs(seedData.Deployment.Sections));
+        Assert.That(resultMetadataEventDTO.Sections, Is.EquivalentTo(seedData.Deployment.Sections));
     }
 
     [Order(2)]
@@ -65,7 +66,6 @@ public class VotingDbRepositoryTests__ReadMetadataAsync : IUseBlockchainAndRepos
 
         //Deploy Contract
         TransactionReceipt transaction = await Repository.CreateSectionRange(seedData.Deployment);
-        WriteLine("Contract Address: " + transaction.ContractAddress);
 
         //Check BYTECODE and transaction status.
         Guard.IsNotNullOrEmpty(await Repository.Web3.Eth.GetCode.SendRequestAsync(transaction.ContractAddress));

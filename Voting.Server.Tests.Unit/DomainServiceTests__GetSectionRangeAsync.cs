@@ -33,12 +33,15 @@ public partial class DomainServiceTests
         //Assertions
         Assert.That(resultJSON, Is.EqualTo(expectedJSON));
         Assert.That(resultSections.Count, Is.EqualTo(expectedSections.Count));
+        Assert.That(resultSections, Is.Not.SameAs(expectedSections));
+        Assert.That(resultSections.Select(section => section.CandidateVotes), 
+            Is.Not.SameAs(expectedSections.Select(section => section.CandidateVotes)));
         CollectionAssert.AreEquivalent(
-            resultSections.Select(item => item.CandidateVotes).ToArray(),
-            expectedSections.Select(item => item.CandidateVotes).ToArray());
+            resultSections.Select(section => section.CandidateVotes).ToArray(),
+            expectedSections.Select(section => section.CandidateVotes).ToArray());
         CollectionAssert.AreEquivalent(
-            resultSections.Select(item => item.SectionID).ToArray(),
-            expectedSections.Select(item => item.SectionID).ToArray());
+            resultSections.Select(section => section.SectionID).ToArray(),
+            expectedSections.Select(section => section.SectionID).ToArray());
     }
     
     [Test]
@@ -93,11 +96,12 @@ public partial class DomainServiceTests
         //Assertions
         Assert.That(resultJSON, Is.EqualTo(expectedJSON));
         Assert.That(resultSections.Count, Is.EqualTo(expectedSectionsValidOnly.Count));
-        CollectionAssert.AreEquivalent(
-            resultSections.Select(item => item.CandidateVotes).ToArray(),
-            expectedSectionsValidOnly.Select(item => item.CandidateVotes).ToArray());
-        CollectionAssert.AreEquivalent(
-            resultSections.Select(item => item.SectionID).ToArray(),
-            expectedSectionsValidOnly.Select(item => item.SectionID).ToArray());
+        Assert.That(resultSections, Is.Not.SameAs(expectedSectionsValidOnly));
+        Assert.That(resultSections.Select(section => section.CandidateVotes), 
+            Is.Not.SameAs(expectedSectionsValidOnly.Select(section => section.CandidateVotes)));
+        Assert.That(resultSections.Select(section => section.SectionID), 
+            Is.EquivalentTo(expectedSectionsValidOnly.Select(section => section.SectionID)));
+        Assert.That(resultSections.Select(section => section.CandidateVotes), 
+            Is.EquivalentTo(expectedSectionsValidOnly.Select(section => section.CandidateVotes)));
     }
 }

@@ -14,29 +14,32 @@ public partial class DomainServiceTests
     {
         //Select a valid expected section.
         uint expectedCandidate = _seedData.Deployment.Candidates.MinBy(_ => Guid.NewGuid());
-        List<Section> expectedSectionList = new();
+        List<Section> expectedSections = new();
         _candidateEventDTOs
             .Where(dto => dto.Candidate == expectedCandidate)
             .ToList()
-            .ForEach(dto => expectedSectionList.Add(new Section(
+            .ForEach(dto => expectedSections.Add(new Section(
                 dto.Section, new List<CandidateVotes> { new(dto.Candidate, dto.Votes) })
             ));
-        Guard.IsNotNull(expectedSectionList);
-        Guard.IsNotEmpty(expectedSectionList);
+        Guard.IsNotNull(expectedSections);
+        Guard.IsNotEmpty(expectedSections);
 
         //Calls method and convert results to JSON.
-        List<Section> resultSectionList = await _domainService.GetVotesByCandidateAsync(expectedCandidate);
+        List<Section> resultSections = await _domainService.GetVotesByCandidateAsync(expectedCandidate);
 
-        string resultJSON = JsonSerializer.Serialize(resultSectionList);
-        string expectedJSON = JsonSerializer.Serialize(expectedSectionList);
+        string resultJSON = JsonSerializer.Serialize(resultSections);
+        string expectedJSON = JsonSerializer.Serialize(expectedSections);
 
         //Assertions
-        Assert.That(resultSectionList, Is.Not.Null.Or.Empty);
+        Assert.That(resultSections, Is.Not.Null.Or.Empty);
         Assert.That(resultJSON, Is.EqualTo(expectedJSON));
-        Assert.That(resultSectionList.Select(s => s.SectionID), 
-            Is.EquivalentTo(expectedSectionList.Select(s => s.SectionID)));
-        Assert.That(resultSectionList.Select(s => s.CandidateVotes), 
-            Is.EquivalentTo(expectedSectionList.Select(s => s.CandidateVotes)));
+        Assert.That(resultSections, Is.Not.SameAs(expectedSections));
+        Assert.That(resultSections.Select(section => section.CandidateVotes), 
+            Is.Not.SameAs(expectedSections.Select(section => section.CandidateVotes)));
+        Assert.That(resultSections.Select(section => section.SectionID), 
+            Is.EquivalentTo(expectedSections.Select(section => section.SectionID)));
+        Assert.That(resultSections.Select(section => section.CandidateVotes), 
+            Is.EquivalentTo(expectedSections.Select(section => section.CandidateVotes)));
     }
     
     [Test]

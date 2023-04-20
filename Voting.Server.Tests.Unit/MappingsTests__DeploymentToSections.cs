@@ -30,15 +30,19 @@ public partial class MappingsTests
             .Returns(seedData.Deployment.CompressedSectionData);
 
         //Act
-        List<Section> result = Mappings.DeploymentToSections(deploymentMock.Object);
-        string resultJSON = JsonSerializer.Serialize(result);
+        List<Section> resultSections = Mappings.DeploymentToSections(deploymentMock.Object);
+        string resultJSON = JsonSerializer.Serialize(resultSections);
         string expectedSectionsJSON = JsonSerializer.Serialize(expectedSections);
 
         //Assertions
         Assert.That(resultJSON, Is.EqualTo(expectedSectionsJSON));
-        Assert.That(result.Select(section => section.SectionID), 
+        Assert.That(resultSections.Count, Is.EqualTo(expectedSections.Count));
+        Assert.That(resultSections, Is.Not.SameAs(expectedSections));
+        Assert.That(resultSections.Select(section => section.CandidateVotes), 
+            Is.Not.SameAs(expectedSections.Select(section => section.CandidateVotes)));
+        Assert.That(resultSections.Select(section => section.SectionID), 
             Is.EquivalentTo(expectedSections.Select(section => section.SectionID)));
-        Assert.That(result.Select(section => section.CandidateVotes), 
+        Assert.That(resultSections.Select(section => section.CandidateVotes), 
             Is.EquivalentTo(expectedSections.Select(section => section.CandidateVotes)));
     }
 

@@ -62,19 +62,22 @@ public class VotingDbRepositoryTests__ReadVotesByCandidateAsync : IUseBlockchain
         //Calls method and convert results to JSON.
         List<CandidateEventDTO> candidateEventDTOList = 
             await Repository.ReadVotesByCandidateAsync(expectedCandidate, FilterRange.FromEarliestToLatest);
-        List<Section> result = Mappings.CandidateEventDTOListToSectionList(candidateEventDTOList);
+        List<Section> resultSections = Mappings.CandidateEventDTOListToSectionList(candidateEventDTOList);
         
-        string resultJSON = JsonSerializer.Serialize(result);
+        string resultJSON = JsonSerializer.Serialize(resultSections);
         string expectedJSON = JsonSerializer.Serialize(expectedCandidateVotes);
 
         //Assertions.
-        Assert.That(result, Is.Not.Null.Or.Empty);
-        Assert.That(result.Count, Is.EqualTo(expectedCandidateVotes.Count));
+        Assert.That(resultSections, Is.Not.Null.Or.Empty);
+        Assert.That(resultSections.Count, Is.EqualTo(expectedCandidateVotes.Count));
         Assert.That(resultJSON, Is.EqualTo(expectedJSON));
-        Assert.That(result.Select(s => s.SectionID), 
-            Is.EqualTo(expectedCandidateVotes.Select(s => s.SectionID)));
-        Assert.That(result.Select(s => s.CandidateVotes), 
-            Is.EqualTo(expectedCandidateVotes.Select(s => s.CandidateVotes)));
+        Assert.That(resultSections, Is.Not.SameAs(expectedCandidateVotes));
+        Assert.That(resultSections.Select(section => section.CandidateVotes), 
+            Is.Not.SameAs(expectedCandidateVotes.Select(section => section.CandidateVotes)));
+        Assert.That(resultSections.Select(section => section.SectionID), 
+            Is.EqualTo(expectedCandidateVotes.Select(section => section.SectionID)));
+        Assert.That(resultSections.Select(section => section.CandidateVotes), 
+            Is.EqualTo(expectedCandidateVotes.Select(section => section.CandidateVotes)));
     }
     
     [Order(2)]

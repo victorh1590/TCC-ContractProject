@@ -50,19 +50,18 @@ internal class DomainService
     }
     
     
-    public async Task<Section> GetVotesByCandidateForSectionAsync(uint candidateNumber = 0, uint sectionNumber = 0)
+    public async Task<Section> GetVotesByCandidateAndSectionAsync(uint candidateNumber = 0, uint sectionNumber = 0)
     {
         CandidateEventDTO? result = await Repository.ReadVotesByCandidateAndSectionAsync(candidateNumber, sectionNumber);
         Section mappedResult = Mappings.CandidateEventDTOToSection(result);
         return mappedResult;
     }
     
-    //TODO Test
     public async Task<long> GetTotalVotesByCandidateAsync(uint candidateNumber = 0)
     {
         List<Section> result = await GetVotesByCandidateAsync(candidateNumber);
         Guard.IsNotEmpty(result);
-        return result.Select(r => r.CandidateVotes.First()).Sum(cv => cv.Candidate);
+        return result.Select(section => section.CandidateVotes.Single()).Sum(cv => cv.Votes);
     }
 
     //TODO Test

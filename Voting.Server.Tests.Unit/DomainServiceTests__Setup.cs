@@ -81,5 +81,7 @@ public partial class DomainServiceTests
         _seedData = default!;
         _mockRepository = default!;
         _domainService = default!;
+        _sectionEventDTOs = default!;
+        _candidateEventDTOs = default!;
     }
 }

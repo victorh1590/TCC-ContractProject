@@ -21,20 +21,31 @@ public partial class MappingsTests
         Guard.IsNotNull(expectedDeployment);
         
         //Act
-        VotingDbDeployment result = Mappings.SectionsListToDeployment(seedData.Sections);
-        string resultJSON = JsonSerializer.Serialize(result);
+        VotingDbDeployment resultDeployment = Mappings.SectionsListToDeployment(seedData.Sections);
+        
+        //SectionsListToDeployment will make a new timestamp and it can be different from the seedData timestamp.
+        //In that case, the JSONs will differ. So i'm forcing equality here.
+        seedData.Deployment.Timestamp = resultDeployment.Timestamp;
+        
+        //Generate JSONs
+        string resultJSON = JsonSerializer.Serialize(resultDeployment);
         string expectedDeploymentJSON = JsonSerializer.Serialize(expectedDeployment);
 
         //Assertions
         Assert.That(resultJSON, Is.EqualTo(expectedDeploymentJSON));
-        Assert.That(result.Candidates, Is.EqualTo(expectedDeployment.Candidates));
-        Assert.That(result.Sections, Is.EqualTo(expectedDeployment.Sections));
-        Assert.That(result.Votes, Is.EqualTo(expectedDeployment.Votes));
-        Assert.That(result.Timestamp, Is.Not.Empty);
-        Assert.That(result.Timestamp, Is.InstanceOf(typeof(string)));
-        Assert.That(DateTime.TryParse(result.Timestamp, out DateTime resultDate), Is.True);
-        Assert.That(result.Timestamp, Is.EqualTo(resultDate.ToString(CultureInfo.InvariantCulture)));
-        Assert.That(result.CompressedSectionData, Is.EqualTo(expectedDeployment.CompressedSectionData));
+        Assert.That(resultDeployment, Is.Not.SameAs(expectedDeployment));
+        Assert.That(resultDeployment.Sections, Is.Not.SameAs(expectedDeployment.Sections));
+        Assert.That(resultDeployment.Candidates, Is.Not.SameAs(expectedDeployment.Candidates));
+        Assert.That(resultDeployment.Votes, Is.Not.SameAs(expectedDeployment.Votes));
+        Assert.That(resultDeployment.CompressedSectionData, Is.Not.SameAs(expectedDeployment.CompressedSectionData));
+        Assert.That(resultDeployment.Candidates, Is.EqualTo(expectedDeployment.Candidates));
+        Assert.That(resultDeployment.Sections, Is.EqualTo(expectedDeployment.Sections));
+        Assert.That(resultDeployment.Votes, Is.EqualTo(expectedDeployment.Votes));
+        Assert.That(resultDeployment.Timestamp, Is.Not.Empty);
+        Assert.That(resultDeployment.Timestamp, Is.InstanceOf(typeof(string)));
+        Assert.That(DateTime.TryParse(resultDeployment.Timestamp, out DateTime resultDate), Is.True);
+        Assert.That(resultDeployment.Timestamp, Is.EqualTo(resultDate.ToString(CultureInfo.InvariantCulture)));
+        Assert.That(resultDeployment.CompressedSectionData, Is.EqualTo(expectedDeployment.CompressedSectionData));
     }
 
     [Test]

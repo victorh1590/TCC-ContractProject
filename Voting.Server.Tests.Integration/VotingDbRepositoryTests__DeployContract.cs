@@ -14,7 +14,7 @@ using static NUnit.Framework.TestContext;
 
 namespace Voting.Server.Tests.Integration;
 
-[Ignore("Debug")]
+// [Ignore("Debug")]
 [Order(1)]
 [TestFixture]
 public class VotingDbRepositoryTests__DeployContract : IUseBlockchainAndRepositoryProps
@@ -25,13 +25,13 @@ public class VotingDbRepositoryTests__DeployContract : IUseBlockchainAndReposito
     public IWeb3ClientsManager ClientsManager { get; set; } = default!;
     public IVotingDbRepository Repository { get; set; } = default!;
     public string Account { get; set; } = default!;
-    public BlockParameter Latest { get; } = BlockParameter.CreateLatest();
-    public BlockParameter Pending { get; } = BlockParameter.CreatePending();
-    public BlockParameter Ealiest { get; } = BlockParameter.CreateEarliest();
+    private BlockParameter Latest { get; } = BlockParameter.CreateLatest();
+    private BlockParameter Pending { get; } = BlockParameter.CreatePending();
+    private BlockParameter Ealiest { get; } = BlockParameter.CreateEarliest();
     private readonly SeedDataBuilder _seedDataBuilder = new();
     
     [Order(1)]
-    [Theory]
+    [Test]
     public async Task CreateSectionRange_Should_Deploy_Valid_Contract()
     {
         Thread.Sleep(5000);
@@ -55,12 +55,13 @@ public class VotingDbRepositoryTests__DeployContract : IUseBlockchainAndReposito
         Assert.That(completedTransactionCount, Is.EqualTo(1));
         
         //Successfully creates ContractHandler.
-        WriteLine("Contract Address: " + transaction.ContractAddress);
         ContractHandler handler = Repository.Web3.Eth.GetContractHandler(transaction.ContractAddress);
         Assert.That(handler, Is.Not.Null);
         
         //Contract returns data.
-        var compressedDataResult = await handler.QueryAsync<GetCompressedDataFunction?, string>(null, Latest);
+        var compressedDataResult = 
+            await handler.QueryAsync<GetCompressedDataFunction?, string>(null, Latest);
+        Assert.That(compressedDataResult, Is.Not.SameAs(seedData.Deployment.CompressedSectionData));
         Assert.That(compressedDataResult, Is.EqualTo(seedData.Deployment.CompressedSectionData));
     }
     

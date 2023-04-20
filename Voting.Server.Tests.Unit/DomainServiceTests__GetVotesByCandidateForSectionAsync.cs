@@ -25,7 +25,7 @@ public partial class DomainServiceTests
         uint expectedCandidate = expectedSection.CandidateVotes.First().Candidate;
 
         //Calls method and convert results to JSON.
-        Section resultSection = await _domainService.GetVotesByCandidateForSectionAsync(
+        Section resultSection = await _domainService.GetVotesByCandidateAndSectionAsync(
             expectedCandidate, expectedSection.SectionID);
 
         string resultJSON = JsonSerializer.Serialize(resultSection);
@@ -33,6 +33,8 @@ public partial class DomainServiceTests
 
         //Assertions
         Assert.That(resultJSON, Is.EqualTo(expectedJSON));
+        Assert.That(resultSection, Is.Not.SameAs(expectedSection));
+        Assert.That(resultSection.CandidateVotes, Is.Not.SameAs(expectedSection.CandidateVotes));
         Assert.That(resultSection.CandidateVotes, Is.EquivalentTo(expectedSection.CandidateVotes));
         Assert.That(resultSection.SectionID, Is.EqualTo(expectedSection.SectionID));
     }
@@ -45,12 +47,12 @@ public partial class DomainServiceTests
             .OrderBy(_ => Guid.NewGuid())
             .First()
             .SectionID;
-        Assert.That(async () => await _domainService.GetVotesByCandidateForSectionAsync(
+        Assert.That(async () => await _domainService.GetVotesByCandidateAndSectionAsync(
                 CurrentContext.Random.NextUInt(SeedDataBuilder.MaxCandidateNumber, uint.MaxValue - 1),
                 validSectionNum), Throws.TypeOf<ArgumentException>().Or.TypeOf<ArgumentNullException>());
-        Assert.That(async () => await _domainService.GetVotesByCandidateForSectionAsync(0, validSectionNum), 
+        Assert.That(async () => await _domainService.GetVotesByCandidateAndSectionAsync(0, validSectionNum), 
             Throws.TypeOf<ArgumentException>().Or.TypeOf<ArgumentNullException>());
-        Assert.That(async () => await _domainService.GetVotesByCandidateForSectionAsync(), 
+        Assert.That(async () => await _domainService.GetVotesByCandidateAndSectionAsync(), 
             Throws.TypeOf<ArgumentException>().Or.TypeOf<ArgumentNullException>());
     }
     
@@ -59,10 +61,10 @@ public partial class DomainServiceTests
     public void GetVotesByCandidateForSectionAsync_Should_Fail_When_SectionNum_Is_Invalid()
     {
         uint validCandidateNum = _seedData.Deployment.Candidates.MinBy(_ => Guid.NewGuid());
-        Assert.That(async () => await _domainService.GetVotesByCandidateForSectionAsync(validCandidateNum,
+        Assert.That(async () => await _domainService.GetVotesByCandidateAndSectionAsync(validCandidateNum,
             CurrentContext.Random.NextUInt(SeedDataBuilder.MaxCandidateNumber, uint.MaxValue - 1)), 
             Throws.TypeOf<ArgumentException>().Or.TypeOf<ArgumentNullException>());
-        Assert.That(async () => await _domainService.GetVotesByCandidateForSectionAsync(validCandidateNum), 
+        Assert.That(async () => await _domainService.GetVotesByCandidateAndSectionAsync(validCandidateNum), 
             Throws.TypeOf<ArgumentException>().Or.TypeOf<ArgumentNullException>());
     }
 }

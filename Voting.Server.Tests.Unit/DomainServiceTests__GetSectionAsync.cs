@@ -24,6 +24,8 @@ public partial class DomainServiceTests
 
         //Assertions
         Assert.That(resultJSON, Is.EqualTo(expectedJSON));
+        Assert.That(resultSection, Is.Not.SameAs(expectedSection));
+        Assert.That(resultSection.CandidateVotes, Is.Not.SameAs(expectedSection.CandidateVotes));
         Assert.That(resultSection.CandidateVotes, Is.EquivalentTo(expectedSection.CandidateVotes));
         Assert.That(resultSection.SectionID, Is.EqualTo(expectedSection.SectionID));
     }

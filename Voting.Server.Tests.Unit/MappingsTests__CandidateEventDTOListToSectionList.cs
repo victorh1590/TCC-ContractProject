@@ -5,7 +5,6 @@ using Voting.Server.Domain.Models.Mappings;
 using Voting.Server.Persistence.ContractDefinition;
 using Voting.Server.Tests.Utils;
 using CommunityToolkit.Diagnostics;
-using static NUnit.Framework.TestContext;
 
 namespace Voting.Server.Tests.Unit;
 
@@ -24,7 +23,7 @@ public partial class MappingsTests
         Guard.IsNotEqualTo(expectedCandidateIndex, -1);
         
         //Generate list with all sections containing the selected candidate votes.
-        List<Section> expectedSectionList = new();
+        List<Section> expectedSections = new();
         foreach (Section section in seedData.Sections)
         {
             List<CandidateVotes> cvList = section.CandidateVotes
@@ -32,11 +31,11 @@ public partial class MappingsTests
                 .ToList();
             Guard.IsEqualTo(cvList.Count, 1);
             
-            expectedSectionList.Add(new Section(section.SectionID, cvList));
+            expectedSections.Add(new Section(section.SectionID, cvList));
         }
         
-        Guard.IsNotNull(expectedSectionList);
-        Guard.IsNotEmpty(expectedSectionList);
+        Guard.IsNotNull(expectedSections);
+        Guard.IsNotEmpty(expectedSections);
 
         //Generate list of CandidateEventDTOs.
         List<CandidateEventDTO> candidateEventDTOList = new();
@@ -55,18 +54,21 @@ public partial class MappingsTests
         Guard.IsNotEmpty(candidateEventDTOList);
         
         //Act
-        List<Section> result = Mappings.CandidateEventDTOListToSectionList(candidateEventDTOList);
-        string resultJSON = JsonSerializer.Serialize(result);
-        string expectedSectionListJSON = JsonSerializer.Serialize(expectedSectionList);
+        List<Section> resultSections = Mappings.CandidateEventDTOListToSectionList(candidateEventDTOList);
+        string resultJSON = JsonSerializer.Serialize(resultSections);
+        string expectedSectionListJSON = JsonSerializer.Serialize(expectedSections);
         
         //Assertions
-        Assert.That(result, Is.Not.Null.Or.Empty);
-        Assert.That(result.Count, Is.EqualTo(expectedSectionList.Count));
+        Assert.That(resultSections, Is.Not.Null.Or.Empty);
+        Assert.That(resultSections.Count, Is.EqualTo(expectedSections.Count));
+        Assert.That(resultSections, Is.Not.SameAs(expectedSections));
+        Assert.That(resultSections.Select(section => section.CandidateVotes), 
+            Is.Not.SameAs(expectedSections.Select(section => section.CandidateVotes)));
         Assert.That(resultJSON, Is.EqualTo(expectedSectionListJSON));
-        Assert.That(result.Select(r => r.SectionID), 
-            Is.EqualTo(expectedSectionList.Select(r => r.SectionID)));
-        Assert.That(result.Select(r => r.CandidateVotes), 
-            Is.EqualTo(expectedSectionList.Select(r => r.CandidateVotes)));
+        Assert.That(resultSections.Select(section => section.SectionID), 
+            Is.EqualTo(expectedSections.Select(section => section.SectionID)));
+        Assert.That(resultSections.Select(section => section.CandidateVotes), 
+            Is.EqualTo(expectedSections.Select(section => section.CandidateVotes)));
     }
     
      [Test]

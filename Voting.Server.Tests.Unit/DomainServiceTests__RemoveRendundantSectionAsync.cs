@@ -25,18 +25,21 @@ public partial class DomainServiceTests
         );
         
         //Act
-        List<Section> result = await _domainService.RemoveRedundantSectionsAsync(entrySeedData);
-        result.Sort((x, y) => x.SectionID > y.SectionID ? 1 : -1 );
+        List<Section> resultSections = await _domainService.RemoveRedundantSectionsAsync(entrySeedData);
+        resultSections.Sort((x, y) => x.SectionID > y.SectionID ? 1 : -1 );
         expectedSections.Sort((x, y) => x.SectionID > y.SectionID ? 1 : -1);
-        string resultJSON = JsonSerializer.Serialize(result);
+        string resultJSON = JsonSerializer.Serialize(resultSections);
         string expectedJSON = JsonSerializer.Serialize(expectedSections);
         
         //Assertions
         Assert.That(resultJSON, Is.EqualTo(expectedJSON));
-        Assert.That(result.Count, Is.EqualTo(expectedSections.Count));
-        Assert.That(result.Select(section => section.SectionID), 
+        Assert.That(resultSections.Count, Is.EqualTo(expectedSections.Count));
+        Assert.That(resultSections, Is.Not.SameAs(expectedSections));
+        Assert.That(resultSections.Select(section => section.CandidateVotes), 
+            Is.Not.SameAs(expectedSections.Select(section => section.CandidateVotes)));
+        Assert.That(resultSections.Select(section => section.SectionID), 
             Is.EquivalentTo(expectedSections.Select(section => section.SectionID)));
-        Assert.That(result.Select(section => section.CandidateVotes), 
+        Assert.That(resultSections.Select(section => section.CandidateVotes), 
             Is.EquivalentTo(expectedSections.Select(section => section.CandidateVotes)));
 
     }
@@ -52,19 +55,22 @@ public partial class DomainServiceTests
         List<Section> expectedSections = new(seedData2.Sections);
 
         //Act
-        List<Section> result = await _domainService.RemoveRedundantSectionsAsync(expectedSections);
-        result.Sort((x, y) => x.SectionID > y.SectionID ? 1 : -1 );
+        List<Section> resultSections = await _domainService.RemoveRedundantSectionsAsync(expectedSections);
+        resultSections.Sort((x, y) => x.SectionID > y.SectionID ? 1 : -1 );
         expectedSections.Sort((x, y) => x.SectionID > y.SectionID ? 1 : -1);
-        string resultJSON = JsonSerializer.Serialize(result);
+        string resultJSON = JsonSerializer.Serialize(resultSections);
         string expectedJSON = JsonSerializer.Serialize(expectedSections);
         
         //Assertions
         Assert.That(resultJSON, Is.EqualTo(expectedJSON));
-        Assert.That(result.Count, Is.EqualTo(seedData2.Sections.Count));
-        Assert.That(result.Count, Is.EqualTo(expectedSections.Count));
-        Assert.That(result.Select(section => section.SectionID), 
+        Assert.That(resultSections.Count, Is.EqualTo(seedData2.Sections.Count));
+        Assert.That(resultSections.Count, Is.EqualTo(expectedSections.Count));
+        Assert.That(resultSections, Is.Not.SameAs(expectedSections));
+        Assert.That(resultSections.Select(section => section.CandidateVotes), 
+            Is.Not.SameAs(expectedSections.Select(section => section.CandidateVotes)));
+        Assert.That(resultSections.Select(section => section.SectionID), 
             Is.EquivalentTo(expectedSections.Select(section => section.SectionID)));
-        Assert.That(result.Select(section => section.CandidateVotes), 
+        Assert.That(resultSections.Select(section => section.CandidateVotes), 
             Is.EquivalentTo(expectedSections.Select(section => section.CandidateVotes)));
     }
     
@@ -76,17 +82,17 @@ public partial class DomainServiceTests
         List<Section> expectedSections = new List<Section>();
 
         //Act
-        List<Section> result = await _domainService.RemoveRedundantSectionsAsync(_seedData.Sections);
-        string resultJSON = JsonSerializer.Serialize(result);
+        List<Section> resultSections = await _domainService.RemoveRedundantSectionsAsync(_seedData.Sections);
+        string resultJSON = JsonSerializer.Serialize(resultSections);
         string expectedJSON = JsonSerializer.Serialize(expectedSections);
         
         //Assertions
         Assert.That(resultJSON, Is.EqualTo(expectedJSON));
-        Assert.That(result, Is.Empty);
-        Assert.That(result.Count, Is.EqualTo(expectedSections.Count));
-        Assert.That(result.Select(section => section.SectionID), 
+        Assert.That(resultSections, Is.Empty);
+        Assert.That(resultSections.Count, Is.EqualTo(expectedSections.Count));
+        Assert.That(resultSections.Select(section => section.SectionID), 
             Is.EquivalentTo(expectedSections.Select(section => section.SectionID)));
-        Assert.That(result.Select(section => section.CandidateVotes), 
+        Assert.That(resultSections.Select(section => section.CandidateVotes), 
             Is.EquivalentTo(expectedSections.Select(section => section.CandidateVotes)));
     }
     

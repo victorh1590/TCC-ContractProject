@@ -65,14 +65,15 @@ internal class DomainServiceTests__InsertSectionsAsync : IUseBlockchainAndReposi
         //Assertions.
         Assert.That(resultSections, Is.Not.Null.Or.Empty);
         Assert.That(resultJSON, Is.EqualTo(expectedJSON));
-        CollectionAssert.AllItemsAreUnique(resultSections);
-        CollectionAssert.AllItemsAreNotNull(resultSections);
-        CollectionAssert.AreEquivalent(
-            resultSections.Select(r => r.SectionID), 
-            expectedSections.Select(e => e.SectionID));
-        CollectionAssert.AreEquivalent(
-            resultSections.Select(r => r.CandidateVotes), 
-            expectedSections.Select(e => e.CandidateVotes));
+        Assert.That(resultSections, Is.Not.SameAs(expectedSections));
+        Assert.That(resultSections.Select(section => section.CandidateVotes), 
+            Is.Not.SameAs(expectedSections.Select(section => section.CandidateVotes)));
+        Assert.That(resultSections, Is.Unique);
+        Assert.That(resultSections, Is.All.Not.Null);
+        Assert.That(resultSections.Select(section => section.SectionID), 
+            Is.EquivalentTo(expectedSections.Select(section => section.SectionID)));
+        Assert.That(resultSections.Select(section => section.CandidateVotes), 
+            Is.EquivalentTo(expectedSections.Select(section => section.CandidateVotes)));
     }
     
     [Order(2)]

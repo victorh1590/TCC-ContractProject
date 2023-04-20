@@ -79,7 +79,7 @@ public partial class VotingDbRepository
         GetFilterRangeSettings(range ?? FilterRange.FromEarliestToLatest, out BlockParameter from, out BlockParameter to);
         NewFilterInput metadataEventFilter = metadataEventHandler.CreateFilterInput(contractAddress, from, to);
         List<EventLog<MetadataEventDTO>>? metadataLogList = await metadataEventHandler.GetAllChangesAsync(metadataEventFilter);
-        EventLog<MetadataEventDTO>? metadataLog = metadataLogList.FirstOrDefault();
+        EventLog<MetadataEventDTO>? metadataLog = metadataLogList.SingleOrDefault();
         return metadataLog?.Event;
     }
 }

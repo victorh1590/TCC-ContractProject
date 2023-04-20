@@ -26,13 +26,15 @@ public partial class MappingsTests
         sectionEventDTOMock.Setup(dto => dto.Votes).Returns(seedData.Deployment.Votes[randomSectionIndex]);
         
         //Act
-        Section result = Mappings.SectionEventDTOToSection(sectionEventDTOMock.Object);
-        string resultJSON = JsonSerializer.Serialize(result);
+        Section resultSection = Mappings.SectionEventDTOToSection(sectionEventDTOMock.Object);
+        string resultJSON = JsonSerializer.Serialize(resultSection);
         string expectedSectionJSON = JsonSerializer.Serialize(expectedSection);
         
         //Assertions
-        Assert.That(result.SectionID, Is.EqualTo(expectedSection.SectionID));
-        Assert.That(result.CandidateVotes, Is.EqualTo(expectedSection.CandidateVotes));
+        Assert.That(resultSection.SectionID, Is.EqualTo(expectedSection.SectionID));
+        Assert.That(resultSection.CandidateVotes, Is.EqualTo(expectedSection.CandidateVotes));
+        Assert.That(resultSection, Is.Not.SameAs(expectedSection));
+        Assert.That(resultSection.CandidateVotes, Is.Not.SameAs(expectedSection.CandidateVotes));
         Assert.That(resultJSON, Is.EqualTo(expectedSectionJSON));
     }
     
