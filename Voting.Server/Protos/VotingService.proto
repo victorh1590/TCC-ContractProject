@@ -7,9 +7,9 @@ import "google/protobuf/timestamp.proto";
 service VotingService {
 	rpc GetCandidateVotes(CandidateIdRequest) returns (SectionListReply) {}
 	rpc GetSectionVotes(SectionIdRequest) returns (SectionReply) {}
-	rpc GetTotalVotes(google.protobuf.Empty) returns (TotalVotesReply) {}
+	rpc GetTotalVotesBySection(SectionIdRequest) returns (TotalVotesReply) {}
 	rpc GetTotalVotesByCandidate(CandidateIdRequest) returns (TotalVotesReply) {}
-	rpc CreateSection(stream SectionsCreationRequest) returns (stream SectionsCreationReply) {}
+	rpc CreateSection(stream SectionCreationRequest) returns (stream SectionsCreationReply) {}
 }
 
 message SectionListReply 
@@ -38,9 +38,9 @@ message SectionsCreationReply
 {
 }
 
-message SectionsCreationRequest
+message SectionCreationRequest
 {
-	repeated SectionReply Sections = 1;
+	SectionReply Section = 1;
 }
 
 message CandidateIdRequest
