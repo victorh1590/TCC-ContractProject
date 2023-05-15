@@ -1,5 +1,6 @@
 ﻿using System.Text.Json;
-using Voting.Server.Domain.Models;
+using Voting.Server.Protos;
+// using Voting.Server.Domain.Models;
 using Voting.Server.Tests.Utils;
 using static NUnit.Framework.TestContext;
 

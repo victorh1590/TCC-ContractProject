@@ -1,6 +1,7 @@
 ﻿using System.Text.Json;
 using CommunityToolkit.Diagnostics;
-using Voting.Server.Domain.Models;
+// using Voting.Server.Domain.Models;
+using Voting.Server.Protos;
 using Voting.Server.Tests.Utils;
 using static NUnit.Framework.TestContext;
 
@@ -81,9 +82,11 @@ public partial class DomainServiceTests
         //Add Invalid Data
         for (int i = 0; i < invalidDataVariance; i++)
         {
-            expectedSectionsWithInvalids.Add(new Section(
-                CurrentContext.Random.NextUInt(SeedDataBuilder.MaxSectionID, uint.MaxValue - 1),
-                new List<CandidateVotes>()));
+            Section section = new Section();
+            section.SectionID = CurrentContext.Random.NextUInt(SeedDataBuilder.MaxSectionID, uint.MaxValue - 1);
+            section.CandidateVotes.AddRange(new List<CandidateVotes>());
+            
+            expectedSectionsWithInvalids.Add(new Section());
         }
     
         //Calls method and convert results to JSON.

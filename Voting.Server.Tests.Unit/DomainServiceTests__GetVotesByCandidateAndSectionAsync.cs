@@ -1,7 +1,8 @@
 ﻿using System.Text.Json;
-using Voting.Server.Domain.Models;
+// using Voting.Server.Domain.Models;
 using Voting.Server.Tests.Utils;
 using CommunityToolkit.Diagnostics;
+using Voting.Server.Protos;
 using static NUnit.Framework.TestContext;
 
 namespace Voting.Server.Tests.Unit;
@@ -16,12 +17,13 @@ public partial class DomainServiceTests
         Section expectedSection = _seedData.Sections
             .OrderBy(_ => Guid.NewGuid())
             .First();
-        expectedSection.CandidateVotes = new List<CandidateVotes>
+        expectedSection.CandidateVotes.AddRange(new List<CandidateVotes?>
         {
             expectedSection.CandidateVotes.MinBy(_ => Guid.NewGuid())
-        };
+        });
         Guard.IsNotNull(expectedSection);
-        Guard.IsNotEmpty(expectedSection.CandidateVotes);
+        Guard.IsNotNull(expectedSection.CandidateVotes.FirstOrDefault());
+        Guard.IsNotEmpty(expectedSection.CandidateVotes.ToList());
         uint expectedCandidate = expectedSection.CandidateVotes.First().Candidate;
 
         //Calls method and convert results to JSON.

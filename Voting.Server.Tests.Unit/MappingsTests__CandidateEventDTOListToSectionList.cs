@@ -1,10 +1,11 @@
 ﻿using Moq;
 using System.Text.Json;
-using Voting.Server.Domain.Models;
+// using Voting.Server.Domain.Models;
 using Voting.Server.Domain.Models.Mappings;
 using Voting.Server.Persistence.ContractDefinition;
 using Voting.Server.Tests.Utils;
 using CommunityToolkit.Diagnostics;
+using Voting.Server.Protos;
 
 namespace Voting.Server.Tests.Unit;
 
@@ -30,8 +31,11 @@ public partial class MappingsTests
                 .Where(cv => cv.Candidate == expectedCandidate)
                 .ToList();
             Guard.IsEqualTo(cvList.Count, 1);
-            
-            expectedSections.Add(new Section(section.SectionID, cvList));
+
+            Section s = new Section();
+            s.SectionID = section.SectionID;
+            s.CandidateVotes.AddRange(cvList);
+            expectedSections.Add(s);
         }
         
         Guard.IsNotNull(expectedSections);
@@ -103,7 +107,10 @@ public partial class MappingsTests
                 .ToList();
             Guard.IsEqualTo(cvList.Count, 1);
             
-            expectedSectionList.Add(new Section(section.SectionID, cvList));
+            Section s = new Section();
+            s.SectionID = section.SectionID;
+            s.CandidateVotes.AddRange(cvList);
+            expectedSectionList.Add(s);
         }
         
         Guard.IsNotNull(expectedSectionList);

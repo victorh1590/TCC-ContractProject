@@ -22,6 +22,10 @@
     </ItemGroup>
 
     <ItemGroup>
+        <Protobuf Include="..\Voting.Server\Protos\VotingService.proto" GrpcServices="VotingService" />
+    </ItemGroup>
+
+    <ItemGroup>
         <ProjectReference Include="..\Voting.Server.Tests.Utils\Voting.Server.Tests.Utils.csproj" />
         <ProjectReference Include="..\Voting.Server\Voting.Server.csproj" />
     </ItemGroup>

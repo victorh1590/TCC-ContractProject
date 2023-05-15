@@ -1,8 +1,9 @@
 ﻿using Moq;
 using System.Text.Json;
-using Voting.Server.Domain.Models;
+// using Voting.Server.Domain.Models;
 using Voting.Server.Domain.Models.Mappings;
 using Voting.Server.Persistence.ContractDefinition;
+using Voting.Server.Protos;
 using Voting.Server.Tests.Utils;
 
 namespace Voting.Server.Tests.Unit;

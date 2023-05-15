@@ -1,7 +1,8 @@
 ﻿using System.Text.Json;
-using Voting.Server.Domain.Models;
+// using Voting.Server.Domain.Models;
 using Voting.Server.Tests.Utils;
 using CommunityToolkit.Diagnostics;
+using Voting.Server.Protos;
 using static NUnit.Framework.TestContext;
 
 namespace Voting.Server.Tests.Unit;
@@ -18,9 +19,19 @@ public partial class DomainServiceTests
         _candidateEventDTOs
             .Where(dto => dto.Candidate == expectedCandidate)
             .ToList()
-            .ForEach(dto => expectedSections.Add(new Section(
-                dto.Section, new List<CandidateVotes> { new(dto.Candidate, dto.Votes) })
-            ));
+            .ForEach(dto =>
+            {
+                Section section = new Section();
+                CandidateVotes cv = new CandidateVotes
+                {
+                    Candidate = dto.Candidate,
+                    Votes = dto.Votes
+                };
+                section.SectionID = dto.Section;
+                section.CandidateVotes.Add(cv);
+
+                expectedSections.Add(section);
+            });
         Guard.IsNotNull(expectedSections);
         Guard.IsNotEmpty(expectedSections);
 

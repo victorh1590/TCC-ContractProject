@@ -1,10 +1,11 @@
 ﻿using Moq;
 using System.Text.Json;
-using Voting.Server.Domain.Models;
+// using Voting.Server.Domain.Models;
 using Voting.Server.Domain.Models.Mappings;
 using Voting.Server.Persistence.ContractDefinition;
 using Voting.Server.Tests.Utils;
 using CommunityToolkit.Diagnostics;
+using Voting.Server.Protos;
 using static NUnit.Framework.TestContext;
 
 namespace Voting.Server.Tests.Unit;
@@ -21,9 +22,11 @@ public partial class MappingsTests
         SeedData seedData = SeedDataBuilder.GenerateNew(30, 5);
         Section? expectedSection = seedData.Sections[randomSectionIndex].Clone() as Section;
         Guard.IsNotNull(expectedSection);
-        expectedSection.CandidateVotes = expectedSection.CandidateVotes
+        List<CandidateVotes> cvList = new List<CandidateVotes>(expectedSection.CandidateVotes
             .Where(candidateVotes => candidateVotes.Candidate == seedData.Deployment.Candidates[randomCandidateIndex])
-            .ToList();
+            .ToList());
+        expectedSection.CandidateVotes.Clear();
+        expectedSection.CandidateVotes.AddRange(cvList);
         Mock<CandidateEventDTO> candidateEventDTOMock = new Mock<CandidateEventDTO>();
         candidateEventDTOMock.Setup(dto => dto.Section)
             .Returns(seedData.Deployment.Sections[randomSectionIndex]);

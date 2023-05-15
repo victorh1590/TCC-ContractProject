@@ -6,6 +6,7 @@ using Nethereum.BlockchainProcessing.BlockStorage.Entities.Mapping;
 using Nethereum.RPC.Eth.DTOs;
 using Voting.Server.Domain.Models;
 using Voting.Server.Domain.Models.Mappings;
+using Voting.Server.Protos;
 
 [assembly: InternalsVisibleTo("Voting.Server.Tests.Unit")]
 [assembly: InternalsVisibleTo("Voting.Server.Tests.Integration")]

@@ -4,10 +4,11 @@ using System.Globalization;
 using System.Linq;
 using System.Text.Json;
 using CommunityToolkit.Diagnostics;
-using Voting.Server.Domain.Models;
+// using Voting.Server.Domain.Models;
 using Voting.Server.Domain.Models.Mappings;
 using Voting.Server.Domain.Utils;
 using Voting.Server.Persistence.ContractDefinition;
+using Voting.Server.Protos;
 
 namespace Voting.Server.Tests.Utils;
 
