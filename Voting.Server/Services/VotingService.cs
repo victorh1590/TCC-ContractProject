@@ -1,8 +1,8 @@
 ﻿using Grpc.Core;
 using Voting.Server.Protos;
 using Google.Protobuf.WellKnownTypes;
-using Voting.Server.Domain;
-using Voting.Server.Domain.Models;
+// using Voting.Server.Domain;
+// using Voting.Server.Domain.Models;
 using System.Linq;
 using CommunityToolkit.Diagnostics;
 using static Voting.Server.Protos.VotingService;
@@ -21,7 +21,7 @@ public class VotingService : VotingServiceBase
     }
 
     //[global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
-    public override async Task<SectionListReply> GetCandidateVotes(CandidateIdRequest request, ServerCallContext context)
+    public override Task GetCandidateVotes(CandidateIdRequest request, IServerStreamWriter<Section> responseStream, ServerCallContext context)
     {
         List<Section> sections = await _domainService.GetVotesByCandidateAsync(request.Candidate);
         SectionListReply reply = new SectionListReply();
@@ -49,7 +49,7 @@ public class VotingService : VotingServiceBase
     }
 
     //[global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
-    public override async Task<SectionReply> GetSectionVotes(SectionIdRequest request, ServerCallContext context)
+    public override Task<Section> GetSectionVotes(SectionIdRequest request, ServerCallContext context)
     {
         Section section = await _domainService.GetSectionAsync(request.Section);
         List<Protos.CandidateVotes> cvList = new List<Protos.CandidateVotes>();
@@ -87,7 +87,7 @@ public class VotingService : VotingServiceBase
     }
 
     //[global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
-    public override async Task CreateSection(IAsyncStreamReader<SectionCreationRequest> requestStream, IServerStreamWriter<SectionsCreationReply> responseStream, ServerCallContext context)
+    public override Task<Empty> CreateSection(IAsyncStreamReader<Section> requestStream, ServerCallContext context)
     {
         await foreach (SectionCreationRequest sectionCreationRequest in requestStream.ReadAllAsync())
         {
