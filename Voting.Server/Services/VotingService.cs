@@ -1,12 +1,8 @@
 ﻿using Grpc.Core;
 using Voting.Server.Protos;
 using Google.Protobuf.WellKnownTypes;
-// using Voting.Server.Domain;
-// using Voting.Server.Domain.Models;
-using System.Linq;
-using CommunityToolkit.Diagnostics;
+using Voting.Server.Domain;
 using static Voting.Server.Protos.VotingService;
-using CandidateVotes = Voting.Server.Domain.Models.CandidateVotes;
 
 namespace Voting.Server.Services;
 
@@ -21,55 +17,19 @@ public class VotingService : VotingServiceBase
     }
 
     //[global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
-    public override Task GetCandidateVotes(CandidateIdRequest request, IServerStreamWriter<Section> responseStream, ServerCallContext context)
+    public override async Task GetCandidateVotes(CandidateIdRequest request, IServerStreamWriter<Section> responseStream, ServerCallContext context)
     {
         List<Section> sections = await _domainService.GetVotesByCandidateAsync(request.Candidate);
-        SectionListReply reply = new SectionListReply();
-        foreach(Section section in sections)
+        foreach (var section in sections)
         {
-            List<Protos.CandidateVotes> cvList = new List<Protos.CandidateVotes>();
-            foreach(Domain.Models.CandidateVotes cv in section.CandidateVotes)
-            {
-                Protos.CandidateVotes cvReply = new Protos.CandidateVotes
-                {
-                    Candidate = cv.Candidate,
-                    Votes = cv.Votes
-                };
-                cvList.Add(cvReply);
-            }
-
-            SectionReply sectionReply = new SectionReply
-            {
-                SectionID = section.SectionID
-            };
-            sectionReply.CandidateVotes.AddRange(cvList);
-            reply.Sections.Add(sectionReply);
+            await responseStream.WriteAsync(section);
         }
-        return await Task.FromResult(reply);
     }
 
     //[global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
-    public override Task<Section> GetSectionVotes(SectionIdRequest request, ServerCallContext context)
+    public override async Task<Section> GetSectionVotes(SectionIdRequest request, ServerCallContext context)
     {
-        Section section = await _domainService.GetSectionAsync(request.Section);
-        List<Protos.CandidateVotes> cvList = new List<Protos.CandidateVotes>();
-        foreach(Domain.Models.CandidateVotes cv in section.CandidateVotes)
-        {
-            Protos.CandidateVotes cvReply = new Protos.CandidateVotes
-            {
-                Candidate = cv.Candidate,
-                Votes = cv.Votes
-            };
-            cvList.Add(cvReply);
-        }
-
-        SectionReply sectionReply = new SectionReply
-        {
-            SectionID = section.SectionID
-        };
-        sectionReply.CandidateVotes.AddRange(cvList);
-
-        return await Task.FromResult(sectionReply);
+        return await _domainService.GetSectionAsync(request.Section);
     }
 
     //[global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
@@ -87,25 +47,14 @@ public class VotingService : VotingServiceBase
     }
 
     //[global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
-    public override Task<Empty> CreateSection(IAsyncStreamReader<Section> requestStream, ServerCallContext context)
+    public override async Task<Empty> CreateSection(IAsyncStreamReader<Section> requestStream, ServerCallContext context)
     {
-        await foreach (SectionCreationRequest sectionCreationRequest in requestStream.ReadAllAsync())
+        await foreach (Section section in requestStream.ReadAllAsync())
         {
-            List<Section> sectionList = new();
-            List<CandidateVotes> cv = new();
-            foreach (var candidateVotes in sectionCreationRequest.Section.CandidateVotes)
-            {
-                Guard.IsNotNull(candidateVotes);
-                cv.Add(new CandidateVotes
-                {
-                    Candidate = candidateVotes.Candidate,
-                    Votes = candidateVotes.Votes
-                });
-            }
-            Section section = new Section(sectionCreationRequest.Section.SectionID, cv);
-
-            sectionList.Add(section);
+            List<Section> sectionList = new List<Section> { section };
             await _domainService.InsertSectionsAsync(sectionList);
         }
+
+        return new Empty();
     }
 }
