@@ -1,5 +1,6 @@
 ﻿#nullable disable
 
+using System.Reflection;
 using Microsoft.Extensions.Configuration;
 using NUnit.Framework.Interfaces;
 using Voting.Server.Persistence;
@@ -25,7 +26,7 @@ public class UseBlockchainAndRepository : TestActionAttribute
             ?? throw new NullReferenceException();
 
         obj.Config = new ConfigurationBuilder()
-            .AddUserSecrets<Ganache>()
+            .AddUserSecrets(Assembly.GetExecutingAssembly(), true)
             .Build();
         obj.AccountManager = new AccountManager(obj.Config);
         obj.TestNet = new Ganache(obj.AccountManager);

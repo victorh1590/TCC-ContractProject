@@ -1,10 +1,10 @@
 ﻿using System.Globalization;
 using System.Text.Json;
 using CommunityToolkit.Diagnostics;
-using Voting.Server.Domain.Utils;
 using Voting.Server.Persistence.ContractDefinition;
+using Voting.Server.Protos;
 
-namespace Voting.Server.Domain.Models.Mappings;
+namespace Voting.Server.Utils.Mappings;
 
 internal class Mappings
 {
@@ -14,11 +14,18 @@ internal class Mappings
         Guard.IsGreaterThan(sectionDTO.Section, 0);
         Guard.IsEqualTo(sectionDTO.Candidates.Count, sectionDTO.Votes.Count);
         List<CandidateVotes> candidateVotes = sectionDTO.Candidates
-            .Select((candidateNum, index) => new CandidateVotes(candidateNum, sectionDTO.Votes[index]))
+            .Select((candidateNum, index) => new CandidateVotes
+            {
+                Candidate = candidateNum,
+                Votes = sectionDTO.Votes[index]
+            })
             .ToList();
         
         Guard.IsNotEmpty(candidateVotes);
-        return new Section(sectionDTO.Section, candidateVotes);
+        Section section = new();
+        section.SectionID = sectionDTO.Section;
+        section.CandidateVotes.AddRange(candidateVotes);
+        return section;
     }
 
     public static Section CandidateEventDTOToSection(CandidateEventDTO? candidateDTO = null)
@@ -36,7 +43,12 @@ internal class Mappings
         };
         
         Guard.IsNotEmpty(candidateVotes);
-        return new Section(candidateDTO.Section, candidateVotes);
+        
+        Guard.IsNotEmpty(candidateVotes);
+        Section section = new();
+        section.SectionID = candidateDTO.Section;
+        section.CandidateVotes.AddRange(candidateVotes);
+        return section;
     }
     
     public static List<Section> CandidateEventDTOListToSectionList(List<CandidateEventDTO>? candidateDTOList = null)
@@ -73,7 +85,11 @@ internal class Mappings
                         Votes = votes 
                     })
                 .ToList();
-            sections.Add(new Section(deployment.Sections[i], candidateVotesList));
+            
+            Section section = new();
+            section.SectionID = deployment.Sections[i];
+            section.CandidateVotes.AddRange(candidateVotesList);
+            sections.Add(section);
         }
 
         Guard.IsNotEmpty(sections);

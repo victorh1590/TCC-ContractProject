@@ -1,7 +1,7 @@
 ﻿using Moq;
-using Voting.Server.Domain;
 using Voting.Server.Persistence;
 using Voting.Server.Persistence.ContractDefinition;
+using Voting.Server.Services;
 using Voting.Server.Tests.Utils;
 
 namespace Voting.Server.Tests.Unit;

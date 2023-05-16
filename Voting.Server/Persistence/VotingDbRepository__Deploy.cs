@@ -1,11 +1,5 @@
-﻿using System.Globalization;
-using System.Text.Json;
-using CommunityToolkit.Diagnostics;
-using Nethereum.RPC.Eth.DTOs;
+﻿using Nethereum.RPC.Eth.DTOs;
 using Nethereum.Web3;
-using Voting.Server.Domain.Models;
-using Voting.Server.Domain.Models.Mappings;
-using Voting.Server.Domain.Utils;
 using Voting.Server.Persistence.ContractDefinition;
 
 namespace Voting.Server.Persistence;

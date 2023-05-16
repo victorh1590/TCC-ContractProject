@@ -9,9 +9,9 @@ using Voting.Server.UnitTests;
 using CommunityToolkit.Diagnostics;
 using Nethereum.BlockchainProcessing.BlockStorage.Entities.Mapping;
 using Nethereum.RPC.Eth.DTOs;
-using Voting.Server.Domain.Models;
-using Voting.Server.Domain.Models.Mappings;
 using Voting.Server.Persistence.ContractDefinition;
+using Voting.Server.Protos;
+using Voting.Server.Utils.Mappings;
 using static NUnit.Framework.TestContext;
 
 namespace Voting.Server.Tests.Integration;
@@ -55,8 +55,12 @@ public class VotingDbRepositoryTests__ReadVotesByCandidateAsync : IUseBlockchain
                 .Where(cv => cv.Candidate == expectedCandidate)
                 .ToList();
             Guard.IsEqualTo(cvList.Count, 1);
+
+            Section s = new Section();
+            s.SectionID = section.SectionID;
+            s.CandidateVotes.AddRange(cvList);
             
-            expectedCandidateVotes.Add(new Section(section.SectionID, cvList));
+            expectedCandidateVotes.Add(s);
         }
 
         //Calls method and convert results to JSON.
@@ -96,11 +100,11 @@ public class VotingDbRepositoryTests__ReadVotesByCandidateAsync : IUseBlockchain
         Guard.IsNotNullOrEmpty(await Repository.Web3.Eth.GetCode.SendRequestAsync(transaction.ContractAddress));
         Guard.IsEqualTo(transaction.Status.ToLong(), 1);
 
-        uint InvalidCandidateNumber = CurrentContext.Random.NextUInt(SeedDataBuilder.MaxCandidateNumber, uint.MaxValue - 1);
+        uint invalidCandidateNumber = CurrentContext.Random.NextUInt(SeedDataBuilder.MaxCandidateNumber, uint.MaxValue - 1);
 
         //Calls method with invalid candidate.
         List<CandidateEventDTO> resultInvalidCandidate = 
-            await Repository.ReadVotesByCandidateAsync(InvalidCandidateNumber, FilterRange.FromEarliestToLatest);
+            await Repository.ReadVotesByCandidateAsync(invalidCandidateNumber, FilterRange.FromEarliestToLatest);
         //Assertions.
         Assert.That(resultInvalidCandidate, Is.Empty);
     }

@@ -1,18 +1,20 @@
 ﻿using System.Runtime.CompilerServices;
 using CommunityToolkit.Diagnostics;
-using Voting.Server.Persistence;
-using Voting.Server.Persistence.ContractDefinition;
 using Nethereum.BlockchainProcessing.BlockStorage.Entities.Mapping;
 using Nethereum.RPC.Eth.DTOs;
-using Voting.Server.Domain.Models;
-using Voting.Server.Domain.Models.Mappings;
+using Voting.Server.Persistence;
+using Voting.Server.Persistence.ContractDefinition;
+using Voting.Server.Protos;
+using Voting.Server.Utils.Mappings;
+
+// using Voting.Server.Domain.Models;
 
 [assembly: InternalsVisibleTo("Voting.Server.Tests.Unit")]
 [assembly: InternalsVisibleTo("Voting.Server.Tests.Integration")]
 [assembly: InternalsVisibleTo("Voting.Server.Tests.Utils")]
-namespace Voting.Server.Domain;
+namespace Voting.Server.Services;
 
-internal class DomainService
+public class DomainService
 {
     private IVotingDbRepository Repository { get; }
 

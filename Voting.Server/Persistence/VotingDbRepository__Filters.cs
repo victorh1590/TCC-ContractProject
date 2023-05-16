@@ -1,8 +1,6 @@
 ﻿using CommunityToolkit.Diagnostics;
 using Nethereum.Contracts;
 using Nethereum.RPC.Eth.DTOs;
-using Voting.Server.Domain.Models;
-using Voting.Server.Domain.Models.Mappings;
 using Voting.Server.Persistence.ContractDefinition;
 
 namespace Voting.Server.Persistence;

@@ -3,15 +3,15 @@ using CommunityToolkit.Diagnostics;
 using Microsoft.Extensions.Configuration;
 using Nethereum.BlockchainProcessing.BlockStorage.Entities.Mapping;
 using Nethereum.RPC.Eth.DTOs;
-using Voting.Server.Domain.Models;
-using Voting.Server.Domain.Models.Mappings;
 using Voting.Server.Persistence;
 using Voting.Server.Persistence.Accounts;
 using Voting.Server.Persistence.Clients;
 using Voting.Server.Persistence.ContractDefinition;
+using Voting.Server.Protos;
 using Voting.Server.Tests.Integration.TestNet.Ganache;
 using Voting.Server.Tests.Utils;
 using Voting.Server.UnitTests;
+using Voting.Server.Utils.Mappings;
 using static NUnit.Framework.TestContext;
 
 namespace Voting.Server.Tests.Integration;

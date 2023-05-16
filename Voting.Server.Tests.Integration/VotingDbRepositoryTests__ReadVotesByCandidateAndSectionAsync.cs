@@ -3,15 +3,15 @@ using CommunityToolkit.Diagnostics;
 using Microsoft.Extensions.Configuration;
 using Nethereum.BlockchainProcessing.BlockStorage.Entities.Mapping;
 using Nethereum.RPC.Eth.DTOs;
-using Voting.Server.Domain.Models;
-using Voting.Server.Domain.Models.Mappings;
 using Voting.Server.Persistence;
 using Voting.Server.Persistence.Accounts;
 using Voting.Server.Persistence.Clients;
 using Voting.Server.Persistence.ContractDefinition;
+using Voting.Server.Protos;
 using Voting.Server.Tests.Integration.TestNet.Ganache;
 using Voting.Server.Tests.Utils;
 using Voting.Server.UnitTests;
+using Voting.Server.Utils.Mappings;
 using static NUnit.Framework.TestContext;
 
 namespace Voting.Server.Tests.Integration;
@@ -50,10 +50,13 @@ public class VotingDbRepositoryTests__ReadVotesByCandidateAndSectionAsync : IUse
         Guard.IsNotNull(expectedSection);
         
         //Get valid random CandidateVotes
-        CandidateVotes expectedCandidateVotes = expectedSection.CandidateVotes.MinBy(_ => Guid.NewGuid());
+        CandidateVotes? expectedCandidateVotes = expectedSection.CandidateVotes.MinBy(_ => Guid.NewGuid());
+        Guard.IsNotNull(expectedCandidateVotes);
         
         //Remove other CandidateVotes from expectedSection
-        expectedSection.CandidateVotes.RemoveAll(cv=> cv.Candidate != expectedCandidateVotes.Candidate);
+        List<CandidateVotes> cvToRemove = new List<CandidateVotes>(expectedSection.CandidateVotes);
+        cvToRemove = cvToRemove.Where(cv => cv.Candidate != expectedCandidateVotes.Candidate).ToList();
+        cvToRemove.ForEach(cv => expectedSection.CandidateVotes.Remove(cv));
 
         //Prints SectionID and Candidate
         WriteLine($"Trying to access contract and getting section {expectedSection.SectionID}...");
@@ -97,11 +100,11 @@ public class VotingDbRepositoryTests__ReadVotesByCandidateAndSectionAsync : IUse
         Guard.IsEqualTo(transaction.Status.ToLong(), 1);
 
         uint invalidSectionNumber = CurrentContext.Random.NextUInt(SeedDataBuilder.MaxSectionID, uint.MaxValue - 1);
-        uint InvalidCandidateNumber = CurrentContext.Random.NextUInt(SeedDataBuilder.MaxCandidateNumber, uint.MaxValue - 1);
+        uint invalidCandidateNumber = CurrentContext.Random.NextUInt(SeedDataBuilder.MaxCandidateNumber, uint.MaxValue - 1);
 
         //Calls method with invalid candidate.
         CandidateEventDTO? resultInvalidCandidate = await Repository.ReadVotesByCandidateAndSectionAsync(
-            InvalidCandidateNumber, seedData.Deployment.Sections.First(), FilterRange.FromLatestToLatest);
+            invalidCandidateNumber, seedData.Deployment.Sections.First(), FilterRange.FromLatestToLatest);
 
         //Calls method with invalid section.
         CandidateEventDTO? resultInvalidSection = await Repository.ReadVotesByCandidateAndSectionAsync(
@@ -109,7 +112,7 @@ public class VotingDbRepositoryTests__ReadVotesByCandidateAndSectionAsync : IUse
 
         //Calls method with invalid candidate and section.
         CandidateEventDTO? resultInvalidCandidateAndSection = await Repository.ReadVotesByCandidateAndSectionAsync(
-            InvalidCandidateNumber, invalidSectionNumber, FilterRange.FromLatestToLatest);
+            invalidCandidateNumber, invalidSectionNumber, FilterRange.FromLatestToLatest);
 
         //Assertions.
         Assert.That(resultInvalidCandidate, Is.Null);

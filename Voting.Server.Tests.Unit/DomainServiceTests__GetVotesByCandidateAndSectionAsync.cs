@@ -1,7 +1,7 @@
 ﻿using System.Text.Json;
-using Voting.Server.Domain.Models;
 using Voting.Server.Tests.Utils;
 using CommunityToolkit.Diagnostics;
+using Voting.Server.Protos;
 using static NUnit.Framework.TestContext;
 
 namespace Voting.Server.Tests.Unit;
@@ -10,18 +10,19 @@ public partial class DomainServiceTests
 {
     [Test]
     [Repeat(10)]
-    public async Task GetVotesByCandidateForSectionAsync_Should_Return_Correct_Data_When_All_CandidateNums_And_SectionNums_Are_Valid()
+    public async Task GetVotesByCandidateAndSectionAsync_Should_Return_Correct_Data_When_All_CandidateNums_And_SectionNums_Are_Valid()
     {
         //Select a valid expected section.
         Section expectedSection = _seedData.Sections
             .OrderBy(_ => Guid.NewGuid())
             .First();
-        expectedSection.CandidateVotes = new List<CandidateVotes>
-        {
-            expectedSection.CandidateVotes.MinBy(_ => Guid.NewGuid())
-        };
+        CandidateVotes? expectedCandidateVotes = expectedSection.CandidateVotes.MinBy(_ => Guid.NewGuid());
+        Guard.IsNotNull(expectedCandidateVotes);
+        expectedSection.CandidateVotes.Clear();
+        expectedSection.CandidateVotes.Add(expectedCandidateVotes);
         Guard.IsNotNull(expectedSection);
-        Guard.IsNotEmpty(expectedSection.CandidateVotes);
+        Guard.IsNotNull(expectedSection.CandidateVotes.FirstOrDefault());
+        Guard.IsNotEmpty(expectedSection.CandidateVotes.ToList());
         uint expectedCandidate = expectedSection.CandidateVotes.First().Candidate;
 
         //Calls method and convert results to JSON.
@@ -41,7 +42,7 @@ public partial class DomainServiceTests
     
     [Test]
     [Repeat(5)]
-    public void GetVotesByCandidateForSectionAsync_Should_Fail_When_CandidateNum_Is_Invalid()
+    public void GetVotesByCandidateAndSectionAsync_Should_Fail_When_CandidateNum_Is_Invalid()
     {
         uint validSectionNum = _seedData.Sections
             .OrderBy(_ => Guid.NewGuid())
@@ -58,7 +59,7 @@ public partial class DomainServiceTests
     
     [Test]
     [Repeat(5)]
-    public void GetVotesByCandidateForSectionAsync_Should_Fail_When_SectionNum_Is_Invalid()
+    public void GetVotesByCandidateAndSectionAsync_Should_Fail_When_SectionNum_Is_Invalid()
     {
         uint validCandidateNum = _seedData.Deployment.Candidates.MinBy(_ => Guid.NewGuid());
         Assert.That(async () => await _domainService.GetVotesByCandidateAndSectionAsync(validCandidateNum,
