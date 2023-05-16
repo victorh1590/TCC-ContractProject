@@ -9,11 +9,12 @@ namespace Voting.Server.Services;
 public class VotingService : VotingServiceBase
 {
     private readonly DomainService _domainService;
+    private readonly ILogger<VotingService> _logger;
 
-
-    internal VotingService(DomainService domainService)
+    internal VotingService(DomainService domainService, ILogger<VotingService> logger)
     {
         _domainService = domainService;
+        _logger = logger;
     }
 
     //[global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]

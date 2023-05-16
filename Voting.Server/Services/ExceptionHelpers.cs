@@ -1,14 +1,15 @@
 //TODO refactor.
+
 using Grpc.Core;
-using Microsoft.Data.SqlClient;
-namespace Voting.Server.Service.Interceptors.Helpers;
+
+namespace Voting.Server.Services;
 public static class ExceptionHelpers
 {
     public static RpcException Handle<T>(this Exception exception, ServerCallContext context, ILogger<T> logger, Guid correlationId) =>
         exception switch
         {
             TimeoutException => HandleTimeoutException((TimeoutException) exception, context, logger, correlationId),
-            SqlException => HandleSqlException((SqlException)exception, context, logger, correlationId),
+            // SqlException => HandleSqlException((SqlException)exception, context, logger, correlationId),
             RpcException => HandleRpcException((RpcException)exception, context, logger, correlationId),
             _ => HandleDefault(exception, context, logger, correlationId)
         };
@@ -19,20 +20,20 @@ public static class ExceptionHelpers
         status = new Status(StatusCode.Internal, "An external resource did not answer within the time limit");
         return new RpcException(status, CreateTrailers(correlationId));
     }
-    private static RpcException HandleSqlException<T>(SqlException exception, ServerCallContext context, ILogger<T> logger, Guid correlationId)
-    {
-        logger.LogError(exception, $"CorrelationId: {correlationId} - An SQL error occurred");
-        Status status;
-        if (exception.Number == -2)
-        {
-            status = new Status(StatusCode.DeadlineExceeded, "SQL timeout");
-        }
-        else
-        {
-            status = new Status(StatusCode.Internal, "SQL error");
-        }
-        return new RpcException(status, CreateTrailers(correlationId));
-    }
+    // private static RpcException HandleSqlException<T>(SqlException exception, ServerCallContext context, ILogger<T> logger, Guid correlationId)
+    // {
+    //     logger.LogError(exception, $"CorrelationId: {correlationId} - An SQL error occurred");
+    //     Status status;
+    //     if (exception.Number == -2)
+    //     {
+    //         status = new Status(StatusCode.DeadlineExceeded, "SQL timeout");
+    //     }
+    //     else
+    //     {
+    //         status = new Status(StatusCode.Internal, "SQL error");
+    //     }
+    //     return new RpcException(status, CreateTrailers(correlationId));
+    // }
     private static RpcException HandleDefault<T>(Exception exception, ServerCallContext context, ILogger<T> logger, Guid correlationId)
     {
         logger.LogError(exception, $"CorrelationId: {correlationId} - An error occurred");

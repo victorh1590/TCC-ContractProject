@@ -11,16 +11,16 @@ public partial class DomainServiceTests
 {
     [Test]
     [Repeat(10)]
-    public async Task GetVotesByCandidateForSectionAsync_Should_Return_Correct_Data_When_All_CandidateNums_And_SectionNums_Are_Valid()
+    public async Task GetVotesByCandidateAndSectionAsync_Should_Return_Correct_Data_When_All_CandidateNums_And_SectionNums_Are_Valid()
     {
         //Select a valid expected section.
         Section expectedSection = _seedData.Sections
             .OrderBy(_ => Guid.NewGuid())
             .First();
-        expectedSection.CandidateVotes.AddRange(new List<CandidateVotes?>
-        {
-            expectedSection.CandidateVotes.MinBy(_ => Guid.NewGuid())
-        });
+        CandidateVotes? expectedCandidateVotes = expectedSection.CandidateVotes.MinBy(_ => Guid.NewGuid());
+        Guard.IsNotNull(expectedCandidateVotes);
+        expectedSection.CandidateVotes.Clear();
+        expectedSection.CandidateVotes.Add(expectedCandidateVotes);
         Guard.IsNotNull(expectedSection);
         Guard.IsNotNull(expectedSection.CandidateVotes.FirstOrDefault());
         Guard.IsNotEmpty(expectedSection.CandidateVotes.ToList());
@@ -43,7 +43,7 @@ public partial class DomainServiceTests
     
     [Test]
     [Repeat(5)]
-    public void GetVotesByCandidateForSectionAsync_Should_Fail_When_CandidateNum_Is_Invalid()
+    public void GetVotesByCandidateAndSectionAsync_Should_Fail_When_CandidateNum_Is_Invalid()
     {
         uint validSectionNum = _seedData.Sections
             .OrderBy(_ => Guid.NewGuid())
@@ -60,7 +60,7 @@ public partial class DomainServiceTests
     
     [Test]
     [Repeat(5)]
-    public void GetVotesByCandidateForSectionAsync_Should_Fail_When_SectionNum_Is_Invalid()
+    public void GetVotesByCandidateAndSectionAsync_Should_Fail_When_SectionNum_Is_Invalid()
     {
         uint validCandidateNum = _seedData.Deployment.Candidates.MinBy(_ => Guid.NewGuid());
         Assert.That(async () => await _domainService.GetVotesByCandidateAndSectionAsync(validCandidateNum,

@@ -115,5 +115,4 @@ public class SeedDataBuilder
         Guard.IsNotNullOrEmpty(compressedSection);
         deployment.CompressedSectionData = compressedSection;
     }
-
 }

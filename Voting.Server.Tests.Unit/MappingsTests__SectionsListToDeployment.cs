@@ -82,13 +82,13 @@ public partial class MappingsTests
         List<Section> badSectionsList = new(seedData1.Sections);
 
         //First CandidateVotes is empty.
-        badSectionsList.First().CandidateVotes.AddRange(new List<CandidateVotes>());
+        badSectionsList.First().CandidateVotes.Clear();
         Assert.That(() => Mappings.SectionsListToDeployment(badSectionsList), 
             Throws.TypeOf<ArgumentException>());
 
         //Last CandidateVotes is empty.
         badSectionsList = new List<Section>(seedData1.Sections);
-        badSectionsList.Last().CandidateVotes.AddRange(new List<CandidateVotes>());
+        badSectionsList.Last().CandidateVotes.Clear();
         Assert.That(() => Mappings.SectionsListToDeployment(badSectionsList), 
             Throws.TypeOf<ArgumentException>());
 
