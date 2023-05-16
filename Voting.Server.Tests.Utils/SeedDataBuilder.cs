@@ -1,14 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Globalization;
-using System.Linq;
+﻿using System.Globalization;
 using System.Text.Json;
 using CommunityToolkit.Diagnostics;
-// using Voting.Server.Domain.Models;
-using Voting.Server.Domain.Models.Mappings;
-using Voting.Server.Domain.Utils;
 using Voting.Server.Persistence.ContractDefinition;
 using Voting.Server.Protos;
+using Voting.Server.Utils;
+using Voting.Server.Utils.Mappings;
 
 namespace Voting.Server.Tests.Utils;
 

@@ -2,7 +2,7 @@ syntax = "proto3";
 package VotingAPI.v1;
 option csharp_namespace = "Voting.Server.Protos";
 import "google/protobuf/empty.proto";
-import "google/protobuf/timestamp.proto";
+//import "google/protobuf/timestamp.proto";
 
 service VotingService {
 	rpc GetCandidateVotes(CandidateIdRequest) returns (stream Section) {}
@@ -12,42 +12,24 @@ service VotingService {
 	rpc CreateSection(stream Section) returns (google.protobuf.Empty) {}
 }
 
-//message SectionListReply 
-//{
-//	repeated Section Sections = 1;
-//}
-
 message Section
 {
 	uint32 SectionID = 1;
 	repeated CandidateVotes CandidateVotes = 2;
 }
-
 message CandidateVotes
 {
 	uint32 Candidate =  1;
 	uint32 Votes = 2;
 }
-
 message TotalVotesReply
 {
 	int64 TotalVotes = 1;
 }
-
-//message SectionsCreationReply
-//{
-//}
-
-//message SectionCreationRequest
-//{
-//	Section Section = 1;
-//}
-
 message CandidateIdRequest
 {
 	uint32 Candidate = 1;
 }
-
 message SectionIdRequest
 {
 	uint32 Section = 1;

@@ -1,6 +1,8 @@
 using System.IO.Compression;
-using Voting.Server.Domain;
+using System.Reflection;
+using Voting.Server.Persistence;
 using Voting.Server.Persistence.Accounts;
+using Voting.Server.Persistence.Clients;
 using Voting.Server.Services;
 
 //GRPC
@@ -10,7 +12,12 @@ var builder = WebApplication.CreateBuilder(args);
 // For instructions on how to configure Kestrel and gRPC clients on macOS, visit https://go.microsoft.com/fwlink/?linkid=2099682
 
 // Add services to the container.
-
+var config = builder.Configuration
+    .AddUserSecrets(Assembly.GetExecutingAssembly(), true)
+    .Build();
+builder.Services.AddSingleton<IConfiguration>(config);
+builder.Services.AddSingleton<IAccountManager, AccountManager>();
+builder.Services.AddSingleton<IWeb3ClientsManager, Web3ClientsManager>();
 builder.Services.AddGrpc(options =>
 {
     options.EnableDetailedErrors = true; // Enabling error details
@@ -20,14 +27,17 @@ builder.Services.AddGrpc(options =>
     {
         new Grpc.Net.Compression.GzipCompressionProvider(CompressionLevel.Optimal) // gzip
     };
-    options.ResponseCompressionAlgorithm = "br";
+    options.ResponseCompressionAlgorithm = "gzip";
     options.ResponseCompressionLevel = CompressionLevel.Optimal;
     options.Interceptors.Add<ExceptionInterceptor>(); // Register custom ExceptionInterceptor interceptor
 });
+builder.Services.AddScoped<IVotingDbRepository, VotingDbRepository>();
 builder.Services.AddSingleton<ProtoService>();
 builder.Services.AddScoped<DomainService>();
+builder.Services.AddScoped<VotingService>();
 builder.Services.AddGrpcReflection();
-builder.Services.AddSingleton<IAccountManager, AccountManager>();
+
+
 
 var app = builder.Build();
 

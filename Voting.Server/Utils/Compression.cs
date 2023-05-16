@@ -2,7 +2,7 @@
 using System.Text;
 using System.Text.Json;
 
-namespace Voting.Server.Domain.Utils;
+namespace Voting.Server.Utils;
 internal class Compression
 {
     public string Compress(string text)

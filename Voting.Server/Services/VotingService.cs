@@ -1,7 +1,6 @@
 ﻿using Grpc.Core;
 using Voting.Server.Protos;
 using Google.Protobuf.WellKnownTypes;
-using Voting.Server.Domain;
 using static Voting.Server.Protos.VotingService;
 
 namespace Voting.Server.Services;
@@ -11,7 +10,7 @@ public class VotingService : VotingServiceBase
     private readonly DomainService _domainService;
     private readonly ILogger<VotingService> _logger;
 
-    internal VotingService(DomainService domainService, ILogger<VotingService> logger)
+    public VotingService(DomainService domainService, ILogger<VotingService> logger)
     {
         _domainService = domainService;
         _logger = logger;

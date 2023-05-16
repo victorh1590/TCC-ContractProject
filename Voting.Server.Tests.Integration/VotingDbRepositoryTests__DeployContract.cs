@@ -10,7 +10,6 @@ using Voting.Server.Persistence.ContractDefinition;
 using Voting.Server.Tests.Integration.TestNet.Ganache;
 using Voting.Server.Tests.Utils;
 using Voting.Server.UnitTests;
-using static NUnit.Framework.TestContext;
 
 namespace Voting.Server.Tests.Integration;
 

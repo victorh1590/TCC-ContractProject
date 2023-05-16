@@ -1,11 +1,10 @@
 ﻿using System.Globalization;
 using System.Text.Json;
 using CommunityToolkit.Diagnostics;
-using Voting.Server.Domain.Utils;
 using Voting.Server.Persistence.ContractDefinition;
 using Voting.Server.Protos;
 
-namespace Voting.Server.Domain.Models.Mappings;
+namespace Voting.Server.Utils.Mappings;
 
 internal class Mappings
 {

@@ -1,5 +1,4 @@
 ﻿using System.Text.Json;
-// using Voting.Server.Domain.Models;
 using Voting.Server.Tests.Utils;
 using CommunityToolkit.Diagnostics;
 using Voting.Server.Protos;

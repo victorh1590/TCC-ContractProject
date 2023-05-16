@@ -5,20 +5,20 @@ using Nethereum.HdWallet;
 using Nethereum.Signer;
 using Nethereum.Web3.Accounts;
 
-[assembly: InternalsVisibleTo("Voting.Server.Tests.Unit")]
-[assembly: InternalsVisibleTo("Voting.Server.Tests.Integration")]
+// [assembly: InternalsVisibleTo("Voting.Server.Tests.Unit")]
+// [assembly: InternalsVisibleTo("Voting.Server.Tests.Integration")]
 namespace Voting.Server.Persistence.Accounts;
 
 public class AccountManager : IAccountManager
 {
-    internal ImmutableList<Account> Accounts { get; }
+    public ImmutableList<Account> Accounts { get; }
     public ImmutableList<string> PublicKeys { get; }
     
-    internal AccountManager(IConfiguration config)
+    public AccountManager(IConfiguration config)
     {
-        Guard.IsNotNull(config.GetSection("Accounts"));
-
-        Wallet wallet = new Wallet(config.GetSection("Mnemonics").Value, config.GetSection("Password").Value);
+        var mnemonics = config.GetValue("Mnemonics",string.Empty);
+        var password = config.GetValue("Password", string.Empty);
+        Wallet wallet = new Wallet(mnemonics, password);
 
         List<Account> accounts = new();
         List<string> publicKeys = new();
