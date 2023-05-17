@@ -4,10 +4,8 @@ using Nethereum.BlockchainProcessing.BlockStorage.Entities.Mapping;
 using Nethereum.RPC.Eth.DTOs;
 using Voting.Server.Persistence;
 using Voting.Server.Persistence.ContractDefinition;
-using Voting.Server.Protos;
+using Voting.Server.Protos.v1;
 using Voting.Server.Utils.Mappings;
-
-// using Voting.Server.Domain.Models;
 
 [assembly: InternalsVisibleTo("Voting.Server.Tests.Unit")]
 [assembly: InternalsVisibleTo("Voting.Server.Tests.Integration")]

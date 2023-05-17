@@ -2,7 +2,7 @@ using System.Text.Json;
 using Voting.Server.Persistence.ContractDefinition;
 using System.Globalization;
 using CommunityToolkit.Diagnostics;
-using Voting.Server.Protos;
+using Voting.Server.Protos.v1;
 using Voting.Server.Tests.Utils;
 using Voting.Server.Utils.Mappings;
 using static NUnit.Framework.TestContext;

@@ -9,7 +9,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <Protobuf Include="..\Voting.Server\Protos\VotingService.proto" GrpcServices="VotingService" />
+        <Protobuf Include="..\Voting.Server\Protos\v1\VotingService.proto" GrpcServices="VotingService" />
     </ItemGroup>
 
     <ItemGroup>

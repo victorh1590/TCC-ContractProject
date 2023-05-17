@@ -7,7 +7,7 @@ using Voting.Server.Persistence;
 using Voting.Server.Persistence.Accounts;
 using Voting.Server.Persistence.Clients;
 using Voting.Server.Persistence.ContractDefinition;
-using Voting.Server.Protos;
+using Voting.Server.Protos.v1;
 using Voting.Server.Tests.Integration.TestNet.Ganache;
 using Voting.Server.Tests.Utils;
 using Voting.Server.UnitTests;

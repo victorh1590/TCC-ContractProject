@@ -1,7 +1,7 @@
 ﻿using System.Text.Json;
 using Voting.Server.Tests.Utils;
 using CommunityToolkit.Diagnostics;
-using Voting.Server.Protos;
+using Voting.Server.Protos.v1;
 using static NUnit.Framework.TestContext;
 
 namespace Voting.Server.Tests.Unit;

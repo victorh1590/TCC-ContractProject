@@ -1,5 +1,5 @@
 ﻿using System.Text.Json;
-using Voting.Server.Protos;
+using Voting.Server.Protos.v1;
 using Voting.Server.Tests.Utils;
 using static NUnit.Framework.TestContext;
 

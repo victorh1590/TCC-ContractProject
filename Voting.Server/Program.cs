@@ -4,6 +4,7 @@ using Voting.Server.Persistence;
 using Voting.Server.Persistence.Accounts;
 using Voting.Server.Persistence.Clients;
 using Voting.Server.Services;
+using Voting.Server.Utils;
 
 //GRPC
 var builder = WebApplication.CreateBuilder(args);
@@ -25,7 +26,7 @@ builder.Services.AddGrpc(options =>
     options.MaxSendMessageSize = 6291456;
     options.CompressionProviders = new List<Grpc.Net.Compression.ICompressionProvider>
     {
-        new Grpc.Net.Compression.GzipCompressionProvider(CompressionLevel.Optimal) // gzip
+        new Grpc.Net.Compression.GzipCompressionProvider(CompressionLevel.Optimal) // gzip on grpc
     };
     options.ResponseCompressionAlgorithm = "gzip";
     options.ResponseCompressionLevel = CompressionLevel.Optimal;
@@ -37,8 +38,6 @@ builder.Services.AddScoped<DomainService>();
 builder.Services.AddScoped<VotingService>();
 builder.Services.AddGrpcReflection();
 
-
-
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -46,56 +45,18 @@ app.MapGrpcReflectionService();
 app.MapGrpcService<VotingService>();
 app.MapGet("/", () => "Communication with gRPC endpoints must be made through a gRPC client. To learn how to create a client, visit: https://go.microsoft.com/fwlink/?linkid=2086909");
 
-//TODO configurar endpoints para o cliente poder acessar o arquivo protobuf.
-app.MapGet("/protos", (ProtoService protoService) =>
-{
-    return Results.Ok(protoService.GetAll());
-});
+app.MapGet("/protos", (ProtoService protoService) => Results.Ok(protoService.GetAll()));
 app.MapGet("/protos/v{version:int}/{protoName}", (ProtoService
     protoService, int version, string protoName) =>
 {
     var filePath = protoService.Get(version, protoName);
-    if (filePath != null)
-        return Results.File(filePath);
-    return Results.NotFound();
+    return filePath != null ? Results.File(filePath) : Results.NotFound();
 });
 app.MapGet("/protos/v{version:int}/{protoName}/view", async (ProtoService
     protoService, int version, string protoName) =>
 {
     var text = await protoService.ViewAsync(version, protoName);
-    if (!string.IsNullOrEmpty(text))
-        return Results.Text(text);
-    return Results.NotFound();
+    return !string.IsNullOrEmpty(text) ? Results.Text(text) : Results.NotFound();
 });
 
 app.Run();
-
-//Rest
-//
-//
-// var builder = WebApplication.CreateBuilder(args);
-//
-// // Add services to the container.
-//
-// builder.Services.AddControllers();
-// // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-// builder.Services.AddEndpointsApiExplorer();
-// builder.Services.AddSwaggerGen();
-// builder.Services.AddSingleton<IAccountManager, AccountManager>();
-//
-// var app = builder.Build();
-//
-// // Configure the HTTP request pipeline.
-// if (app.Environment.IsDevelopment())
-// {
-//     app.UseSwagger();
-//     app.UseSwaggerUI();
-// }
-//
-// app.UseHttpsRedirection();
-//
-// app.UseAuthorization();
-//
-// app.MapControllers();
-//
-// app.Run();

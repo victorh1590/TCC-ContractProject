@@ -5,7 +5,7 @@ using Voting.Server.Persistence.Accounts;
 using Voting.Server.Persistence.Clients;
 using Voting.Server.Tests.Integration.TestNet.Ganache;
 using Voting.Server.UnitTests;
-using Voting.Server.Protos;
+using Voting.Server.Protos.v1;
 using Voting.Server.Tests.Utils;
 using Nethereum.JsonRpc.Client;
 using Voting.Server.Services;

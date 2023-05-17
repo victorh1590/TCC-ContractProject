@@ -1,7 +1,8 @@
-//TODO refactor.
 using Grpc.Core;
 using Grpc.Core.Interceptors;
-namespace Voting.Server.Services;
+using Voting.Server.Services;
+
+namespace Voting.Server.Utils;
 public class ExceptionInterceptor : Interceptor
 {
     private readonly ILogger<ExceptionInterceptor> _logger;

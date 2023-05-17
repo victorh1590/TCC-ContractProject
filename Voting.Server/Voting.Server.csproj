@@ -7,10 +7,6 @@
     <UserSecretsId>7d5aad5a-654f-4397-be39-c823eb40f5c8</UserSecretsId>
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
   </PropertyGroup>
-
-  <ItemGroup>
-    <Protobuf Include="Protos\VotingService.proto" GrpcServices="VotingService" />
-  </ItemGroup>
   
   <ItemGroup>
     <PackageReference Include="Grpc.AspNetCore" Version="2.53.0" />
@@ -23,6 +19,17 @@
     <PackageReference Include="Nethereum.Accounts" Version="4.14.0" />
     <PackageReference Include="Nethereum.RPC" Version="4.14.0" />
     <PackageReference Include="Nethereum.Web3" Version="4.14.0" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <Protobuf Include="Protos\v1\VotingService.proto">
+      <GrpcServices>VotingService</GrpcServices>
+      <Access>Public</Access>
+      <ProtoCompile>True</ProtoCompile>
+      <CompileOutputs>True</CompileOutputs>
+      <OutputDir>obj\Debug\net7.0\</OutputDir>
+      <Generator>MSBuild:Compile</Generator>
+    </Protobuf>
   </ItemGroup>
 
 </Project>

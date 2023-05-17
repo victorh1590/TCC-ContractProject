@@ -1,7 +1,7 @@
 ﻿using Moq;
 using System.Text.Json;
 using Voting.Server.Persistence.ContractDefinition;
-using Voting.Server.Protos;
+using Voting.Server.Protos.v1;
 using Voting.Server.Tests.Utils;
 using Voting.Server.Utils.Mappings;
 

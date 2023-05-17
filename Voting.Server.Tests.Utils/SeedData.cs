@@ -1,7 +1,7 @@
 ﻿using System.Text.Json;
 using CommunityToolkit.Diagnostics;
 using Voting.Server.Persistence.ContractDefinition;
-using Voting.Server.Protos;
+using Voting.Server.Protos.v1;
 
 namespace Voting.Server.Tests.Utils;
 
