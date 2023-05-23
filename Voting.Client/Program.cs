@@ -2,162 +2,127 @@
 
 namespace voting;
 
-//Exemplo commandline app.
-class Program
+public class Program
 {
-    static async Task<int> Main(string[] args)
+    public static async Task<int> Main(string[] args)
     {
         //Options(flags)
-      var fileOption = new Option<FileInfo?>(
-          name: "--file",
-          description: "An option whose argument is parsed as a FileInfo",
-          isDefault: true, //Diz que existe um default.
-          parseArgument: result => // Validação.
-          {
-              if (result.Tokens.Count == 0)
-              {
-                  return new FileInfo("sampleQuotes.txt");
+        var jsonOption = new Option<FileInfo?>(
+            name: "--json",
+            description: "An option whose argument json file is parsed as a FileInfo.",
+            isDefault: true, //Default value exists.
+            parseArgument: result => // Validation.
+            {
+                if (result.Tokens.Count == 0)
+                {
+                    return null; // Default.
+                }
 
-              }
-              string? filePath = result.Tokens.Single().Value;
-              if (!File.Exists(filePath))
-              {
-                  result.ErrorMessage = "File does not exist";
-                  return null;
-              }
-              else
-              {
-                  return new FileInfo(filePath); // Default
-              }
-          });
+                string? filePath = result.Tokens.SingleOrDefault()?.Value;
+                FileInfo fi = new FileInfo(filePath ?? string.Empty);
+                if (String.IsNullOrEmpty(fi.FullName) || !fi.Exists)
+                {
+                    result.ErrorMessage = "File does not exist.";
+                    return null;
+                }
 
-          var searchTermsOption = new Option<string[]>(
-            name: "--search-terms",
-            description: "Strings to search for when deleting entries.")
-            { 
-              //Settings
-              IsRequired = true,
-              AllowMultipleArgumentsPerToken = true 
-            };
+                if (fi.Extension != "json")
+                {
+                    result.ErrorMessage = "File is not json.";
+                    return null;
+                }
 
+                return fi;
+            });
 
-        //Argumentos. Também é possível configurá-los separadamente.
-        var quoteArgument = new Argument<string>(
-            name: "quote",
-            description: "Text of quote.");
+        var sectionOption = new Option<uint?>(
+            name: "--section",
+            description: "Sections to look for when querying the blockchain.",
+            isDefault: true, //Default value exists.
+            parseArgument: result => // Validation.
+            {
+                if (result.Tokens.Count == 0)
+                {
+                    return null; // Default.
+                }
 
-        var bylineArgument = new Argument<string>(
-            name: "byline",
-            description: "Byline of quote.");
+                string sectionString = result.Tokens.SingleOrDefault()?.Value ?? string.Empty;
+                if (!uint.TryParse(sectionString, out uint section))
+                {
+                    result.ErrorMessage = "No section passed.";
+                    return null;
+                }
 
-        var delayOption = new Option<int>(
-            name: "--delay",
-            description: "Delay between lines, specified as milliseconds per character in a line.",
-            getDefaultValue: () => 42);
+                return section;
+            });
 
-        var fgcolorOption = new Option<ConsoleColor>(
-            name: "--fgcolor",
-            description: "Foreground color of text displayed on the console.",
-            getDefaultValue: () => ConsoleColor.White);
+        var candidateOption = new Option<uint?>(
+            name: "--section",
+            description: "Candidate to look for when querying the blockchain.",
+            isDefault: true, //Default value exists.
+            parseArgument: result => // Validation.
+            {
+                string candidateString = result.Tokens.SingleOrDefault()?.Value ?? string.Empty;
+                if(!uint.TryParse(candidateString, out uint candidate))
+                {
+                    result.ErrorMessage = "No candidate passed.";
+                    return null;
+                }
 
-        var lightModeOption = new Option<bool>(
-            name: "--light-mode",
-            description: "Background color of text displayed on the console: default is black, light mode is white.");
+                return candidate; // Default
+            });
 
-        
-        //Cria comandos.
-
-        //Root
+        //Create commands.
+        //Root command.
         var rootCommand = new RootCommand("Sample app for System.CommandLine");
-        // Global options are applied to the command and recursively to subcommands. 
-        // Since --file is on the root command, it will be available automatically in all subcommands of the app.
-        rootCommand.AddGlobalOption(fileOption);
-
-        //Sub1
-        var quotesCommand = new Command("quotes", "Work with a file that contains quotes.");
-        rootCommand.AddCommand(quotesCommand);
-
-        //Sub1Sub1
-        var readCommand = new Command("read", "Read and display the file.")
+        
+        //Subcommands
+        var getCommand = new Command("get", "Get voting data from blockchain.")
         {
-            delayOption,
-            fgcolorOption,
-            lightModeOption
+            sectionOption,
+            candidateOption
         };
-        quotesCommand.AddCommand(readCommand);
-
-        //Sub1Sub2
-        var deleteCommand = new Command("delete", "Delete lines from the file.");
-        deleteCommand.AddOption(searchTermsOption); //Adiciona options.
-        quotesCommand.AddCommand(deleteCommand);
-
-        //Sub1Sub3
-        var addCommand = new Command("add", "Add an entry to the file.");
-        addCommand.AddArgument(quoteArgument); // Adicina argumentos
-        addCommand.AddArgument(bylineArgument);
-        addCommand.AddAlias("insert"); //Alias para commando.
-        quotesCommand.AddCommand(addCommand); //Adiciona a Sub1.
-
-
-        //Handlers.
-        //read
-        readCommand.SetHandler(async (file, delay, fgcolor, lightMode) =>
+        getCommand.AddValidator(result =>
         {
-            await ReadFile(file!, delay, fgcolor, lightMode);
-        },
-        fileOption, delayOption, fgcolorOption, lightModeOption);
-
-        //delete
-        deleteCommand.SetHandler((file, searchTerms) =>
+            if (result.Tokens.Count <= 1)
+            {
+                result.ErrorMessage = "Must set a value for option --section, --candidate or both.";
+            }
+        });
+        
+        var totalCommand = new Command("total", "Get totalization of votes from blockchain.")
         {
-            DeleteFromFile(file!, searchTerms);
-        },
-        fileOption, searchTermsOption);
-
-        //add
-        addCommand.SetHandler((file, quote, byline) =>
+            sectionOption,
+            candidateOption
+        };
+        totalCommand.AddValidator(result =>
         {
-            AddToFile(file!, quote, byline);
-        },
-        fileOption, quoteArgument, bylineArgument);
+            if (result.Tokens.Count <= 1)
+            {
+                result.ErrorMessage = "Must set a value for option --section, --candidate or both.";
+            }
+        });
+        
+        var addCommand = new Command("add", "Send voting data to the blockchain.")
+        {
+            jsonOption
+        };
+        addCommand.AddValidator(result =>
+        {
+            if (result.Tokens.Count <= 1)
+            {
+                result.ErrorMessage = "Must set a value for at least one option (--json or --csv).";
+            }
+        });
+        addCommand.AddAlias("insert");
+        addCommand.AddAlias("send");
+        addCommand.AddAlias("put");
+        
+        rootCommand.AddCommand(getCommand);
+        rootCommand.AddCommand(totalCommand);
+        rootCommand.AddCommand(addCommand);
 
-        //Ação do Comando root.
-        // rootCommand.SetHandler((file) => 
-        // { 
-        //     ReadFile(file!); 
-        // },
-        // fileOption);
-
+        //Invoke root command.
         return await rootCommand.InvokeAsync(args);
-    }
-
-    //Métodos a serem invocados.
-    internal static async Task ReadFile(
-            FileInfo file, int delay, ConsoleColor fgColor, bool lightMode)
-    {
-        Console.BackgroundColor = lightMode ? ConsoleColor.White : ConsoleColor.Black;
-        Console.ForegroundColor = fgColor;
-        List<string> lines = File.ReadLines(file.FullName).ToList();
-        foreach (string line in lines)
-        {
-            Console.WriteLine(line);
-            await Task.Delay(delay * line.Length);
-        };
-    }
-
-    internal static void DeleteFromFile(FileInfo file, string[] searchTerms)
-    {
-        Console.WriteLine("Deleting from file");
-        File.WriteAllLines(
-            file.FullName, File.ReadLines(file.FullName)
-                .Where(line => searchTerms.All(s => !line.Contains(s))).ToList());
-    }
-    internal static void AddToFile(FileInfo file, string quote, string byline)
-    {
-        Console.WriteLine("Adding to file");
-        using StreamWriter? writer = file.AppendText();
-        writer.WriteLine($"{Environment.NewLine}{Environment.NewLine}{quote}");
-        writer.WriteLine($"{Environment.NewLine}-{byline}");
-        writer.Flush();
     }
 }
