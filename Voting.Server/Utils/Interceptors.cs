@@ -1,6 +1,5 @@
 using Grpc.Core;
 using Grpc.Core.Interceptors;
-using Voting.Server.Services;
 
 namespace Voting.Server.Utils;
 public class ExceptionInterceptor : Interceptor

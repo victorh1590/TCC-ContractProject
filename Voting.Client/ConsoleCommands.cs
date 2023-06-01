@@ -21,7 +21,6 @@ public static class ConsoleCommands
             logging.AddConsole();
             logging.SetMinimumLevel(LogLevel.Trace);
         });
-        loggerFactory.CreateLogger<ILogger>();
         
         //Create commands.
         //Root command.
@@ -35,21 +34,10 @@ public static class ConsoleCommands
         };
         GetCommand.AddValidator(result =>
         {
-            // try
-            // {
-            //     if (result.Tokens.Count == 0)
-            //     {
-            //         result.ErrorMessage = "Must set a value for option --section, --candidate or both.";
-            //     }
-            //     else
-            //     {
-            //         result.ErrorMessage = "An Error Occurred.";
-            //     }
-            // }
-            // catch (Exception e)
-            // {
-            //     result.ErrorMessage = $"{e.Message}";
-            // }
+            if (result.Tokens.Count == 0)
+            {
+                result.ErrorMessage = "Must set a value for option --section, --candidate or both.";
+            }
         });
 
         TotalCommand = new Command("total", "Get totalization of votes from blockchain.")
@@ -59,16 +47,9 @@ public static class ConsoleCommands
         };
         TotalCommand.AddValidator(result =>
         {
-            try
+            if (result.Tokens.Count == 0)
             {
-                // if (result.Tokens.Count == 0 || result.ErrorMessage?.Length >= 1)
-                // {
-                //     result.ErrorMessage = "Must set a value for option --section, --candidate or both.";
-                // }
-            }
-            catch (Exception e)
-            {
-                result.ErrorMessage = $"{e.Message}";
+                result.ErrorMessage = "Must set a value for option --section, --candidate or both.";
             }
         });
 
@@ -90,7 +71,7 @@ public static class ConsoleCommands
         RootCommand.AddCommand(GetCommand);
         RootCommand.AddCommand(TotalCommand);
         RootCommand.AddCommand(AddCommand);
-
+        
         //Handlers.
         GetCommand.SetHandler(
             async (section, candidate) =>
