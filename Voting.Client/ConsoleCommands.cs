@@ -11,17 +11,17 @@ public static class ConsoleCommands
     private static Command GetCommand { get; }
     private static Command AddCommand { get; }
     private static Command TotalCommand { get; }
-    private static readonly ILogger _logger;
+    // private static readonly ILogger _logger;
     
 
     static ConsoleCommands()
     {
-        var loggerFactory = LoggerFactory.Create(logging =>
-        {
-            logging.AddConsole();
-            logging.SetMinimumLevel(LogLevel.Trace);
-        });
-        
+        // var loggerFactory = LoggerFactory.Create(logging =>
+        // {
+        //     logging.AddConsole();
+        //     logging.SetMinimumLevel(LogLevel.Trace);
+        // });
+        //
         //Create commands.
         //Root command.
         RootCommand = new RootCommand("Sample app for System.CommandLine");
@@ -34,7 +34,7 @@ public static class ConsoleCommands
         };
         GetCommand.AddValidator(result =>
         {
-            if (result.Tokens.Count == 0)
+            if (!result.Children.Any(opt => opt.Tokens.Count >= 1)) 
             {
                 result.ErrorMessage = "Must set a value for option --section, --candidate or both.";
             }
@@ -47,7 +47,7 @@ public static class ConsoleCommands
         };
         TotalCommand.AddValidator(result =>
         {
-            if (result.Tokens.Count == 0)
+            if (!result.Children.Any(opt => opt.Tokens.Count >= 1)) 
             {
                 result.ErrorMessage = "Must set a value for option --section, --candidate or both.";
             }
@@ -59,7 +59,7 @@ public static class ConsoleCommands
         };
         AddCommand.AddValidator(result =>
         {
-            if (result.Tokens.Count == 0 || result.ErrorMessage?.Length >= 1)
+            if (result.Children.Count < 1 && result.Children.FirstOrDefault()?.Tokens.Count == 0)
             {
                 result.ErrorMessage = "Must set a value for --json or --csv.";
             }
@@ -98,7 +98,7 @@ public static class ConsoleCommands
                 }
                 catch (Exception e)
                 {
-                    Console.WriteLine($"Failed with {e.GetBaseException()}.");
+                    // Console.WriteLine($"Failed with {e.GetBaseException()}.");
                     throw;
                 }
                 finally
@@ -133,7 +133,7 @@ public static class ConsoleCommands
                 }
                 catch (Exception e)
                 {
-                    Console.WriteLine($"Failed with {e.GetBaseException()}.");
+                    // Console.WriteLine($"Failed with {e.GetBaseException()}.");
                     throw;
                 }
                 finally

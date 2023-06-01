@@ -61,13 +61,7 @@ public static class ConsoleOptions
 
                 return section;
             });
-        SectionOption.AddValidator(result =>
-        {
-            if (result.Tokens.Count == 0)
-            {
-                result.ErrorMessage = "Must set a value for option --section, --candidate or both.";
-            }
-        });
+
 
         CandidateOption = new Option<uint?>(
             name: "--candidate",
@@ -89,12 +83,5 @@ public static class ConsoleOptions
 
                 return candidate; // Default
             });
-        CandidateOption.AddValidator(result =>
-        {
-            if (result.Tokens.Count == 0)
-            {
-                result.ErrorMessage = "Must set a value for option --section, --candidate or both.";
-            }
-        });
     }
 }
