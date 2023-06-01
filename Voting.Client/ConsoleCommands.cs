@@ -1,17 +1,28 @@
 ﻿using System.CommandLine;
+using System.CommandLine.Parsing;
 using System.Linq;
+using Microsoft.Extensions.Logging;
 
 namespace Voting.Client;
 
 public static class ConsoleCommands
 {
     public static RootCommand RootCommand { get; }
-    public static Command GetCommand { get; }
-    public static Command AddCommand { get; }
-    public static Command TotalCommand { get; }
+    private static Command GetCommand { get; }
+    private static Command AddCommand { get; }
+    private static Command TotalCommand { get; }
+    private static readonly ILogger _logger;
+    
 
     static ConsoleCommands()
     {
+        var loggerFactory = LoggerFactory.Create(logging =>
+        {
+            logging.AddConsole();
+            logging.SetMinimumLevel(LogLevel.Trace);
+        });
+        loggerFactory.CreateLogger<ILogger>();
+        
         //Create commands.
         //Root command.
         RootCommand = new RootCommand("Sample app for System.CommandLine");
@@ -24,10 +35,21 @@ public static class ConsoleCommands
         };
         GetCommand.AddValidator(result =>
         {
-            if (result.Tokens.Count == 0 || result.ErrorMessage?.Length >= 1)
-            {
-                result.ErrorMessage = "Must set a value for option --section, --candidate or both.";
-            }
+            // try
+            // {
+            //     if (result.Tokens.Count == 0)
+            //     {
+            //         result.ErrorMessage = "Must set a value for option --section, --candidate or both.";
+            //     }
+            //     else
+            //     {
+            //         result.ErrorMessage = "An Error Occurred.";
+            //     }
+            // }
+            // catch (Exception e)
+            // {
+            //     result.ErrorMessage = $"{e.Message}";
+            // }
         });
 
         TotalCommand = new Command("total", "Get totalization of votes from blockchain.")
@@ -37,9 +59,16 @@ public static class ConsoleCommands
         };
         TotalCommand.AddValidator(result =>
         {
-            if (result.Tokens.Count == 0 || result.ErrorMessage?.Length >= 1)
+            try
             {
-                result.ErrorMessage = "Must set a value for option --section, --candidate or both.";
+                // if (result.Tokens.Count == 0 || result.ErrorMessage?.Length >= 1)
+                // {
+                //     result.ErrorMessage = "Must set a value for option --section, --candidate or both.";
+                // }
+            }
+            catch (Exception e)
+            {
+                result.ErrorMessage = $"{e.Message}";
             }
         });
 
@@ -67,25 +96,34 @@ public static class ConsoleCommands
             async (section, candidate) =>
             {
                 var client = new GrpcClient();
-                if (section != null && candidate != null)
+                try
                 {
-                    throw new NotImplementedException("Not implemented");
+                    if (section != null && candidate != null)
+                    {
+                        throw new NotImplementedException("Not implemented");
+                    }
+                    else if (section != null)
+                    {
+                        await client.GetSectionVotes((uint)section);
+                    }
+                    else if (candidate != null)
+                    {
+                        await client.GetCandidateVotes((uint)candidate);
+                    }
+                    else
+                    {
+                        throw new Exception("No suitable method.");
+                    }
                 }
-                else if (section != null)
+                catch (Exception e)
                 {
-                    // await ReadFile(file!, delay, fgcolor, lightMode);
-                    await client.GetSectionVotes((uint)section);
+                    Console.WriteLine($"Failed with {e.GetBaseException()}.");
+                    throw;
                 }
-                else if (candidate != null)
+                finally
                 {
-                    await client.GetCandidateVotes((uint)candidate);
+                    client.Dispose();
                 }
-                else
-                {
-                    throw new Exception("No suitable method.");
-                }
-
-                client.Dispose();
             },
             ConsoleOptions.SectionOption, ConsoleOptions.CandidateOption);
 
@@ -93,24 +131,34 @@ public static class ConsoleCommands
             async (section, candidate) =>
             {
                 var client = new GrpcClient();
-                if (section != null && candidate != null)
+                try
                 {
-                    throw new NotImplementedException("Not implemented");
+                    if (section != null && candidate != null)
+                    {
+                        throw new NotImplementedException("Not implemented");
+                    }
+                    else if (section != null)
+                    {
+                        await client.GetTotalVotesBySection((uint)section);
+                    }
+                    else if (candidate != null)
+                    {
+                        await client.GetTotalVotesByCandidate((uint)candidate);
+                    }
+                    else
+                    {
+                        throw new Exception("No suitable method.");
+                    }
                 }
-                else if (section != null)
+                catch (Exception e)
                 {
-                    await client.GetTotalVotesBySection((uint)section);
+                    Console.WriteLine($"Failed with {e.GetBaseException()}.");
+                    throw;
                 }
-                else if (candidate != null)
+                finally
                 {
-                    await client.GetTotalVotesByCandidate((uint)candidate);
+                    client.Dispose();
                 }
-                else
-                {
-                    throw new Exception("No suitable method.");
-                }
-
-                client.Dispose();
             },
             ConsoleOptions.SectionOption, ConsoleOptions.CandidateOption);
     }

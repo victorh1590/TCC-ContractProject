@@ -1,4 +1,6 @@
 ﻿using System.CommandLine;
+using System.IO;
+using System.Linq;
 
 namespace Voting.Client;
 
@@ -24,7 +26,7 @@ public static class ConsoleOptions
 
                 string? filePath = result.Tokens.SingleOrDefault()?.Value;
                 FileInfo fi = new FileInfo(filePath ?? string.Empty);
-                if (String.IsNullOrEmpty(fi.FullName) || !fi.Exists)
+                if (string.IsNullOrEmpty(fi.FullName) || !fi.Exists)
                 {
                     result.ErrorMessage = "File does not exist.";
                     return null;
@@ -66,12 +68,7 @@ public static class ConsoleOptions
             isDefault: true, //Default value exists.
             parseArgument: result => // Validation.
             {
-                // if (result.Tokens.Count == 0)
-                // {
-                //     result.ErrorMessage = "No candidate passed.";
-                // }
-                
-                if (result.Tokens.Count == 0)
+                if (!result.Tokens.Any())
                 {
                     return null; // Default.
                 }
@@ -79,7 +76,6 @@ public static class ConsoleOptions
                 string candidateString = result.Tokens.SingleOrDefault()?.Value ?? string.Empty;
                 if (!uint.TryParse(candidateString, out uint candidate))
                 {
-                    // result.ErrorMessage = "Invalid candidate. Argument must be uint.";
                     result.ErrorMessage = result.LocalizationResources.ArgumentConversionCannotParse("CandidateNumber", typeof(uint));
                     return null;
                 }

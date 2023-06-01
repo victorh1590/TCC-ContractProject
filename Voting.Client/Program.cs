@@ -1,9 +1,6 @@
 ﻿using System.CommandLine;
-using Grpc.Core;
-using Grpc.Net.Client;
-using Microsoft.Extensions.Logging;
+using System.Threading.Tasks;
 using Voting.Client;
-using Voting.Server.Protos.v1;
 
 namespace voting;
 
@@ -21,6 +18,6 @@ public class Program
         
 
         //Invoke root command.
-        return await Task.FromResult(ConsoleCommands.RootCommand.InvokeAsync(args).Result);
+        return await ConsoleCommands.RootCommand.InvokeAsync(args);
     }
 }

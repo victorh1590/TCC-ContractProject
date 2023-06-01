@@ -1,9 +1,13 @@
-﻿using Grpc.Core;
+﻿using System;
+using System.Collections.Generic;
+using Grpc.Core;
 using Voting.Server.Protos.v1;
 using System.Text.Json;
+using System.Threading.Tasks;
 using Grpc.Core.Interceptors;
 using Grpc.Net.Client;
 using Microsoft.Extensions.Logging;
+using CommunityToolkit.Diagnostics;
 using static Voting.Server.Protos.v1.VotingService;
 
 namespace Voting.Client;
@@ -12,11 +16,7 @@ public class GrpcClient : IDisposable
 {
     private readonly VotingServiceClient _client;
     private readonly GrpcChannel _channel;
-
-    // public GrpcClientCalls(VotingServiceClient client)
-    // {
-    //     _client = client;
-    // }
+    
     public GrpcClient()
     {
         _channel = GrpcChannel.ForAddress("https://localhost:7090");
@@ -45,7 +45,6 @@ public class GrpcClient : IDisposable
         await foreach (var response in serverStreamingCall.ResponseStream.ReadAllAsync())
         {
             var json = JsonSerializer.Serialize(response);
-            // Console.WriteLine($"{response.SectionID}: {response.CandidateVotes}");
             Console.WriteLine(json);
         }
     }
@@ -82,18 +81,20 @@ public class GrpcClient : IDisposable
 
     public async Task CreateSection(string json)
     {
-        // using var clientStreamingCall = _client.CreateSection();
-        // // Write
-        // List<Section> sectionToInsert = JsonSerializer.Deserialize<List<Section>>(json);
-        //
-        // foreach (var sectionToInsert in sectionToInsert)
-        // {
-        //     await clientStreamingCall.RequestStream.WriteAsync(sectionToInsert);
-        // }
-        //
-        // // Tells server that request streaming is done
-        // await clientStreamingCall.RequestStream.CompleteAsync();
-        // // Finish the call by getting the response
-        // var emptyResponse = await clientStreamingCall.ResponseAsync;
+        using var clientStreamingCall = _client.CreateSection();
+        // Write
+        List<Section>? sectionsToInsert = JsonSerializer.Deserialize<List<Section>>(json);
+        Guard.IsNotNull(sectionsToInsert);
+        Guard.IsNotEmpty(sectionsToInsert);
+        
+        foreach (var sectionToInsert in sectionsToInsert)
+        {
+            await clientStreamingCall.RequestStream.WriteAsync(sectionToInsert);
+        }
+        
+        // Tells server that request streaming is done
+        await clientStreamingCall.RequestStream.CompleteAsync();
+        // Finish the call by getting the response
+        var emptyResponse = await clientStreamingCall.ResponseAsync;
     }
 }
