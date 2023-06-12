@@ -455,7 +455,7 @@ $RECYCLE.BIN/
 !.vscode/extensions.json
 
 ##Besu Infrastructure
-./Infrastructure.Besu.Clique/*.lock
-./Infrastructure.Besu.Clique/data
-./Infrastructure.Besu.Clique/volumes/
-./Infrastructure.Besu.Clique/DS_Store
+/Infrastructure.Besu.Clique/*.lock
+/Infrastructure.Besu.Clique/data/
+/Infrastructure.Besu.Clique/volumes/
+/Infrastructure.Besu.Clique/DS_Store

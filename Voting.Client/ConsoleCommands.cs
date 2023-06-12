@@ -18,7 +18,7 @@ public static class ConsoleCommands
     //Error Messages.
     private static string SectionOrCandidateNotFound => "Section or candidate not found.";
     private static string SectionFailedToBeAdded 
-        => "Section Failed to be added. Please verify your json file and make sure the sections are unique";
+        => "Section Failed to be added. Please verify your json file and make sure the sections are unique.";
 
     static ConsoleCommands()
     {
@@ -180,9 +180,8 @@ public static class ConsoleCommands
     
     private static void WriteError(string errorMessage)
     {
-        var baseForegroundColor = Console.ForegroundColor;
         Console.ForegroundColor = ConsoleColor.Red;
         Console.Error.WriteLine(errorMessage);
-        Console.ForegroundColor = baseForegroundColor;
+        Console.ResetColor();
     }
 }

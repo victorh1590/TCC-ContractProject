@@ -1,4 +1,5 @@
 ﻿using System.CommandLine;
+using System.Drawing;
 using Grpc.Core;
 using Voting.Server.Protos.v1;
 using System.Text.Json;
@@ -50,7 +51,7 @@ public class GrpcClient : IDisposable
         await foreach (var response in serverStreamingCall.ResponseStream.ReadAllAsync())
         {
             var json = JsonSerializer.Serialize(response);
-            Console.WriteLine(json);
+            GetSectionMessage(json);
         }
     }
 
@@ -61,7 +62,7 @@ public class GrpcClient : IDisposable
             Section = section
         });
         var json = JsonSerializer.Serialize(response);
-        Console.WriteLine(json);
+        GetSectionMessage(json);
     }
 
     public async Task GetTotalVotesBySection(uint section = 0)
@@ -97,6 +98,7 @@ public class GrpcClient : IDisposable
         foreach (var sectionToInsert in sectionsToInsert)
         {
             await clientStreamingCall.RequestStream.WriteAsync(sectionToInsert);
+            AddSectionMessage(sectionToInsert.SectionID.ToString());
         }
         
         // Tells server that request streaming is done
@@ -106,5 +108,21 @@ public class GrpcClient : IDisposable
         var emptyResponse = await clientStreamingCall.ResponseAsync;
 
         return emptyResponse.ToString();
+    }
+    
+    private static void AddSectionMessage(string sectionNumber)
+    {
+        Console.ForegroundColor = ConsoleColor.Green;
+        Console.WriteLine($"Trying to insert Section #: {sectionNumber}");
+        Console.ResetColor();
+    }
+    
+    private static void GetSectionMessage(string json)
+    {
+        Console.ForegroundColor = ConsoleColor.Green;
+        Console.WriteLine("Result was successfully retrieved: ");
+        Console.ForegroundColor = ConsoleColor.Yellow;
+        Console.Write(json);
+        Console.ResetColor();
     }
 }
