@@ -8,6 +8,8 @@ using Grpc.Core.Interceptors;
 using Grpc.Net.Client;
 using Microsoft.Extensions.Logging;
 using CommunityToolkit.Diagnostics;
+using Google.Protobuf;
+using Google.Protobuf.Collections;
 using static Voting.Server.Protos.v1.VotingService;
 
 namespace Voting.Client;
@@ -79,11 +81,14 @@ public class GrpcClient : IDisposable
         Console.WriteLine(json);
     }
 
-    public async Task CreateSection(string json)
+    public async Task<string> CreateSection(string json)
     {
         using var clientStreamingCall = _client.CreateSection();
         // Write
-        List<Section>? sectionsToInsert = JsonSerializer.Deserialize<List<Section>>(json);
+        // List<Section>? sectionsToInsert = JsonSerializer.Deserialize<List<Section>>(json);
+
+        var parsedSections = Sections.Parser.ParseJson(json);
+        List<Section> sectionsToInsert = new List<Section>(parsedSections.SectionList);
         Guard.IsNotNull(sectionsToInsert);
         Guard.IsNotEmpty(sectionsToInsert);
         
@@ -94,7 +99,10 @@ public class GrpcClient : IDisposable
         
         // Tells server that request streaming is done
         await clientStreamingCall.RequestStream.CompleteAsync();
+        
         // Finish the call by getting the response
         var emptyResponse = await clientStreamingCall.ResponseAsync;
+
+        return emptyResponse.ToString();
     }
 }

@@ -32,7 +32,7 @@ public static class ConsoleOptions
                     return null;
                 }
 
-                if (fi.Extension != "json")
+                if (fi.Extension != ".json")
                 {
                     result.ErrorMessage = "File is not json.";
                     return null;

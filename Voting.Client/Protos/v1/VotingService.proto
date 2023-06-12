@@ -12,6 +12,10 @@ service VotingService {
 	rpc CreateSection(stream Section) returns (google.protobuf.Empty) {}
 }
 
+message Sections
+{
+	repeated Section SectionList = 1;
+}
 message Section
 {
 	uint32 SectionID = 1;

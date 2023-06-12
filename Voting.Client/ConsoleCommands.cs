@@ -1,7 +1,9 @@
 ﻿using System.CommandLine;
 using System.CommandLine.Parsing;
 using System.Linq;
+using System.Text.Json.Nodes;
 using Microsoft.Extensions.Logging;
+using Voting.Server.Protos.v1;
 
 namespace Voting.Client;
 
@@ -142,6 +144,39 @@ public static class ConsoleCommands
                 }
             },
             ConsoleOptions.SectionOption, ConsoleOptions.CandidateOption);
+        
+        AddCommand.SetHandler(
+            async fi =>
+            {
+                var client = new GrpcClient();
+                try
+                {
+                    if (fi != null)
+                    {
+                        using StreamReader sr = fi.OpenText();
+                        string content = await sr.ReadToEndAsync();
+                        
+                        // // Will throw an FormatException if content format is not a valid JSON
+                        // var json = JsonValue.Parse(content);
+
+                        var result = await client.CreateSection(content);
+                        Console.WriteLine(result);
+                    }
+                    else
+                    {
+                        throw new Exception("No suitable method.");
+                    }
+                }
+                catch
+                {
+                    WriteError("Error");
+                }
+                finally
+                {
+                    client.Dispose();
+                }
+            },
+            ConsoleOptions.JsonOption);
     }
     
     private static void WriteError(string errorMessage)
