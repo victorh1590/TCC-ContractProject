@@ -159,6 +159,7 @@ public class TracerInterceptor : Interceptor
 
     private void LogError(Exception ex)
     {
-        _logger.LogError(ex, $"Call error: {ex.Message}");
+        // _logger.LogError(ex, $"{ex.Message}");
+        _logger.LogError("Grpc method has thrown an internal error.");
     }
 }

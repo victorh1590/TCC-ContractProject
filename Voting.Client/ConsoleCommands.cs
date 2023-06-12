@@ -13,6 +13,8 @@ public static class ConsoleCommands
     private static Command TotalCommand { get; }
     // private static readonly ILogger _logger;
     
+    //Error Messages.
+    private static string SectionOrCandidateNotFound => "Section or candidate not found.";
 
     static ConsoleCommands()
     {
@@ -96,10 +98,9 @@ public static class ConsoleCommands
                         throw new Exception("No suitable method.");
                     }
                 }
-                catch (Exception e)
+                catch
                 {
-                    // Console.WriteLine($"Failed with {e.GetBaseException()}.");
-                    throw;
+                    WriteError(SectionOrCandidateNotFound);
                 }
                 finally
                 {
@@ -131,10 +132,9 @@ public static class ConsoleCommands
                         throw new Exception("No suitable method.");
                     }
                 }
-                catch (Exception e)
+                catch
                 {
-                    // Console.WriteLine($"Failed with {e.GetBaseException()}.");
-                    throw;
+                    WriteError(SectionOrCandidateNotFound);
                 }
                 finally
                 {
@@ -142,5 +142,13 @@ public static class ConsoleCommands
                 }
             },
             ConsoleOptions.SectionOption, ConsoleOptions.CandidateOption);
+    }
+    
+    private static void WriteError(string errorMessage)
+    {
+        var baseForegroundColor = Console.ForegroundColor;
+        Console.ForegroundColor = ConsoleColor.Red;
+        Console.Error.WriteLine(errorMessage);
+        Console.ForegroundColor = baseForegroundColor;
     }
 }
