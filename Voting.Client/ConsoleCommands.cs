@@ -17,6 +17,8 @@ public static class ConsoleCommands
     
     //Error Messages.
     private static string SectionOrCandidateNotFound => "Section or candidate not found.";
+    private static string SectionFailedToBeAdded 
+        => "Section Failed to be added. Please verify your json file and make sure the sections are unique";
 
     static ConsoleCommands()
     {
@@ -156,9 +158,6 @@ public static class ConsoleCommands
                         using StreamReader sr = fi.OpenText();
                         string content = await sr.ReadToEndAsync();
                         
-                        // // Will throw an FormatException if content format is not a valid JSON
-                        // var json = JsonValue.Parse(content);
-
                         var result = await client.CreateSection(content);
                         Console.WriteLine(result);
                     }
@@ -169,7 +168,7 @@ public static class ConsoleCommands
                 }
                 catch
                 {
-                    WriteError("Error");
+                    WriteError(SectionFailedToBeAdded);
                 }
                 finally
                 {

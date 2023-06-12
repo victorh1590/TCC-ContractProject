@@ -14,10 +14,10 @@ public class Web3ClientsManager : IWeb3ClientsManager
 
     public Web3ClientsManager(IAccountManager accounts, IConfiguration config)
     {
-        var URL = config.GetValue("URL", string.Empty);
-        Guard.IsTrue(Uri.IsWellFormedUriString(URL, UriKind.Absolute));
+        Uri URL = new Uri(config.GetSection("Blockchain")["Address"] ?? string.Empty);
+        Guard.IsTrue(URL.Scheme == Uri.UriSchemeHttp || URL.Scheme == Uri.UriSchemeHttps);
         Web3Clients = accounts.Accounts
-            .Select(account => new Web3(account, URL))
+            .Select(account => new Web3(account, URL.ToString()))
             .ToImmutableList();
         
         Web3Clients.ForEach(web3 => web3.TransactionManager.UseLegacyAsDefault = true);

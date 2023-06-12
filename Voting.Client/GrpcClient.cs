@@ -1,15 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.CommandLine;
 using Grpc.Core;
 using Voting.Server.Protos.v1;
 using System.Text.Json;
-using System.Threading.Tasks;
 using Grpc.Core.Interceptors;
 using Grpc.Net.Client;
 using Microsoft.Extensions.Logging;
 using CommunityToolkit.Diagnostics;
-using Google.Protobuf;
-using Google.Protobuf.Collections;
+using Microsoft.Extensions.Configuration;
 using static Voting.Server.Protos.v1.VotingService;
 
 namespace Voting.Client;
@@ -21,7 +18,13 @@ public class GrpcClient : IDisposable
     
     public GrpcClient()
     {
-        _channel = GrpcChannel.ForAddress("https://localhost:7090");
+        var serverAddress = new ConfigurationBuilder()
+            .SetBasePath(Environment.CurrentDirectory)
+            .AddJsonFile("appsettings.json")
+            .Build()
+            .GetSection("Server")["Address"];
+        if(serverAddress == null) throw new CommandLineConfigurationException("Invalid server address");
+        _channel = GrpcChannel.ForAddress(serverAddress);
 
         var loggerFactory = LoggerFactory.Create(logging =>
         {
@@ -84,10 +87,9 @@ public class GrpcClient : IDisposable
     public async Task<string> CreateSection(string json)
     {
         using var clientStreamingCall = _client.CreateSection();
-        // Write
-        // List<Section>? sectionsToInsert = JsonSerializer.Deserialize<List<Section>>(json);
-
         var parsedSections = Sections.Parser.ParseJson(json);
+        Guard.IsNotNull(parsedSections);
+        
         List<Section> sectionsToInsert = new List<Section>(parsedSections.SectionList);
         Guard.IsNotNull(sectionsToInsert);
         Guard.IsNotEmpty(sectionsToInsert);

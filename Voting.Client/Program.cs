@@ -1,6 +1,5 @@
 ﻿using System.CommandLine;
 using System.CommandLine.Builder;
-using System.Threading.Tasks;
 using Voting.Client;
 
 namespace voting;
