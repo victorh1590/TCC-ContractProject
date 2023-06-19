@@ -10,7 +10,9 @@ services:
     command: [
       "--config-file=/opt/besu/conf/besu.conf",
       "--miner-enabled=true",
-      "--miner-coinbase=0xfe3b557e8fb62b89f4916b721be55ceb828dbd73"
+      "--miner-coinbase=0xfe3b557e8fb62b89f4916b721be55ceb828dbd73",
+      "--min-gas-price=0",
+      "--fork=london"
     ]
     ports:
       - 8545:8545
@@ -32,7 +34,9 @@ services:
     command: [
       "--config-file=/opt/besu/conf/besu.conf",
       "--miner-enabled=true",
-      "--miner-coinbase=0x627306090abaB3A6e1400e9345bC60c78a8BEf57"
+      "--miner-coinbase=0x627306090abaB3A6e1400e9345bC60c78a8BEf57",
+      "--min-gas-price=0",
+      "--fork=london"
     ]
     ports:
       - 8548:8545
@@ -55,7 +59,9 @@ services:
     command: [
       "--config-file=/opt/besu/conf/besu.conf",
       "--miner-enabled=true",
-      "--miner-coinbase=0xf17f52151EbEF6C7334FAD080c5704D77216b732"
+      "--miner-coinbase=0xf17f52151EbEF6C7334FAD080c5704D77216b732",
+      "--min-gas-price=0",
+      "--fork=london"
       ]
     ports:
       - 8551:8545

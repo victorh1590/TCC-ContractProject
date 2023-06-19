@@ -1,9 +1,4 @@
 ﻿using System.CommandLine;
-using System.CommandLine.Parsing;
-using System.Linq;
-using System.Text.Json.Nodes;
-using Microsoft.Extensions.Logging;
-using Voting.Server.Protos.v1;
 
 namespace Voting.Client;
 

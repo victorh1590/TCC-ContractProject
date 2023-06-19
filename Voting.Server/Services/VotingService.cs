@@ -46,8 +46,23 @@ public class VotingService : VotingServiceBase
     {
         await foreach (Section section in requestStream.ReadAllAsync())
         {
-            List<Section> sectionList = new List<Section> { section };
-            await _domainService.InsertSectionsAsync(sectionList);
+            int repeatCount = 0;
+            while(repeatCount < 5)
+            {
+                try
+                {
+                    List<Section> sectionList = new List<Section> { section };
+                    _logger.LogInformation($"Trying to create section {section.SectionID}");
+                    await _domainService.InsertSectionsAsync(sectionList);
+                    break;
+                }
+                catch(RpcException e)
+                {
+                    _logger.LogInformation($"Failed to create section {section.SectionID}.\n{e.Status}");
+                    repeatCount++;
+                }
+            }
+            _logger.LogInformation($"Success creating {section.SectionID}.");
         }
 
         return new Empty();
