@@ -32,10 +32,10 @@ builder.Services.AddGrpc(options =>
     options.ResponseCompressionLevel = CompressionLevel.Optimal;
     options.Interceptors.Add<ExceptionInterceptor>(); // Register custom ExceptionInterceptor interceptor
 });
-builder.Services.AddScoped<IVotingDbRepository, VotingDbRepository>();
+builder.Services.AddTransient<IVotingDbRepository, VotingDbRepository>();
 builder.Services.AddSingleton<ProtoService>();
-builder.Services.AddScoped<DomainService>();
-builder.Services.AddScoped<VotingService>();
+builder.Services.AddTransient<DomainService>();
+builder.Services.AddTransient<VotingService>();
 builder.Services.AddGrpcReflection();
 
 var app = builder.Build();

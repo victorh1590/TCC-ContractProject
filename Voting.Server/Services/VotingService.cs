@@ -10,6 +10,9 @@ public class VotingService : VotingServiceBase
     private readonly DomainService _domainService;
     private readonly ILogger<VotingService> _logger;
 
+    private int MaxRepeats => 5;
+    private int MaxListSize => 30;
+
     public VotingService(DomainService domainService, ILogger<VotingService> logger)
     {
         _domainService = domainService;
@@ -44,25 +47,36 @@ public class VotingService : VotingServiceBase
 
     public override async Task<Empty> CreateSection(IAsyncStreamReader<Section> requestStream, ServerCallContext context)
     {
+        List<Section> sectionList = new List<Section>();
         await foreach (Section section in requestStream.ReadAllAsync())
         {
-            int repeatCount = 0;
-            while(repeatCount < 5)
+            if (sectionList.Count < MaxListSize)
             {
-                try
-                {
-                    List<Section> sectionList = new List<Section> { section };
-                    _logger.LogInformation($"Trying to create section {section.SectionID}");
-                    await _domainService.InsertSectionsAsync(sectionList);
-                    break;
-                }
-                catch(RpcException e)
-                {
-                    _logger.LogInformation($"Failed to create section {section.SectionID}.\n{e.Status}");
-                    repeatCount++;
-                }
+                sectionList.Add(section);
+                continue;
             }
-            _logger.LogInformation($"Success creating {section.SectionID}.");
+            else
+            {
+                int repeatCount = 0;
+                while (repeatCount < MaxRepeats)
+                {
+                    try
+                    {
+                        _logger.LogInformation($"Trying to create section ");
+                        sectionList.ForEach(s => _logger.LogInformation($"{s.SectionID}"));
+                        await _domainService.InsertSectionsAsync(sectionList);
+                        break;
+                    }
+                    catch (RpcException e)
+                    {
+                        _logger.LogInformation($"Failed to create sections. \n{e.Status}");
+                        repeatCount++;
+                    }
+                }
+                _logger.LogInformation($"Success creating sections ");
+                sectionList.ForEach(s => _logger.LogInformation($"{s.SectionID}"));
+                sectionList = new List<Section>();
+            }
         }
 
         return new Empty();

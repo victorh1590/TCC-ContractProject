@@ -4,7 +4,7 @@
     "londonBlock": 0,
     "zeroBaseFee": true,
     "clique":{
-      "blockperiodseconds":0.01,
+      "blockperiodseconds":1,
       "epochlength":30000,
       "contractSizeLimit": 2147483647
     }

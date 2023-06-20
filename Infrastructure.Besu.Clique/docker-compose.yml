@@ -1,18 +1,18 @@
 ---
 version: '3.4'
 services:
-
   besu:
     image: hyperledger/besu:${BESU_VERSION}
+    user: root
     volumes:
       - ./config/besu:/opt/besu/conf/
       - ./data/besu:/opt/besu/data/
+    restart: always
     command: [
       "--config-file=/opt/besu/conf/besu.conf",
       "--miner-enabled=true",
       "--miner-coinbase=0xfe3b557e8fb62b89f4916b721be55ceb828dbd73",
-      "--min-gas-price=0",
-      "--fork=london"
+      "--min-gas-price=0"
     ]
     ports:
       - 8545:8545
@@ -26,8 +26,10 @@ services:
 
   besu2:
     image: hyperledger/besu:${BESU_VERSION}
+    user: root
     depends_on:
       - besu
+    restart: always
     volumes:
       - ./config/besu2:/opt/besu/conf/
       - ./data/besu2:/opt/besu/data/
@@ -35,8 +37,7 @@ services:
       "--config-file=/opt/besu/conf/besu.conf",
       "--miner-enabled=true",
       "--miner-coinbase=0x627306090abaB3A6e1400e9345bC60c78a8BEf57",
-      "--min-gas-price=0",
-      "--fork=london"
+      "--min-gas-price=0"
     ]
     ports:
       - 8548:8545
@@ -50,9 +51,11 @@ services:
 
   besu3:
     image: hyperledger/besu:${BESU_VERSION}
+    user: root
     depends_on:
       - besu
       - besu2
+    restart: always
     volumes:
       - ./config/besu3:/opt/besu/conf/
       - ./data/besu3:/opt/besu/data/
@@ -60,8 +63,7 @@ services:
       "--config-file=/opt/besu/conf/besu.conf",
       "--miner-enabled=true",
       "--miner-coinbase=0xf17f52151EbEF6C7334FAD080c5704D77216b732",
-      "--min-gas-price=0",
-      "--fork=london"
+      "--min-gas-price=0"
       ]
     ports:
       - 8551:8545
